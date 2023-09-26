@@ -1,0 +1,94 @@
+import tkinter as tk
+from tkinter import ttk
+
+# Fonction de sauvegarde (à implémenter)
+def save():
+    pass
+
+# Fonction d'exécution (à implémenter)
+def run():
+    pass
+
+# Fonction d'arrêt (à implémenter)
+def stop():
+    pass
+
+# Fonction d'exécution pas à pas (à implémenter)
+def run_step_by_step():
+    pass
+
+# Fonction de réinitialisation (à implémenter)
+def reset():
+    pass
+
+# Fonction de connexion à la carte (à implémenter)
+def connect_board():
+    pass
+
+# Fonction de téléchargement du code (à implémenter)
+def download_code():
+    pass
+
+# Fonction de paramètres (à implémenter)
+def settings():
+    pass
+
+# Création de la fenêtre principale
+fenetre = tk.Tk()
+fenetre.title("Simulateur")
+fenetre.geometry("800x600")  # Taille initiale de la fenêtre
+
+# Barre d'outils en haut
+barre_outils = ttk.Frame(fenetre)
+barre_outils.pack(fill="x")
+
+bouton_save = ttk.Button(barre_outils, text="Save", command=save)
+bouton_run = ttk.Button(barre_outils, text="Run", command=run)
+bouton_stop = ttk.Button(barre_outils, text="Stop", command=stop)
+bouton_step = ttk.Button(barre_outils, text="Run Step by Step", command=run_step_by_step)
+bouton_reset = ttk.Button(barre_outils, text="Reset", command=reset)
+bouton_connect = ttk.Button(barre_outils, text="Connect Board", command=connect_board)
+bouton_download = ttk.Button(barre_outils, text="Download Code", command=download_code)
+bouton_settings = ttk.Button(barre_outils, text="Settings", command=settings)
+
+bouton_save.pack(side="left", padx=5)
+bouton_run.pack(side="left", padx=5)
+bouton_stop.pack(side="left", padx=5)
+bouton_step.pack(side="left", padx=5)
+bouton_reset.pack(side="left", padx=5)
+bouton_connect.pack(side="left", padx=5)
+bouton_download.pack(side="left", padx=5)
+bouton_settings.pack(side="left", padx=5)
+
+# Zone de code en assembleur à gauche
+zone_asm = tk.Text(fenetre, width=40, height=20)
+zone_asm.pack(side="left", fill="both", expand=True, padx=5, pady=5)
+
+# Section pour les valeurs des registres à droite
+cadre_registres = ttk.LabelFrame(fenetre, text="Registres")
+cadre_registres.pack(side="right", fill="y", padx=5, pady=5)
+
+# Création des widgets de registres (à adapter au nombre de registres)
+registres = []
+for i in range(15):
+    nom_registre = f"R{i + 1}:"
+    valeur_registre = tk.StringVar()
+    valeur_registre.set("0x0000")  # Valeur initiale
+    label_registre = ttk.Label(cadre_registres, text=nom_registre)
+    champ_registre = ttk.Label(cadre_registres, textvariable=valeur_registre)
+    label_registre.grid(row=i, column=0, sticky="w", padx=5, pady=2)
+    champ_registre.grid(row=i, column=1, sticky="w", padx=5, pady=2)
+    registres.append(valeur_registre)
+
+# Tableau de pipeline en bas (à adapter)
+cadre_pipeline = ttk.LabelFrame(fenetre, text="Pipeline")
+cadre_pipeline.pack(side="bottom", fill="both", expand=True, padx=5, pady=5)
+
+# Ajoutez des étapes de pipeline au tableau (à adapter)
+pipeline = []
+for i, etape in enumerate(["Fetch", "Decode", "Execute"]):
+    label_etape = ttk.Label(cadre_pipeline, text=etape)
+    label_etape.grid(row=0, column=i, padx=5, pady=2)
+    pipeline.append(label_etape)
+
+fenetre.mainloop()
