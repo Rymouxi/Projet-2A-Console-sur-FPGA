@@ -105,10 +105,10 @@ pip_frame = ttk.LabelFrame(window, text="Pipeline")
 pip_frame.pack(side="bottom", fill="both", expand=True, padx=5, pady=5)
 
 # Add pipeline stages to the frame (to be adapted)
-pipeline_stages = []
+pip_stages = []
 for i, stage in enumerate(["Fetch", "Decode", "Execute"]):
     stage_label = ttk.Label(pipeline_frame, text=stage)
     stage_label.grid(row=0, column=i, padx=5, pady=2)
-    pipeline_stages.append(stage_label)
+    pip_stages.append(stage_label)
 
 window.mainloop()
