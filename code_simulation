@@ -33,9 +33,15 @@ def download_code():
 def settings():
     pass
 
-# Import code function (to be implemented)
+# Import function
 def import_code():
-    pass
+    file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
+    if file_path:
+        with open(file_path, 'r') as file:
+            imported_code = file.read()
+            # Mettez le code importé dans la zone de texte
+            asm_zone.delete("1.0", tk.END)  # Supprime le contenu actuel de la zone de texte
+            asm_zone.insert(tk.END, imported_code)  # Insère le code importé dans la zone de texte
 
 # New file code function (to be implemented)
 def new_file():
