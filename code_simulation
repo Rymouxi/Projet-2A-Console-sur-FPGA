@@ -41,6 +41,10 @@ def import_code():
 def new_file():
     pass
 
+# New file code function (to be implemented)
+def save_as():
+    pass
+
 # Create the main window
 window = tk.Tk()
 window.title("Simulator")
@@ -58,6 +62,7 @@ toolbar = ttk.Frame(toolbar_frame)
 toolbar.pack(fill="y")
 
 button_save = ttk.Button(toolbar, text="Save", command=save)
+button_save_as = ttk.Button(toolbar, text="Save as", command=save_as)
 button_run = ttk.Button(toolbar, text="Run", command=run)
 button_stop = ttk.Button(toolbar, text="Stop", command=stop)
 button_step = ttk.Button(toolbar, text="Run Step by Step", command=run_step_by_step)
@@ -70,6 +75,7 @@ button_newfile = ttk.Button(toolbar, text="New File", command=new_file)
 
 button_newfile.pack(fill="x",pady=5)
 button_save.pack(fill="x", pady=5)
+button_save_as.pack(fill="x", pady=5)
 button_import.pack(fill="x", pady=5)
 button_run.pack(fill="x", pady=5)
 button_stop.pack(fill="x", pady=5)
@@ -85,30 +91,30 @@ asm_zone = tk.Text(main_frame, width=40, height=20)
 asm_zone.pack(side="left", fill="both", expand=True, padx=5, pady=5)
 
 # Register frame on the right of the assembly zone
-reg_frame = ttk.LabelFrame(main_frame, text="Registers")
-reg_frame.pack(side="right", fill="y")
+register_frame = ttk.LabelFrame(main_frame, text="Registers")
+register_frame.pack(side="right", fill="y")
 
 # Create register widgets (to be adapted to the number of registers)
 registers = []
 for i in range(15):
-    reg_name = f"R{i + 1}:"
-    reg_value = tk.StringVar()
-    reg_value.set("0x0000")  # Initial value
-    label_reg = ttk.Label(reg_frame, text=reg_name)
-    reg_field = ttk.Label(reg_frame, textvariable=reg_value)
-    label_reg.grid(row=i, column=0, sticky="w", padx=5, pady=2)
-    reg_field.grid(row=i, column=1, sticky="w", padx=5, pady=2)
-    registers.append(reg_value)
+    register_name = f"R{i + 1}:"
+    register_value = tk.StringVar()
+    register_value.set("0x0000")  # Initial value
+    label_register = ttk.Label(register_frame, text=register_name)
+    register_field = ttk.Label(register_frame, textvariable=register_value)
+    label_register.grid(row=i, column=0, sticky="w", padx=5, pady=2)
+    register_field.grid(row=i, column=1, sticky="w", padx=5, pady=2)
+    registers.append(register_value)
 
 # Pipeline frame at the bottom
-pip_frame = ttk.LabelFrame(window, text="Pipeline")
-pip_frame.pack(side="bottom", fill="both", expand=True, padx=5, pady=5)
+pipeline_frame = ttk.LabelFrame(window, text="Pipeline")
+pipeline_frame.pack(side="bottom", fill="both", expand=True, padx=5, pady=5)
 
 # Add pipeline stages to the frame (to be adapted)
-pip_stages = []
+pipeline_stages = []
 for i, stage in enumerate(["Fetch", "Decode", "Execute"]):
     stage_label = ttk.Label(pipeline_frame, text=stage)
     stage_label.grid(row=0, column=i, padx=5, pady=2)
-    pip_stages.append(stage_label)
+    pipeline_stages.append(stage_label)
 
 window.mainloop()
