@@ -2,18 +2,18 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 
-# Variable pour stocker le chemin du fichier
+# Variable to store the file path
 file_path = None
 
 # Save function
 def save():
     global file_path
 
-    # Si le fichier n'a pas encore été enregistré, demandez à l'utilisateur où enregistrer le fichier
+    # If the file hasn't been saved yet, ask the user where to save it
     if file_path is None:
         file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
 
-    # Si l'utilisateur a sélectionné un emplacement de fichier, enregistrez le contenu de la zone de texte dans le fichier
+    # If the user selected a file location, save the content of the text area to the file
     if file_path:
         with open(file_path, 'w') as file:
             saved_code = asm_zone.get("1.0", tk.END)  # Get the code from the text area
@@ -50,15 +50,15 @@ def import_code():
     if file_path:
         with open(file_path, 'r') as file:
             imported_code = file.read()
-            # Mettez le code importé dans la zone de texte
-            asm_zone.delete("1.0", tk.END)  # Supprime le contenu actuel de la zone de texte
-            asm_zone.insert(tk.END, imported_code)  # Insère le code importé dans la zone de texte
+            # Put the imported code into the text area
+            asm_zone.delete("1.0", tk.END)  # Clear the current content of the text area
+            asm_zone.insert(tk.END, imported_code)  # Insert the imported code into the text area
 
 # New file code function (to be implemented)
 def new_file():
     global file_path
-    file_path = None  # Réinitialise le chemin du fichier
-    asm_zone.delete("1.0", tk.END)  # Supprime le contenu actuel de la zone de texte
+    file_path = None  # Reset the file path
+    asm_zone.delete("1.0", tk.END)  # Clear the current content of the text area
 
 # Save as code function
 def save_as():
@@ -82,8 +82,13 @@ main_frame.pack(expand=True, fill="both")
 toolbar_frame = ttk.Frame(main_frame)
 toolbar_frame.pack(side="top", fill="x")
 
+# Add an empty space to the left of the toolbar
+empty_space = ttk.Label(toolbar_frame, width=10)  # You can adjust the width as needed
+empty_space.pack(side="left")
+
+# Toolbar
 toolbar = ttk.Frame(toolbar_frame)
-toolbar.pack()
+toolbar.pack(side="left")
 
 # File Menu
 file_menu = ttk.Menubutton(toolbar, text="File", direction="below")
