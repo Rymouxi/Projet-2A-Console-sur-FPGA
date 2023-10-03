@@ -37,6 +37,10 @@ def settings():
 def import_code():
     pass
 
+# New file code function (to be implemented)
+def new_file():
+    pass
+
 # Create the main window
 window = tk.Tk()
 window.title("Simulator")
@@ -62,7 +66,9 @@ button_import = ttk.Button(toolbar, text="Import", command=import_code)
 button_connect = ttk.Button(toolbar, text="Connect Board", command=connect_board)
 button_download = ttk.Button(toolbar, text="Download Code", command=download_code)
 button_settings = ttk.Button(toolbar, text="Settings", command=settings)
+button_newfile = ttk.Button(toolbar, text="New File", command=new_file)
 
+button_newfile.pack(fill="x",pady=5)
 button_save.pack(fill="x", pady=5)
 button_import.pack(fill="x", pady=5)
 button_run.pack(fill="x", pady=5)
@@ -72,6 +78,7 @@ button_reset.pack(fill="x", pady=5)
 button_connect.pack(fill="x", pady=5)
 button_download.pack(fill="x", pady=5)
 button_settings.pack(fill="x", pady=5)
+
 
 # Assembly code area in the middle
 asm_zone = tk.Text(main_frame, width=40, height=20)
@@ -105,4 +112,3 @@ for i, stage in enumerate(["Fetch", "Decode", "Execute"]):
     pipeline_stages.append(stage_label)
 
 window.mainloop()
-
