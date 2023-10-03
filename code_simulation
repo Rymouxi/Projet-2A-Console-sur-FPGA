@@ -85,24 +85,24 @@ asm_zone = tk.Text(main_frame, width=40, height=20)
 asm_zone.pack(side="left", fill="both", expand=True, padx=5, pady=5)
 
 # Register frame on the right of the assembly zone
-register_frame = ttk.LabelFrame(main_frame, text="Registers")
-register_frame.pack(side="right", fill="y")
+reg_frame = ttk.LabelFrame(main_frame, text="Registers")
+reg_frame.pack(side="right", fill="y")
 
 # Create register widgets (to be adapted to the number of registers)
 registers = []
 for i in range(15):
-    register_name = f"R{i + 1}:"
-    register_value = tk.StringVar()
-    register_value.set("0x0000")  # Initial value
-    label_register = ttk.Label(register_frame, text=register_name)
-    register_field = ttk.Label(register_frame, textvariable=register_value)
-    label_register.grid(row=i, column=0, sticky="w", padx=5, pady=2)
-    register_field.grid(row=i, column=1, sticky="w", padx=5, pady=2)
-    registers.append(register_value)
+    reg_name = f"R{i + 1}:"
+    reg_value = tk.StringVar()
+    reg_value.set("0x0000")  # Initial value
+    label_reg = ttk.Label(reg_frame, text=reg_name)
+    reg_field = ttk.Label(reg_frame, textvariable=reg_value)
+    label_reg.grid(row=i, column=0, sticky="w", padx=5, pady=2)
+    reg_field.grid(row=i, column=1, sticky="w", padx=5, pady=2)
+    registers.append(reg_value)
 
 # Pipeline frame at the bottom
-pipeline_frame = ttk.LabelFrame(window, text="Pipeline")
-pipeline_frame.pack(side="bottom", fill="both", expand=True, padx=5, pady=5)
+pip_frame = ttk.LabelFrame(window, text="Pipeline")
+pip_frame.pack(side="bottom", fill="both", expand=True, padx=5, pady=5)
 
 # Add pipeline stages to the frame (to be adapted)
 pipeline_stages = []
