@@ -2,9 +2,22 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 
-# Save function (to be implemented)
+# Variable pour stocker le chemin du fichier
+file_path = None
+
+# Save function
 def save():
-    pass
+    global file_path
+
+    # Si le fichier n'a pas encore été enregistré, demandez à l'utilisateur où enregistrer le fichier
+    if file_path is None:
+        file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
+    
+    # Si l'utilisateur a sélectionné un emplacement de fichier, enregistrez le contenu de la zone de texte dans le fichier
+    if file_path:
+        with open(file_path, 'w') as file:
+            saved_code = asm_zone.get("1.0", tk.END)  # Get the code from the text area
+            file.write(saved_code)
 
 # Run function (to be implemented)
 def run():
