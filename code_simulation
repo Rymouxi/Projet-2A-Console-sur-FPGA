@@ -96,6 +96,13 @@ button_settings.pack(fill="x", pady=5)
 asm_zone = tk.Text(main_frame, width=40, height=20)
 asm_zone.pack(side="left", fill="both", expand=True, padx=5, pady=5)
 
+# Create a vertical scrollbar
+scrollbar = ttk.Scrollbar(main_frame, orient="vertical", command=asm_zone.yview)
+scrollbar.pack(side="right", fill="y")
+
+# Configure the text widget to work with the scrollbar
+asm_zone.config(yscrollcommand=scrollbar.set)
+
 # Register frame on the right of the assembly zone
 register_frame = ttk.LabelFrame(main_frame, text="Registers")
 register_frame.pack(side="right", fill="y")
