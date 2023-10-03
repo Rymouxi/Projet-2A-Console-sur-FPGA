@@ -41,7 +41,7 @@ def import_code():
 def new_file():
     pass
 
-# New file code function (to be implemented)
+# Save as code function (to be implemented)
 def save_as():
     pass
 
