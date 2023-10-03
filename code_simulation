@@ -54,11 +54,7 @@ def import_code():
             asm_zone.delete("1.0", tk.END)  # Clear the current content of the text area
             asm_zone.insert(tk.END, imported_code)  # Insert the imported code into the text area
 
-# New file code function (to be implemented)
-def new_file():
-    global file_path
-    file_path = None  # Reset the file path
-    asm_zone.delete("1.0", tk.END)  # Clear the current content of the text area
+
 
 # Save as code function
 def save_as():
@@ -97,7 +93,6 @@ file_menu.pack(side="left")
 file_menu.menu = tk.Menu(file_menu, tearoff=0)
 file_menu["menu"] = file_menu.menu
 
-file_menu.menu.add_command(label="New File", command=new_file)
 file_menu.menu.add_command(label="Import", command=import_code)
 file_menu.menu.add_separator()
 file_menu.menu.add_command(label="Save", command=save)
