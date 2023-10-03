@@ -38,12 +38,12 @@ def import_code():
     pass
 
 # Create the main window
-fenetre = tk.Tk()
-fenetre.title("Simulator")
-fenetre.geometry("800x600")  # Initial size of the window
+window = tk.Tk()
+window.title("Simulator")
+window.geometry("800x600")  # Initial size of the window
 
 # Main frame
-main_frame = ttk.Frame(fenetre)
+main_frame = ttk.Frame(window)
 main_frame.pack(expand=True, fill="both")
 
 # Frame for the left toolbar
@@ -58,12 +58,13 @@ button_run = ttk.Button(toolbar, text="Run", command=run)
 button_stop = ttk.Button(toolbar, text="Stop", command=stop)
 button_step = ttk.Button(toolbar, text="Run Step by Step", command=run_step_by_step)
 button_reset = ttk.Button(toolbar, text="Reset", command=reset)
+button_import = ttk.Button(toolbar, text="Import", command=import_code)
 button_connect = ttk.Button(toolbar, text="Connect Board", command=connect_board)
 button_download = ttk.Button(toolbar, text="Download Code", command=download_code)
 button_settings = ttk.Button(toolbar, text="Settings", command=settings)
-button_import = ttk.Button(toolbar, text="Import", command=import_code)
 
 button_save.pack(fill="x", pady=5)
+button_import.pack(fill="x", pady=5)
 button_run.pack(fill="x", pady=5)
 button_stop.pack(fill="x", pady=5)
 button_step.pack(fill="x", pady=5)
@@ -71,7 +72,6 @@ button_reset.pack(fill="x", pady=5)
 button_connect.pack(fill="x", pady=5)
 button_download.pack(fill="x", pady=5)
 button_settings.pack(fill="x", pady=5)
-button_import.pack(fill="x", pady=5)
 
 # Assembly code area in the middle
 asm_zone = tk.Text(main_frame, width=40, height=20)
@@ -94,7 +94,7 @@ for i in range(15):
     registers.append(register_value)
 
 # Pipeline frame at the bottom
-pipeline_frame = ttk.LabelFrame(fenetre, text="Pipeline")
+pipeline_frame = ttk.LabelFrame(window, text="Pipeline")
 pipeline_frame.pack(side="bottom", fill="both", expand=True, padx=5, pady=5)
 
 # Add pipeline stages to the frame (to be adapted)
@@ -104,4 +104,5 @@ for i, stage in enumerate(["Fetch", "Decode", "Execute"]):
     stage_label.grid(row=0, column=i, padx=5, pady=2)
     pipeline_stages.append(stage_label)
 
-fenetre.mainloop()
+window.mainloop()
+
