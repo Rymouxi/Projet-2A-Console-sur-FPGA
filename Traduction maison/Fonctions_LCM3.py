@@ -1,4 +1,5 @@
 from DecToBin import *
+from add_sub import *
 
 def reconnaissance_instruction(instruction):
     n=len(instruction)
@@ -32,32 +33,33 @@ def add(instruction):
     #ADD Rd,#imm8
     #ADD Rd,Rn,Rm
     n=len(instruction)
-    Assembleur_offset='0001110'
-    Assembleur=''
-    copie=instruction
+    assembleur_offset='0001110'
+    assembleur=''
+    copie=instruction[4:n]
+
     if copie.count(',')==1:
     #ADD Rd,#imm8
-        Assembleur+=DecToBin(int(copie[copie.find('R')+1:copie.find(',')-1]))
-        Assembleur+=DecToBin(int(copie[copie.find('#'):n]))
+        assembleur+=DecToBin(int(copie[copie.find('R')+1]))
+        assembleur+=DecToBin(int(copie[copie.find('#')+1:n]))
 
     elif copie.count(',')==2:
         if copie.count('#')==0:
         #ADD Rd,Rn,Rm
-            Assembleur+=DecToBin(int(copie[copie.find('R')+1:copie.find(',')-1]))
+            assembleur+=DecToBin(int(copie[copie.find('R')+1]))
             copie=copie[0:copie.find('R')-1]+copie[copie.find(','):len(copie)]
-            Assembleur+=DecToBin(int(copie[copie.find('R')+1:copie.find(',')-1]))
+            assembleur+=DecToBin(int(copie[copie.find('R')+1]))
             copie=copie[0:copie.find('R')-1]+copie[copie.find(','):len(copie)]
-            Assembleur+=DecToBin(int(copie[copie.find('R')+1:len(copie)]))
+            assembleur+=DecToBin(int(copie[copie.find('R')+1]))
 
         elif copie.count('#')==1:
         #ADD Rd,Rn,#imm3  
-            Assembleur+=DecToBin(int(copie[copie.find('#')+1]))
-            Assembleur+=DecToBin(int(copie[copie.find('R')+1]))
+            assembleur+=DecToBin(int(copie[copie.find('#')+1]))
+            assembleur+=DecToBin(int(copie[copie.find('R')+1]))
             copie=copie[0:copie.find('R')-1]+copie[copie.find(','):len(copie)]
-            Assembleur+=DecToBin(int(copie[copie.find('R')+1]))
+            assembleur+=DecToBin(int(copie[copie.find('R')+1]))
             
 
-    return Assembleur_offset
+    return assembleur_offset
 
 def and_(instruction):
     return 1

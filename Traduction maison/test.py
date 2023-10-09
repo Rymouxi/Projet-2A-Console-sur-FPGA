@@ -1,5 +1,7 @@
 from Fonctions_LCM3 import *
 from DecToBin import *
+from Register_recognition import *
 
-phrase='Je vais voir des chevaux, des vaches et des cochons'
-print(add('ADD R1,R5,#7'))
+instruction='ADD R10,R7520,#855026'
+print(Register_recognition(instruction))
+print(htag_recognition(instruction))
