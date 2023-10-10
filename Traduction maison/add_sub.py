@@ -41,4 +41,24 @@ def ADD(instructions:str):
         return(machine3)
     else:
         return(print("error systéme"))    
-   
+
+
+
+
+
+def MOV(instructions:str):
+    """ Fonctions MOV qui à 2 modes de fonctionnement, 
+    2 registre en entrées ou 1 registre et un nombre compris entre 0 et 255
+    Notre fonctions prend en entrée une chaine de carractére qui correspond a une ligne d'instruction contenant "MOV" et renvoie l'instruction machine en bianire correspondante.
+    """
+    if len(register_recognition(instructions))==2:
+        machine1='0000000000'+(register_recognition(instructions)[1])+(register_recognition(instructions)[0])
+        return(machine1)
+    if len(register_recognition(instructions))==1:
+        if (htag_recognition(instructions,8))>255 or (htag_recognition(instructions,8))<0:
+            return(print("Dans le MOV ton chiffre et trop grand COn****d ou trop petit"))  
+                                                                
+        machine2='00100'+(register_recognition(instructions)[0])+(htag_recognition(instructions,8))
+        return(machine2)
+    
+  
