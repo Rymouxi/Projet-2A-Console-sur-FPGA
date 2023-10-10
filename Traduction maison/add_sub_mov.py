@@ -1,11 +1,11 @@
 from DecToBin import*
 
-def ADD(instruction:str):
+def ADD(instructions:str):
     """ 3 modes de fonctionnement pour la fonction ADD
     
     """
-    if len(register_recognition(instruction))==3:
-        machine1='0001100'+(register_recognition(instruction)[2])+(register_recognition(instructions)[1])+(register_recognition(instructions)[0])
+    if len(register_recognition(instructions))==3:
+        machine1='0001100'+(register_recognition(instructions)[2])+(register_recognition(instructions)[1])+(register_recognition(instructions)[0])
         return(machine1)
     if len(register_recognition(instructions))==2:
         if htag_recognition(instructions,3)==-1:
