@@ -3,14 +3,14 @@ from add_sub import *
 from Register_recognition import *
 
 #On travaille toujours avec des chaînes de caractères
-#Les fonctions appelées renvoient des chaînes de caractère ou des listes de chaînes de caractère
+#Les fonctions appelées renvoient des chaînes de caractère
 
 def reconnaissance_instruction(instruction):
     n=len(instruction)
     l=''
     if instruction[0:3]=='ADD':
         add(instruction)
-    elif instruction[0:3]=='AND':
+    elif instruction[0:3]=='AND ':
         l=and_(instruction)
     elif instruction[0]=='B':
         b_instruct(instruction)
@@ -32,14 +32,13 @@ def reconnaissance_instruction(instruction):
         print("Error Syntax")
     return l
 
-def add(instruction):
-    return 1
+
 def and_(instruction:str):
     """Traduction de l'instruction and en langage machine de 0 et de 1\n
     L'instruction qu'elle renvoie est de type str"""
     #AND Rd,Rm
-    register=Register_recognition(instruction)
-    machine='0100000000'+DecToBin(register[1])+DecToBin(register[0])
+    register=register_recognition(instruction)
+    machine='0100000000'+register[1]+register[0]
     return machine
 
 def b_instruct(instruction):
@@ -60,6 +59,4 @@ def lsl(instruction):
 def mov(instruction):
     return 1
 def str_(instruction):
-    return 1
-def sub(instruction):
     return 1
