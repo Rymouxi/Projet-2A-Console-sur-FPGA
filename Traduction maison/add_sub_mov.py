@@ -1,4 +1,5 @@
 from DecToBin import*
+from Register_recognition import*
 
 def ADD(instructions:str):
     """ 3 modes de fonctionnement pour la fonction ADD
@@ -23,8 +24,8 @@ def ADD(instructions:str):
 
 
 
- def SUB(instructions:str):
-   """ a compléter comme le add"""
+def SUB(instructions:str):
+    """ a compléter comme le add"""
     
     if len(register_recognition(instructions))==3:
         machine1='0001101'+(register_recognition(instructions)[2])+(register_recognition(instructions)[1])+(register_recognition(instructions)[0])
