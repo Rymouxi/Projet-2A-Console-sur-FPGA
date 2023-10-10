@@ -7,6 +7,8 @@ file_path = None
 
 # Save function
 def save():
+    """La fonction 'save' permet d'enregistrer le code en cours d'utilisation qui sera écrasé dans le fichier enregistrer\n 
+    Si le fichier n'a pas été enregistrer, la fonction ouvrira alors une fenêtre pop-up qui nous permettra d'enregistrer ce fichier s'abord."""
     global file_path
 
     # If the file hasn't been saved yet, ask the user where to save it
@@ -45,6 +47,7 @@ def settings():
 
 # Import function
 def import_code():
+     """La fonction 'import_code' permet d'ouvrir une fenêtre pop-up qui pourra importer le code enregistrer précedemment ou un code d'une source exterieur dans la fenêtre ASM"""
     global file_path
     file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
     if file_path:
@@ -58,6 +61,7 @@ def import_code():
 
 # Save as code function
 def save_as():
+    """La fonction 'save_as' permet d'ouvrir une fenêtre pop-up qui pourra enregistrer le code écrit en un nouveau fichier qui pourra être utiliser plus tard par le biais de la fonction import"""
     global file_path
     file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
     if file_path:
