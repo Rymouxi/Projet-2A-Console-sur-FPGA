@@ -13,7 +13,7 @@ def save():
 
     # If the file hasn't been saved yet, ask the user where to save it
     if file_path is None:
-        file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
+        save()
 
     # If the user selected a file location, save the content of the text area to the file
     if file_path:
@@ -60,8 +60,18 @@ def open_lcm3_conventions():
 
 # Import function
 def import_code():
-     """La fonction 'import_code' permet d'ouvrir une fenêtre pop-up qui pourra importer le code enregistrer précedemment ou un code d'une source exterieur dans la fenêtre ASM"""
+    """La fonction 'import_code' permet d'ouvrir une fenêtre pop-up qui pourra importer le code enregistrer précedemment ou un code d'une source exterieur dans la fenêtre ASM \n
+    Si la zone d'ASM contient un texte, ouvre une fenêtre pop-up qui demande si on veut sauvegarder ou non. Si on veut sauvegarder, on appelle la fonction save_as"""
     global file_path
+    
+    # Check if the asm_zone contains text
+    if asm_zone.get("1.0", tk.END).strip():
+        # Ask the user if they want to save the current content before importing
+        response = tk.messagebox.askyesno("Save Before Import", "Do you want to save the current code before importing?")
+        if response:
+            save_as()
+
+    # Open the file dialog to import code
     file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
     if file_path:
         with open(file_path, 'r') as file:
@@ -70,7 +80,12 @@ def import_code():
             asm_zone.delete("1.0", tk.END)  # Clear the current content of the text area
             asm_zone.insert(tk.END, imported_code)  # Insert the imported code into the text area
 
-
+    if file_path:
+        with open(file_path, 'r') as file:
+            imported_code = file.read()
+            # Put the imported code into the text area
+            asm_zone.delete("1.0", tk.END)  # Clear the current content of the text area
+            asm_zone.insert(tk.END, imported_code)  # Insert the imported code into the text area
 
 # Save as code function
 def save_as():
