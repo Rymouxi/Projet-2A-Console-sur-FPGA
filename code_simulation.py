@@ -45,6 +45,19 @@ def download_code():
 def settings():
     pass
 
+# Open link function
+def open_link(url):
+    import webbrowser
+    webbrowser.open_new(url)
+
+# Open asm documentation function
+def open_asm_documentation():
+    open_link("https://example.com/asm_documentation")
+
+# Open lcm3 conventions function
+def open_lcm3_conventions():
+    open_link("https://example.com/lcm3_conventions")
+
 # Import function
 def import_code():
      """La fonction 'import_code' permet d'ouvrir une fenêtre pop-up qui pourra importer le code enregistrer précedemment ou un code d'une source exterieur dans la fenêtre ASM"""
@@ -73,6 +86,8 @@ def save_as():
 window = tk.Tk()
 window.title("Simulator")
 window.geometry("800x600")  # Initial size of the window
+
+
 
 # Main frame
 main_frame = ttk.Frame(window)
@@ -103,6 +118,17 @@ file_menu.menu.add_command(label="Save", command=save)
 file_menu.menu.add_command(label="Save As", command=save_as)
 file_menu.pack()
 
+# Help Menu
+help_menu = ttk.Menubutton(toolbar, text="Help", direction="below")
+help_menu.pack(side="right")
+
+help_menu.menu = tk.Menu(help_menu, tearoff=0)
+help_menu["menu"] = help_menu.menu
+
+help_menu.menu.add_command(label="ASM Documentation", command=open_asm_documentation)
+help_menu.menu.add_separator()
+help_menu.menu.add_command(label="LCM3 Conventions", command=open_lcm3_conventions)
+
 # Other buttons
 button_run = ttk.Button(toolbar, text="Run", command=run)
 button_step = ttk.Button(toolbar, text="Run Step by Step", command=run_step_by_step)
@@ -117,6 +143,10 @@ button_reset.pack(side="left", padx=5)
 button_connect.pack(side="left", padx=5)
 button_download.pack(side="left", padx=5)
 button_settings.pack(side="left", padx=5)
+
+# Create a style object
+style = ttk.Style(window)
+style.theme_use('default')  
 
 # Assembly code area in the middle
 asm_zone = tk.Text(main_frame, width=40, height=20)
