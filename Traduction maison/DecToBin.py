@@ -1,4 +1,6 @@
-def DecToBin(Nombre):
+def DecToBin(Nombre:int):
+    """Nombre doit être un int \n
+    Elle renvoie ce même nombre converti en binaire"""
     Binaire=''
     Copie=Nombre
     while Copie!=1:
