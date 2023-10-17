@@ -1,3 +1,5 @@
+from instruction_recognition import*
+from saut_ligne import*
 def instruction_translation(texte_ASM:str):
     """
     """
