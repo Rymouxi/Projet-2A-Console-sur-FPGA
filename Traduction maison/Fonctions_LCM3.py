@@ -13,19 +13,19 @@ def recognition_instruction(instruction):
     elif instruction[0:3]=='AND ':
         l=AND_(instruction)
     elif instruction[0]=='B':
-        b_instruct(instruction)
+        l=b_instruct(instruction)
     elif instruction[0:3]=='CMP':
-        cmp(instruction)
+        l=CMP(instruction)
     elif instruction[0:3]=='EOR':
-        eor(instruction)
+        l=EOR(instruction)
     elif instruction[0:3]=='LDR':
-        ldr(instruction)
+        l=LDR(instruction)
     elif instruction[0:3]=='LSL':
-        lsl(instruction)
+        l=LSL(instruction)
     elif instruction[0:3]=='MOV':
         l=MOV(instruction)
     elif instruction[0:3]=='STR':
-        str_(instruction)
+        l=STR(instruction)
     elif instruction[0:3]=='SUB':
         l=SUB(instruction)
     else:
@@ -54,8 +54,13 @@ def eor(instruction):
     return 1
 def ldr(instruction):
     return 1
-def lsl(instruction):
-    return 1
+def LSL(instruction):
+    """ Fonction renvoyant le code machine de l'instruction LSL \n
+    En partant du principe qu'il est de la forme: LSL Rd,Rm,#imm5
+    """
+    #LSL Rd,Rm,#imm5
+    n=len(instruction)
+    return '00000'+register_recognition(instruction)[0]+register_recognition(instruction)[1]+htag_recognition(instruction,5)
 def mov(instruction):
     return 1
 def STR(instruction):
