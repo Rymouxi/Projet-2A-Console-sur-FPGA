@@ -58,5 +58,12 @@ def lsl(instruction):
     return 1
 def mov(instruction):
     return 1
-def str_(instruction):
-    return 1
+def STR(instruction:str):
+    """ MY name is STR 
+    """
+    if len(register_recognition(instruction))==2:
+        machine5='0110000000'+(register_recognition(instruction)[1])+(register_recognition(instruction)[0])
+        return(machine5)
+    else:
+        return(print("error systéme sur le STR dans le arguments"))
+    
