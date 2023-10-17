@@ -73,4 +73,22 @@ def STR(instruction):
     else:
         return(print("Number of arguments doesn't match"))
     
+def LDR(instructions:str):
+    """   
+    """
+    if len(register_recognition(instructions))==2:
+        machine5='0110100000'+(register_recognition(instructions)[1])+(register_recognition(instructions)[0])
+        return(machine5)
+    else:
+        return(print("error systéme sur le LDR dans le arguments"))
+    
+ 
+def EOR(instructions:str):
+    """
+    """    
+    if len(register_recognition(instructions))==2:
+        machine5='0100000001'+(register_recognition(instructions)[1])+(register_recognition(instructions)[0])
+        return(machine5)
+    else:
+        return(print("error systéme sur le EOR dans le arguments"))
     
