@@ -1,6 +1,7 @@
 from DecToBin import *
 from add_sub_mov import *
 from Register_recognition import *
+from B_instruct import*
 
 #On travaille toujours avec des chaînes de caractères
 #Les fonctions appelées renvoient des chaînes de caractère
