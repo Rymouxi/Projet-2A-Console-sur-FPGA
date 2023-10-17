@@ -9,4 +9,3 @@ def saut_ligne(code_text):
     code_asm.append(code_loop[0:len(code_loop)])
     return code_asm
 
-print(saut_ligne("bonjour\nmoi c'est\nlael"))
