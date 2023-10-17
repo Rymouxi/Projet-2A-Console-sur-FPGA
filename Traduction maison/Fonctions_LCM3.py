@@ -48,12 +48,8 @@ def cmp(instruction):
     """Traduction de l'instruction and en langage machine de 0 et de 1\n
     L'instruction qu'elle renvoie est de type str"""
     #CMP Rn,#imm8
+    return 1
     
-    return 1
-def eor(instruction):
-    return 1
-def ldr(instruction):
-    return 1
 def LSL(instruction):
     """ Fonction renvoyant le code machine de l'instruction LSL \n
     En partant du principe qu'il est de la forme: LSL Rd,Rm,#imm5
@@ -61,8 +57,7 @@ def LSL(instruction):
     #LSL Rd,Rm,#imm5
     n=len(instruction)
     return '00000'+register_recognition(instruction)[0]+register_recognition(instruction)[1]+htag_recognition(instruction,5)
-def mov(instruction):
-    return 1
+
 def STR(instruction):
     """ Fonction renvoyant le code machine de l'instruction STR \n
     En partant du principe qu'il est de la forme: STR Rt,[Rn]
