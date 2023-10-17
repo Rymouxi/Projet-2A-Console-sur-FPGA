@@ -1,4 +1,5 @@
-def instruction_recognition(instruction):
+from Fonctions_LCM3 import*
+def instruction_recognition(str:instruction):
   """Reconnaissance des instructions données
   """
     n=len(instruction)
