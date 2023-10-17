@@ -58,12 +58,14 @@ def lsl(instruction):
     return 1
 def mov(instruction):
     return 1
-def STR(instruction:str):
-    """ MY name is STR 
+def STR(instruction):
+    """ Fonction renvoyant le code machine de l'instruction STR \n
+    En partant du principe qu'il est de la forme: STR Rt,[Rn]
     """
+    #STR Rt,[Rn]
     if len(register_recognition(instruction))==2:
-        machine5='0110000000'+(register_recognition(instruction)[1])+(register_recognition(instruction)[0])
-        return(machine5)
+        return '0110000000'+register_recognition(instruction)[1]+register_recognition(instruction)[0]
     else:
-        return(print("error systéme sur le STR dans le arguments"))
+        return(print("Number of arguments doesn't match"))
+    
     
