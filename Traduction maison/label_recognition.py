@@ -1,3 +1,5 @@
+from saut_ligne import *
+
 def label_recognition(code_asm_brute):
     split_instruction=saut_ligne(code_asm_brute)
     listelabel=[]
