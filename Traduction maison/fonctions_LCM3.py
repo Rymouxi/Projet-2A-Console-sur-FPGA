@@ -1,4 +1,4 @@
-from Register_recognition import *
+from register_recognition import *
 
 #On travaille toujours avec des chaînes de caractères
 #Les fonctions appelées renvoient des chaînes de caractère
