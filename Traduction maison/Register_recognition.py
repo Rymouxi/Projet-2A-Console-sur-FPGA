@@ -8,7 +8,7 @@ def register_recognition(instruction:str):
     if iteration==0:
         return -1
     register_dec=[]  #La liste des numéros des registres en décimal
-        if instruction.find('R')<4:
+    if instruction.find('R')<4:
         instruction=instruction[3:n]
         iteration-=1
     for i in range(iteration):
