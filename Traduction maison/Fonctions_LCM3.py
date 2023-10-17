@@ -45,11 +45,6 @@ def AND_(instruction:str):
 def b_instruct(instruction):
     return 1
 
-def cmp(instruction):
-    """Traduction de l'instruction and en langage machine de 0 et de 1\n
-    L'instruction qu'elle renvoie est de type str"""
-    #CMP Rn,#imm8
-    return 1
     
 def LSL(instruction):
     """ Fonction renvoyant le code machine de l'instruction LSL \n
@@ -88,3 +83,12 @@ def EOR(instructions:str):
     else:
         return(print("error systéme sur le EOR dans le arguments"))
     
+def CMP(instructions:str):
+     """Traduction de l'instruction and en langage machine de 0 et de 1\n
+    L'instruction qu'elle renvoie est de type str"""
+    #CMP Rn,#imm8
+    if len(register_recognition(instructions))==1:
+        machine5='00101'+(register_recognition(instructions)[0])+(htag_recognition(instructions,8))
+        return(machine5)
+    else:
+        return(print("error systéme sur le EOR dans le arguments"))
