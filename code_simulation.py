@@ -5,6 +5,7 @@ from tkinter import filedialog
 
 
 
+
 # ---------- Variables ---------- #
 
 file_path = None
@@ -13,174 +14,79 @@ registers = []  # Registers' array
 
 ''' Some global variables are defined in functions:
 
-asm_zone is defined in main_window_init() and is the text center zone.
-reg_frame is defined in main_window_init() and is the register frame.
-file_path is redefined as global in save(), import(), and save_as().
-
+    asm_zone:     text center zone defined in main_window_init().
+    reg_frame:    register frame defined in registers_init().
+    reg_label:    register label defined in registers_init().
+    memory_tree:  memory arraydefined in memory_array_init().
+    file_path:    redefined as global in save(), import(), and save_as().
 '''
 
 
 
 
-# ---------- Active Functions ---------- #
+
+# ---------- Interface functions (for Lael and Cyprien) ---------- #
 
 
-def save():
-    '''Overwrites the current save file, or opens a dialog window to create a one.'''
+def reg_edit(Rx: int, value: int, color: str):
+    '''Updates the registers' values and window.\n
+        Inputs:\n
+        Rx: Index of the register (between 0 and 15).\n
+        value: New value to put into the register.\n
+        color: Name of the color in which the register will be displayed.'''
 
-    global file_path
-
-    # If the file hasn't been saved yet, asks the user where to save it
-    if file_path is None:
-        save_as()
- 
-    # If the user selected a file location, saves the content of the text area to the file
-    if file_path:
-        with open(file_path, 'w') as file:
-            saved_code = asm_zone.get("1.0", tk.END)  # Gets the code from the text area
-            file.write(saved_code)
-
-
-# (To be implemented)
-def run():
-    pass
+    hex_value = "0x"+format(value, '08x')  # Changes from int to string hex display (0x08......)
+    reg_value = tk.StringVar()
+    reg_value.set(hex_value)
+    reg_label = ttk.Label(reg_frame, text=f"R{Rx}:", foreground=color)  # Applies the color
+    reg_field = ttk.Label(reg_frame, textvariable=reg_value, foreground=color)
+    reg_label.grid(row=Rx, column=0, sticky="w", padx=5, pady=2)
+    reg_field.grid(row=Rx, column=1, sticky="w", padx=5, pady=2)
+    registers[Rx] = reg_value  # Changes the value
 
 
-# (To be implemented)
-def run_step_by_step():
-    pass
+def mem_edit(line: int, value: str, instruction: str, color: str):
+    '''Updates the memory values and corresponding instructions.\n
+        Inputs:\n
+        line: Number of the line to modify.\n
+        value: Hex value to insert in the second column.\n
+        instr: Text to insert in the third column.\n
+        color: Name of the color in which the line will be displayed.'''
 
-
-# (To be implemented)
-def reset():
-    pass
-
-
-# (To be implemented)
-def connect_board():
-    pass
-
-
-# (To be implemented)
-def download_code():
-    pass
-
-
-# (To be implemented)
-def settings():
-    pass
-
-
-def open_link(url: str):
-    '''Opens the provided url.\n
-        Input: url: The online adress to open.'''
-    
-    import webbrowser
-    webbrowser.open_new(url)
-
-
-def open_asm_documentation():
-    '''Opens an online documentation of the ASM assembly code.'''
-
-    open_link("https://example.com/asm_documentation")
-
-
-def open_lcm3_conventions():
-    '''Onpens an online documentation of the LCM3 instructions.'''
-    
-    open_link("https://example.com/lcm3_conventions")
-
-
-def import_code():
-    '''Opens a dialog window to import a code. If code is present in the text window, asks if the user wants to save the current code.\n
-        If yes: Calls the 'save_as' function.\n
-        If not: The current code will be lost !'''
-
-    global file_path
-    
-    # Checks if the asm_zone contains text
-    if asm_zone.get("1.0", tk.END).strip():
-        # Asks the user if they want to save the current content before importing
-        response = tk.messagebox.askyesno("Save Before Import", "Do you want to save the current code before importing?")
-        if response:
-            save_as()
-
-    # Open the file dialog to import code
-    file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
-    if file_path:
-        with open(file_path, 'r') as file:
-            imported_code = file.read()
-
-            # Pastes imported code into the text area
-            asm_zone.delete("1.0", tk.END)          # Clears the text area content
-            asm_zone.insert(tk.END, imported_code)  # Pastes the code
-
-
-def save_as():
-    '''Opens a dialog window to save the current code into a new file.\n
-        It wont save it automatically like the 'save' function does.'''
-
-    global file_path
-
-    file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
-    if file_path:
-        with open(file_path, 'w') as file:
-            saved_code = asm_zone.get("1.0", tk.END)  # Gets the code from the text area
-            file.write(saved_code)
+    item_id = memory_tree.get_children()[line - 1]  # Get the item ID for the line
+    # Update the value in the specified column
+    memory_tree.item(item_id, values=(memory_tree.item(item_id, "values")[0], value, memory_tree.item(item_id, "values")[2]))
+    memory_tree.item(item_id, values=(memory_tree.item(item_id, 'values')[0], memory_tree.item(item_id, 'values')[1], instruction))
+    memory_tree.item(item_id, tags=(color))
+    memory_tree.tag_configure(color, foreground=color)
 
 
 
 
-# ---------- Interface Initialization functions ---------- #
 
 
-def main_window_init():
-    '''Creates and initializes the window of the simulator.'''
+# ---------- Main function ---------- #
+
+
+def main():
+    '''Main function. Creates and initializes the window of the simulator and runs the rest of the program.'''
 
     # Creation of the main window
     window = tk.Tk()
-    window.title("ENSEA's Python LCM3 ASM Simulator")
-    window.geometry("832x624")  # Initial size of the window
-
-    # Main frame
-    main_frame = ttk.Frame(window)
+    window.title("ENSEA's Python LCM3 ASM Simulator") 
+    window.geometry("980x720")      # Initial size of the window
+    main_frame = ttk.Frame(window)  # Main frame
     main_frame.pack(expand=True, fill="both")
 
-    # Top toolbar
-    toolbar_frame = ttk.Frame(main_frame)                  # Frame for the top toolbar
-    toolbar_frame.pack(side="top", fill="x")
-    left_empty_space = ttk.Label(toolbar_frame, width=10)  # Indentation to the left
-    left_empty_space.pack(side="left")
-    toolbar = ttk.Frame(toolbar_frame)
-    toolbar.pack(side="left")
-
-    # Memory frame on the left of the assembly zone
-    create_memory_array_display_frame(main_frame)
-
-    # Assembly code area in the middle
+    # Creation of the other frames
     global asm_zone
-    asm_zone = tk.Text(main_frame, width=40, height=20)
-    asm_zone.pack(side="left", fill="both", expand=True, padx=5, pady=5)
-    asm_scrollbar = ttk.Scrollbar(asm_zone, orient="vertical", command=asm_zone.yview)  # Creation of a vertical scrollbar
-    asm_scrollbar.pack(side="right", fill="y")
-    asm_zone.config(yscrollcommand=asm_scrollbar.set)        # Configuration of the text widget to work with the scrollbar
+    toolbar = toolbar_init(main_frame)    # Top toolbar
+    memory_array_init(main_frame)         # Memory frame on the left of the assembly zone
+    asm_zone = asm_zone_init(main_frame)  # Assembly code area in the middle
+    registers_init(main_frame)            # Register frame on the right of the assembly zone
+    pipeline_init(window)
 
-    # Register frame on the right of the assembly zone
-    reg_init(main_frame)
-    reg_update(2, 6000)
-
-    # Pipeline frame at the bottom
-    pip_frame = ttk.LabelFrame(window, text="Pipeline")
-    pip_frame.pack(side="bottom", fill="both", expand=True, padx=5, pady=5)
-
-    # Add pipeline stages to the frame (to be adapted)
-    pip_stages = []
-    for i, stage in enumerate(["Fetch", "Decode", "Execute"]):
-        stage_label = ttk.Label(pip_frame, text=stage)
-        stage_label.grid(row=0, column=i, padx=5, pady=2)
-        pip_stages.append(stage_label)
-
-    # Toolbar buttons
+    # Creation of the toolbar buttons
     btn_file_menu_init(toolbar)
     btn_help_menu_init(toolbar)
     btn_run_init(toolbar)
@@ -190,15 +96,35 @@ def main_window_init():
     btn_dowload_init(toolbar)
     btn_settings_menu_init(toolbar)
 
-    '''/!\ TO IMPLEMENT'''
-    # Create a style object
-    style = ttk.Style(window)
-    style.theme_use('default')
+    # Examples of use
+    reg_edit(6, 2526451350, "brown")
+    mem_edit(3, "0x12345678", "bruh", "brown")
+
+    # Call to Lael and Cyp's code
 
     window.mainloop()
 
 
-def create_memory_array_display_frame(main_frame):
+
+
+
+# ---------- Interface Initialization functions ---------- #
+
+
+def toolbar_init(main_frame):
+    '''Creates the top toolbar frame.\n
+        Input: main_frame: Frame in which the toolbar will be generated.'''
+
+    toolbar_frame = ttk.Frame(main_frame)  # Frame for the top toolbar
+    toolbar_frame.pack(side="top", fill="x")
+    left_empty_space = ttk.Label(toolbar_frame, width=10)  # Indentation to the left
+    left_empty_space.pack(side="left")
+    toolbar = ttk.Frame(toolbar_frame)
+    toolbar.pack(side="left")
+    return(toolbar_frame)
+
+
+def memory_array_init(main_frame):
     '''Creates the left memory frame and fills it with an array.'''
 
     # Frame for the memory section
@@ -206,20 +132,30 @@ def create_memory_array_display_frame(main_frame):
     memory_frame.pack(side="left", fill="y")
 
     # Creation of the Tree (array)
-    memory_tree = ttk.Treeview(memory_frame, columns=("Adress", "Value", "Description"), show='headings')
-    memory_tree.heading("Adress", text="Adress")
+    global memory_tree
+    memory_tree = ttk.Treeview(memory_frame, columns=("Address", "Value", "Instruction"), show='headings')
+    memory_tree.heading("Address", text="Address")
     memory_tree.heading("Value", text="Value")
-    memory_tree.heading("Description", text="Instruction")
-    memory_tree.column("Adress", width=70)
+    memory_tree.heading("Instruction", text="Instruction")
+    memory_tree.column("Address", width=70)
     memory_tree.column("Value", width=70)
-    memory_tree.column("Description", width=180)
+    memory_tree.column("Instruction", width=180)
 
     # Initialization of the memory
     for i in range(30):
-        adress = "0x"+format(i*2+134217728, '08x')  # Creates the iterable adress 2 by 2 with a 0x0800000 offset
+        address = "0x"+format(i*2+134217728, '08x')  # Creates the iterable adress 2 by 2 with a 0x0800000 offset
         value = "0x"+format(0, '08x') 
-        description = f"Line {i} of the code to copy here"
-        memory_tree.insert("", tk.END, values=(adress, value, description))
+        instruction = ""
+
+        tags = ()  # Tags are used to add a background color inside the array to improve visibility
+        if i % 2 == 0:
+            tags = ("row1")
+        else:
+            tags = ("row2")
+        memory_tree.insert("", tk.END, values=(address, value, instruction), tags=tags)
+    memory_tree.tag_configure("row1", background="gainsboro", foreground="black")
+    memory_tree.tag_configure("row2", background="whitesmoke", foreground="black")
+
     memory_tree.pack(fill="both", expand=True)
 
     mem_scrollbar = ttk.Scrollbar(main_frame, orient=tk.VERTICAL, command=memory_tree.yview)  # Creation of a vertical scrollbar
@@ -227,10 +163,23 @@ def create_memory_array_display_frame(main_frame):
     memory_tree.config(yscrollcommand=mem_scrollbar.set)
 
 
-def reg_init(main_frame):
+def asm_zone_init(main_frame):
+    '''Creates the asm text frame.\n
+        Input: main_frame: Frame in which the asm window will be created.'''
+
+    asm_zone = tk.Text(main_frame, width=40, height=20)
+    asm_zone.pack(side="left", fill="both", expand=True, padx=5, pady=5)
+    asm_scrollbar = ttk.Scrollbar(asm_zone, orient="vertical", command=asm_zone.yview)  # Creation of a vertical scrollbar
+    asm_scrollbar.pack(side="right", fill="y")
+    asm_zone.config(yscrollcommand=asm_scrollbar.set)  # Configuration of the text widget to work with the scrollbar
+    return(asm_zone)
+
+
+def registers_init(main_frame):
     '''Initializes the registers' value and window.'''
 
     global reg_frame
+    global reg_label
     reg_frame = ttk.LabelFrame(main_frame, text="Registers")
     reg_frame.pack(side="right", fill="y")
 
@@ -246,18 +195,17 @@ def reg_init(main_frame):
         registers.append(reg_value)
 
 
-def reg_update(Rx: int, val: int):
-    '''Updates the registers' values and window.\n
-        Inputs:\n
-        Rx: Index of the register (between 0 and 15).\n
-        val: New value to put into the register.'''
+def pipeline_init(window):
+    '''Creates the pipeline frame.\n
+        Input: window: Frame into which the pipeline will be generated.'''
+    pip_frame = ttk.LabelFrame(window, text="Pipeline")  # Pipeline frame at the bottom
+    pip_frame.pack(side="bottom", fill="both", expand=True, padx=5, pady=5)
 
-    hex_val = "0x"+format(val, '08x')
-    reg_value = tk.StringVar()
-    reg_value.set(hex_val)
-    reg_field = ttk.Label(reg_frame, textvariable=reg_value)
-    reg_field.grid(row=Rx, column=1, sticky="w", padx=5, pady=2)
-    registers[Rx] = reg_value
+    pip_stages = []
+    for i, stage in enumerate(["Fetch", "Decode", "Execute"]):
+        stage_label = ttk.Label(pip_frame, text=stage)
+        stage_label.grid(row=0, column=i, padx=5, pady=2)
+        pip_stages.append(stage_label)
 
 
 def btn_file_menu_init(toolbar):
@@ -345,10 +293,125 @@ def btn_settings_menu_init(toolbar):
 
 
 
-# ---------- Code ---------- #
 
-def main():
-    main_window_init()
+# ---------- Button Control functions ---------- #
+
+
+def import_code():
+    '''Opens a dialog window to import a code. If code is present in the text window, asks if the user wants to save the current code.\n
+        If yes: Calls the 'save_as' function.\n
+        If not: The current code will be lost !'''
+
+    global file_path
+    
+    # Checks if the asm_zone contains text
+    if asm_zone.get("1.0", tk.END).strip():
+        # Asks the user if they want to save the current content before importing
+        response = tk.messagebox.askyesno("Save Before Import", "Do you want to save the current code before importing?")
+        if response:
+            save_as()
+
+    # Open the file dialog to import code
+    file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
+    if file_path:
+        with open(file_path, 'r') as file:
+            imported_code = file.read()
+
+            # Pastes imported code into the text area
+            asm_zone.delete("1.0", tk.END)          # Clears the text area content
+            asm_zone.insert(tk.END, imported_code)  # Pastes the code
+
+
+def save():
+    '''Overwrites the current save file, or opens a dialog window to create a one.'''
+
+    global file_path
+
+    # If the file hasn't been saved yet, asks the user where to save it
+    if file_path is None:
+        save_as()
+ 
+    # If the user selected a file location, saves the content of the text area to the file
+    if file_path:
+        with open(file_path, 'w') as file:
+            saved_code = asm_zone.get("1.0", tk.END)  # Gets the code from the text area
+            file.write(saved_code)
+
+
+def save_as():
+    '''Opens a dialog window to save the current code into a new file.\n
+        It wont save it automatically like the 'save' function does.'''
+
+    global file_path
+
+    file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
+    if file_path:
+        with open(file_path, 'w') as file:
+            saved_code = asm_zone.get("1.0", tk.END)  # Gets the code from the text area
+            file.write(saved_code)
+
+
+# (To be implemented)
+def run():
+    pass
+
+
+# (To be implemented)
+def run_step_by_step():
+    pass
+
+
+# (To be implemented)
+def reset():
+    pass
+
+
+# (To be implemented)
+def connect_board():
+    pass
+
+
+# (To be implemented)
+def download_code():
+    pass
+
+
+# (To be implemented)
+def settings():
+    pass
+
+
+def open_asm_documentation():
+    '''Opens an online documentation of the ASM assembly code.'''
+
+    open_link("https://example.com/asm_documentation")
+
+
+def open_lcm3_conventions():
+    '''Onpens an online documentation of the LCM3 instructions.'''
+    
+    open_link("https://example.com/lcm3_conventions")
+
+
+def open_link(url: str):
+    '''Opens the provided url.\n
+        Input: url: The online adress to open.'''
+    
+    import webbrowser
+    webbrowser.open_new(url)
+
+
+
+
+
+# ---------- Code ---------- #
 
 
 main()
+
+
+# Create a style object
+#style = ttk.Style()
+#style.configure("Color.TLabel", foreground="white", background="black")
+
+
