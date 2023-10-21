@@ -6,6 +6,7 @@ from tkinter import filedialog
 
 
 
+
 # ---------- Variables ---------- #
 
 file_path = None
@@ -20,6 +21,7 @@ registers = []  # Registers' array
     memory_tree:  memory arraydefined in memory_array_init().
     file_path:    redefined as global in save(), import(), and save_as().
 '''
+
 
 
 
@@ -45,7 +47,7 @@ def reg_edit(Rx: int, value: int, color: str):
     registers[Rx] = reg_value  # Changes the value
 
 
-def mem_edit(line: int, value: str, instruction: str, color: str):
+def mem_edit(line: int, value: int, instruction: str, color: str):
     '''Updates the memory values and corresponding instructions.\n
         Inputs:\n
         line: Number of the line to modify.\n
@@ -53,12 +55,20 @@ def mem_edit(line: int, value: str, instruction: str, color: str):
         instr: Text to insert in the third column.\n
         color: Name of the color in which the line will be displayed.'''
 
+    hex_value = "0x"+format(value, '08x')
     item_id = memory_tree.get_children()[line - 1]  # Get the item ID for the line
     # Update the value in the specified column
-    memory_tree.item(item_id, values=(memory_tree.item(item_id, "values")[0], value, memory_tree.item(item_id, "values")[2]))
+    memory_tree.item(item_id, values=(memory_tree.item(item_id, "values")[0], hex_value, memory_tree.item(item_id, "values")[2]))
     memory_tree.item(item_id, values=(memory_tree.item(item_id, 'values')[0], memory_tree.item(item_id, 'values')[1], instruction))
-    memory_tree.item(item_id, tags=(color))
-    memory_tree.tag_configure(color, foreground=color)
+
+    if line % 2 == 1:  # Following part to ensure the background doesn't change color
+        tags = "even"
+    else:
+        tags = "odd"
+    memory_tree.item(item_id, tags=tags)
+    memory_tree.tag_configure("even", background="gainsboro", foreground=color)
+    memory_tree.tag_configure("odd", background="whitesmoke", foreground=color)
+
 
 
 
@@ -98,11 +108,12 @@ def main():
 
     # Examples of use
     reg_edit(6, 2526451350, "brown")
-    mem_edit(3, "0x12345678", "bruh", "brown")
+    mem_edit(9, 2526451350, "bruh", "brown")
 
     # Call to Lael and Cyp's code
 
     window.mainloop()
+
 
 
 
@@ -218,6 +229,7 @@ def btn_file_menu_init(toolbar):
     file_menu.menu = tk.Menu(file_menu, tearoff=0)
     file_menu["menu"] = file_menu.menu
 
+    file_menu.menu.add_command(label="New File", command=new_file)
     file_menu.menu.add_command(label="Import", command=import_code)
     file_menu.menu.add_separator()
     file_menu.menu.add_command(label="Save", command=save)
@@ -294,7 +306,25 @@ def btn_settings_menu_init(toolbar):
 
 
 
+
 # ---------- Button Control functions ---------- #
+
+
+def new_file():
+    '''Creates a new blank code page. If code is present in the text window, asks if the user wants to save the current code.\n
+        If yes: Calls the 'save_as' function.\n
+        If not: The current code will be lost !'''
+    
+    global file_path
+
+    # Checks if the asm_zone contains text
+    if asm_zone.get("1.0", tk.END).strip():
+        # Asks the user if they want to save the current content before creating a new file
+        response = tk.messagebox.askyesno("Save Before Creating a New File?", "Do you want to save the current code before creating a blank page?")
+        if response:
+            save_as()
+    if file_path:
+        asm_zone.delete("1.0", tk.END)
 
 
 def import_code():
@@ -363,7 +393,12 @@ def run_step_by_step():
 
 # (To be implemented)
 def reset():
-    pass
+    '''Resets the registers, the memory, and the pipeline.'''
+
+    for i in range(16):
+        reg_edit(i, 0, "black")
+    for i in range(30):
+        mem_edit(i, 0, "", "black")
 
 
 # (To be implemented)
@@ -399,6 +434,7 @@ def open_link(url: str):
     
     import webbrowser
     webbrowser.open_new(url)
+
 
 
 
