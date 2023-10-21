@@ -11,6 +11,14 @@ file_path = None
 
 registers = []  # Registers' array
 
+''' Some global variables are defined in functions:
+
+asm_zone is defined in main_window_init() and is the text center zone.
+reg_frame is defined in main_window_init() and is the register frame.
+file_path is redefined as global in save(), import(), and save_as().
+
+'''
+
 
 
 
@@ -64,8 +72,8 @@ def settings():
 
 
 def open_link(url: str):
-    '''Input : url\n
-    Opens the provided url'''
+    '''Opens the provided url.\n
+        Input: url: The online adress to open.'''
     
     import webbrowser
     webbrowser.open_new(url)
@@ -104,7 +112,7 @@ def import_code():
             imported_code = file.read()
 
             # Pastes imported code into the text area
-            asm_zone.delete("1.0", tk.END)  # Clears the text area content
+            asm_zone.delete("1.0", tk.END)          # Clears the text area content
             asm_zone.insert(tk.END, imported_code)  # Pastes the code
 
 
@@ -131,49 +139,35 @@ def main_window_init():
 
     # Creation of the main window
     window = tk.Tk()
-    window.title("ENSEA's Python LCM3 ASM Simulator"+"{file_path}")
-    window.geometry("800x600")  # Initial size of the window
+    window.title("ENSEA's Python LCM3 ASM Simulator")
+    window.geometry("832x624")  # Initial size of the window
 
     # Main frame
     main_frame = ttk.Frame(window)
     main_frame.pack(expand=True, fill="both")
 
-    # Frame for the top toolbar
-    global toolbar
-    toolbar_frame = ttk.Frame(main_frame)
-    toolbar_frame.pack(side="top", fill="x")
-
-    # Frame for the top toolbar
-    toolbar_frame = ttk.Frame(main_frame)
-    toolbar_frame.pack(side="top", fill="x")
-
-    # Adds an indentation to the left to the top toolbar
-    empty_space = ttk.Label(toolbar_frame, width=10)  # You can adjust the width as needed
-    empty_space.pack(side="left")
-
     # Top toolbar
+    toolbar_frame = ttk.Frame(main_frame)                  # Frame for the top toolbar
+    toolbar_frame.pack(side="top", fill="x")
+    left_empty_space = ttk.Label(toolbar_frame, width=10)  # Indentation to the left
+    left_empty_space.pack(side="left")
     toolbar = ttk.Frame(toolbar_frame)
     toolbar.pack(side="left")
+
+    # Memory frame on the left of the assembly zone
+    create_memory_array_display_frame(main_frame)
 
     # Assembly code area in the middle
     global asm_zone
     asm_zone = tk.Text(main_frame, width=40, height=20)
     asm_zone.pack(side="left", fill="both", expand=True, padx=5, pady=5)
-
-    # Creation of a vertical scrollbar
-    scrollbar = ttk.Scrollbar(main_frame, orient="vertical", command=asm_zone.yview)
-    scrollbar.pack(side="right", fill="y")
-
-    # Configuration of the text widget to work with the scrollbar
-    asm_zone.config(yscrollcommand=scrollbar.set)
+    asm_scrollbar = ttk.Scrollbar(asm_zone, orient="vertical", command=asm_zone.yview)  # Creation of a vertical scrollbar
+    asm_scrollbar.pack(side="right", fill="y")
+    asm_zone.config(yscrollcommand=asm_scrollbar.set)        # Configuration of the text widget to work with the scrollbar
 
     # Register frame on the right of the assembly zone
-    global reg_frame
-    reg_frame = ttk.LabelFrame(main_frame, text="Registers")
-    reg_frame.pack(side="right", fill="y")
-
-    # Creation of the register widgets
-    reg_init()
+    reg_init(main_frame)
+    reg_update(2, 6000)
 
     # Pipeline frame at the bottom
     pip_frame = ttk.LabelFrame(window, text="Pipeline")
@@ -187,14 +181,14 @@ def main_window_init():
         pip_stages.append(stage_label)
 
     # Toolbar buttons
-    btn_file_menu_init()
-    btn_help_menu_init()
-    btn_run_init()
-    btn_step_init()
-    btn_reset_init()
-    btn_connect_init()
-    btn_dowload_init()
-    btn_settings_menu_init()
+    btn_file_menu_init(toolbar)
+    btn_help_menu_init(toolbar)
+    btn_run_init(toolbar)
+    btn_step_init(toolbar)
+    btn_reset_init(toolbar)
+    btn_connect_init(toolbar)
+    btn_dowload_init(toolbar)
+    btn_settings_menu_init(toolbar)
 
     '''/!\ TO IMPLEMENT'''
     # Create a style object
@@ -204,25 +198,59 @@ def main_window_init():
     window.mainloop()
 
 
-def reg_init():
-    '''Initializes the registers' value and window'''
+def create_memory_array_display_frame(main_frame):
+    '''Creates the left memory frame and fills it with an array.'''
 
+    # Frame for the memory section
+    memory_frame = ttk.LabelFrame(main_frame, text="Memory")
+    memory_frame.pack(side="left", fill="y")
+
+    # Creation of the Tree (array)
+    memory_tree = ttk.Treeview(memory_frame, columns=("Adress", "Value", "Description"), show='headings')
+    memory_tree.heading("Adress", text="Adress")
+    memory_tree.heading("Value", text="Value")
+    memory_tree.heading("Description", text="Instruction")
+    memory_tree.column("Adress", width=70)
+    memory_tree.column("Value", width=70)
+    memory_tree.column("Description", width=180)
+
+    # Initialization of the memory
+    for i in range(30):
+        adress = "0x"+format(i*2+134217728, '08x')  # Creates the iterable adress 2 by 2 with a 0x0800000 offset
+        value = "0x"+format(0, '08x') 
+        description = f"Line {i} of the code to copy here"
+        memory_tree.insert("", tk.END, values=(adress, value, description))
+    memory_tree.pack(fill="both", expand=True)
+
+    mem_scrollbar = ttk.Scrollbar(main_frame, orient=tk.VERTICAL, command=memory_tree.yview)  # Creation of a vertical scrollbar
+    mem_scrollbar.pack(side="left", fill="y")
+    memory_tree.config(yscrollcommand=mem_scrollbar.set)
+
+
+def reg_init(main_frame):
+    '''Initializes the registers' value and window.'''
+
+    global reg_frame
+    reg_frame = ttk.LabelFrame(main_frame, text="Registers")
+    reg_frame.pack(side="right", fill="y")
+
+    # Creation of the register widgets
     for i in range(16):
         reg_name = f"R{i}:"
         reg_value = tk.StringVar()
         reg_value.set("0x00000000")  # Initial value
-        label_reg = ttk.Label(reg_frame, text=reg_name)
+        reg_label = ttk.Label(reg_frame, text=reg_name)
         reg_field = ttk.Label(reg_frame, textvariable=reg_value)
-        label_reg.grid(row=i, column=0, sticky="w", padx=5, pady=2)
+        reg_label.grid(row=i, column=0, sticky="w", padx=5, pady=2)
         reg_field.grid(row=i, column=1, sticky="w", padx=5, pady=2)
         registers.append(reg_value)
 
 
 def reg_update(Rx: int, val: int):
-    '''Updates the registers' values and window\n
-    Inputs:\n
-    Rx: Index of the register (between 0 and 15)\n
-    val: New value to put into the register.'''
+    '''Updates the registers' values and window.\n
+        Inputs:\n
+        Rx: Index of the register (between 0 and 15).\n
+        val: New value to put into the register.'''
 
     hex_val = "0x"+format(val, '08x')
     reg_value = tk.StringVar()
@@ -232,8 +260,9 @@ def reg_update(Rx: int, val: int):
     registers[Rx] = reg_value
 
 
-def btn_file_menu_init():
-    '''Creates and initializes the file menu.'''
+def btn_file_menu_init(toolbar):
+    '''Creates and initializes the file menu.\n
+        Input: toolbar: Frame in which to place the button.'''
 
     file_menu = ttk.Menubutton(toolbar, text="File", direction="below")
     file_menu.pack(side="left")
@@ -248,8 +277,9 @@ def btn_file_menu_init():
     file_menu.pack()
 
 
-def btn_help_menu_init():
-    '''Creates and initializes the help menu.'''
+def btn_help_menu_init(toolbar):
+    '''Creates and initializes the help menu.\n
+        Input: toolbar: Frame in which to place the button.'''
 
     help_menu = ttk.Menubutton(toolbar, text="Help", direction="below")
     help_menu.pack(side="right")
@@ -262,43 +292,52 @@ def btn_help_menu_init():
     help_menu.menu.add_command(label="LCM3 Conventions", command=open_lcm3_conventions)
 
 
-def btn_run_init():
-    '''Creates the run button which allows to simulate the code on the computer in one shot.'''
+def btn_run_init(toolbar):
+    '''Creates the run button which allows to simulate the code on the computer in one shot.\n
+        Input: toolbar: Frame in which to place the button.'''
 
     button_run = ttk.Button(toolbar, text="Run", command=run)
     button_run.pack(side="left", padx=5)
 
 
-def btn_step_init():
-    '''Creates the run_step_by_step button which allows to simulate the code, one line at a time, on the computer.'''
+def btn_step_init(toolbar):
+    '''Creates the run_step_by_step button which allows to simulate the code, one line at a time, on the computer.\n
+        Input: toolbar: Frame in which to place the button.'''
 
     button_step = ttk.Button(toolbar, text="Run Step by Step", command=run_step_by_step)
     button_step.pack(side="left", padx=5)
 
 
-def btn_reset_init():
-    '''Creates the reset button which resets the registers, the memory, and the pipeline'''
+def btn_reset_init(toolbar):
+    '''Creates the reset button which resets the registers, the memory, and the pipeline.\n
+        Input: toolbar: Frame in which to place the button.'''
 
     button_reset = ttk.Button(toolbar, text="Reset", command=reset)
     button_reset.pack(side="left", padx=5)
 
 
-def btn_connect_init():
-    '''Creates the connect button which automatically connects the simulator to a connected board, if there's one.'''
+def btn_connect_init(toolbar):
+    '''Creates the connect button which automatically connects the simulator to a connected board, if there's one.\n
+        Input: toolbar: Frame in which to place the button.'''
 
     button_connect = ttk.Button(toolbar, text="Connect Board", command=connect_board)
     button_connect.pack(side="left", padx=5)
 
 
-def btn_dowload_init():
-    '''Creates the download button which downloads the code in the text window into the board, and executes it.'''
+def btn_dowload_init(toolbar):
+    '''Creates the download button which downloads the code in the text window into the board, and executes it.\n
+        Input: toolbar: Frame in which to place the button.'''
 
     button_download = ttk.Button(toolbar, text="Download Code", command=download_code)
     button_download.pack(side="left", padx=5)
+    button_download.state(['disabled'])
+    # To remove as soon as the simulator is connected to a board with the following command:
+    #button_download.state(['!disabled'])
 
 
-def btn_settings_menu_init():
-    '''Creates and initializes the settings menu.'''
+def btn_settings_menu_init(toolbar):
+    '''Creates and initializes the settings menu.\n
+        Input: toolbar: Frame in which to place the button.'''
 
     button_settings = ttk.Button(toolbar, text="Settings", command=settings)
     button_settings.pack(side="left", padx=5)
