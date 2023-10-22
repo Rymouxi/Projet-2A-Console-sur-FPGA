@@ -15,7 +15,12 @@
 
 import tkinter as tk
 from tkinter import ttk
-from tkinter import filedialog
+import customtkinter as ctk
+
+# /!\ customtkinter
+# file et help qui se rétractent au 2nd click
+# fenêtre pour settings
+# pip_shift_column
 
 
 
@@ -42,7 +47,7 @@ registers = []    # Registers' array
 
 
 
-# ---------- Interface functions (for Lael and Cyprien) ---------- #
+# ---------- Interface Edition Functions (for Lael and Cyprien) ---------- #
 
 
 def reg_edit(Rx: int, value: int, color: str):
@@ -52,7 +57,7 @@ def reg_edit(Rx: int, value: int, color: str):
         value: New value to put into the register.\n
         color: Name of the color in which the register will be displayed.'''
 
-    if (Rx>=0) & (Rx<16):
+    if (Rx>=0) & (Rx<8):
         hex_value = "0x"+format(value, '08x')  # Changes from int to string hex display (0x08......)
         reg_value = tk.StringVar()             # Changes from string hex to tk.StringVar
         reg_value.set(hex_value)
@@ -92,13 +97,13 @@ def pip_edit_column(pip_column_text, c: int, color_array):
         c: Number of the column to create/modify /!\ FDE is 0, MAX is 16.\n
         color_aray: Array of 3 colors corresponding to the Fetch, Decode and execute lines in the column.'''
 
-    if (c>0) & (c<17):
+    if (c>0) & (c<20):
         column_frame = ttk.LabelFrame(pip_frame)
         column_frame.grid(row=0, column=c, sticky="w")  # Creation of the column
 
         for i, text in enumerate(pip_column_text):
             column_label = ttk.Label(column_frame, text=text, width=5, foreground=color_array[i])  # Column text and color
-            column_label.grid(padx=10, pady=5, sticky="w")                                         # Column shape and place config
+            column_label.grid(padx=10, pady=8, sticky="w")                                         # Column shape and place config
 
 
 # /!\ This function might not be necessary as asm_code should be accessible everywhere. It improves visibility though.
@@ -114,7 +119,7 @@ def asm_get_code():
 
 
 
-# ---------- Main function ---------- #
+# ---------- Main Function ---------- #
 
 
 def main():
@@ -123,8 +128,8 @@ def main():
     window = main_window_init()
 
     # Examples of use
-    reg_edit(6, 2526451350, "brown")
-    mem_edit(9, 2526451350, "MOV R1, R2", "brown")
+    reg_edit(6, 2526451350, "red")
+    mem_edit(9, 2526451350, "MOV R1, R2", "red")
     pip_edit_column(["MOV", "LDR", "STR"], 6, ["red", "blue", "green"])
 
     # Call to Lael and Cyp's code
@@ -136,18 +141,18 @@ def main():
 
 
 
-# ---------- Interface Initialization functions ---------- #
+# ---------- Interface Initialization Functions ---------- #
 
 
 def main_window_init():
     '''This function initializes the main window and calls all the other initialisation functions.\n
         Output: window: The window on which everything is happening.'''
 
-        # Creation of the main window
-    window = tk.Tk()
+    # Creation of the main window
+    window = ctk.CTk()
     window.title("ENSEA's Python LCM3 ASM Simulator") 
     window.geometry("980x720")      # Initial size of the window
-    main_frame = ttk.Frame(window)  # Main frame
+    main_frame = ctk.CTkFrame(window)  # Main frame
     main_frame.pack(expand=True, fill="both")
 
     # Creation of the other frames
@@ -159,13 +164,14 @@ def main_window_init():
 
     # Creation of the toolbar buttons
     btn_file_menu_init(toolbar)
-    btn_run_init(toolbar)
+    btn_settings_menu_init(toolbar)
+    btn_help_menu_init(toolbar)
     btn_step_init(toolbar)
     btn_reset_init(toolbar)
     btn_connect_init(toolbar)
     btn_dowload_init(toolbar)
-    btn_settings_menu_init(toolbar)
-    btn_help_menu_init(toolbar)
+
+    ctk.set_appearance_mode("Light")
 
     return(window)
 
@@ -175,12 +181,8 @@ def toolbar_init(main_frame):
         Input: main_frame: Frame in which the toolbar will be generated.\n
         Output: toolbar_frame: Frame in which we will generate the buttons.'''
 
-    toolbar_frame = ttk.Frame(main_frame)                  # Frame for the top toolbar
+    toolbar_frame = ctk.CTkFrame(main_frame)                  # Frame for the top toolbar
     toolbar_frame.pack(side="top", fill="x")
-    left_empty_space = ttk.Label(toolbar_frame, width=10)  # Indentation to the left
-    left_empty_space.pack(side="left")
-    toolbar = ttk.Frame(toolbar_frame)
-    toolbar.pack(side="left")
     return(toolbar_frame)
 
 
@@ -230,7 +232,7 @@ def asm_zone_init(main_frame):
 
     global asm_zone
     asm_zone = tk.Text(main_frame, width=40, height=20)
-    asm_zone.pack(side="left", fill="both", expand=True, padx=5, pady=5)
+    asm_zone.pack(side="left", fill="both", expand=True, padx=10, pady=10)
     asm_scrollbar = ttk.Scrollbar(asm_zone, orient="vertical", command=asm_zone.yview)  # Creation of a vertical scrollbar
     asm_scrollbar.pack(side="right", fill="y")
     asm_zone.config(yscrollcommand=asm_scrollbar.set)  # Configuration of the text widget to work with the scrollbar
@@ -244,8 +246,7 @@ def registers_init(main_frame):
     reg_frame.pack(side="right", fill="y")
 
     # Creation of the register widgets
-    for i in range(16):
-        reg_value = tk.StringVar()
+    for i in range(8):
         reg_value = tk.StringVar()
         registers.append(reg_value)
         reg_edit(i, 0, "black")
@@ -258,7 +259,7 @@ def pipeline_init(window):
     # Pipeline frame at the bottom
     global pip_frame
     pip_frame = ttk.LabelFrame(window, text="Pipeline")
-    pip_frame.pack(side="bottom", fill="both", expand=True, padx=10, pady=5)
+    pip_frame.pack(side="bottom", fill="both", padx=10, pady=10)
 
     # Fetch Decode Execute
     pip_fde_frame = ttk.LabelFrame(pip_frame)
@@ -266,11 +267,11 @@ def pipeline_init(window):
     pip_fde_lines = ["Fetch", "Decode", "Execute"]   # Text array to copy in the column
     for i, header in enumerate(pip_fde_lines):
         header_label = ttk.Label(pip_fde_frame, text=header, width=8)    # Column text
-        header_label.grid(row=i, column=0, padx=12, pady=5, sticky="w")  # Column shape and place config
+        header_label.grid(row=i, column=0, padx=12, pady=8, sticky="w")  # Column shape and place config
 
-    # Initialisation of the other cells (15 of them)
-    pip_column_text = [["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""],
-        ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""]]
+    # Initialisation of the other cells (19 of them)
+    pip_column_text = [["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""],
+        ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""]]
 
     for i, col_labels in enumerate(pip_column_text):
         pip_edit_column(col_labels, i+1, ["black", "black", "black"])
@@ -292,57 +293,21 @@ def btn_file_menu_init(toolbar):
     file_menu.menu.add_command(label="Save", command=save)
     file_menu.menu.add_command(label="Save As", command=save_as)
     file_menu.pack()
-
-
-def btn_run_init(toolbar):
-    '''Creates the run button which allows to simulate the code on the computer in one shot.\n
-        Input: toolbar: Frame in which to place the button.'''
-
-    button_run = ttk.Button(toolbar, text="Run", command=run)
-    button_run.pack(side="left", padx=5)
-
-
-def btn_step_init(toolbar):
-    '''Creates the run_step_by_step button which allows to simulate the code, one line at a time, on the computer.\n
-        Input: toolbar: Frame in which to place the button.'''
-
-    button_step = ttk.Button(toolbar, text="Run Step by Step", command=run_step_by_step)
-    button_step.pack(side="left", padx=5)
-
-
-def btn_reset_init(toolbar):
-    '''Creates the reset button which resets the registers, the memory, and the pipeline.\n
-        Input: toolbar: Frame in which to place the button.'''
-
-    button_reset = ttk.Button(toolbar, text="Reset", command=reset)
-    button_reset.pack(side="left", padx=5)
-
-
-def btn_connect_init(toolbar):
-    '''Creates the connect button which automatically connects the simulator to a connected board, if there's one.\n
-        Input: toolbar: Frame in which to place the button.'''
-
-    button_connect = ttk.Button(toolbar, text="Connect Board", command=connect_board)
-    button_connect.pack(side="left", padx=5)
-
-
-def btn_dowload_init(toolbar):
-    '''Creates the download button which downloads the code in the text window into the board, and executes it.\n
-        Input: toolbar: Frame in which to place the button.'''
-
-    button_download = ttk.Button(toolbar, text="Download Code", command=download_code)
-    button_download.pack(side="left", padx=5)
-    button_download.state(['disabled'])
-    # To remove as soon as the simulator is connected to a board with the following command:
-    #button_download.state(['!disabled'])
-
+    
 
 def btn_settings_menu_init(toolbar):
     '''Creates and initializes the settings menu.\n
         Input: toolbar: Frame in which to place the button.'''
 
-    button_settings = ttk.Button(toolbar, text="Settings", command=settings)
-    button_settings.pack(side="left", padx=5)
+    settings_menu = ttk.Menubutton(toolbar, text="Settings", direction="below")
+    settings_menu.pack(side="left")
+
+    settings_menu.menu = tk.Menu(settings_menu, tearoff=0)  # File menu "menu"
+    settings_menu["menu"] = settings_menu.menu
+
+    settings_menu.menu.add_command(label="Dark mode")
+    settings_menu.menu.add_command(label="Light mode")
+    settings_menu.pack()
 
 
 def btn_help_menu_init(toolbar):
@@ -357,16 +322,50 @@ def btn_help_menu_init(toolbar):
 
     help_menu.menu.add_command(label="ASM Documentation", command=help_asm_docu)
     help_menu.menu.add_separator()
-    help_menu.menu.add_command(label="LCM3 Conventions", command=help_lcm3_conv)
+    help_menu.menu.add_command(label="LCM3 Documentation", command=help_lcm3_docu)
     help_menu.menu.add_separator()
-    help_menu.menu.add_command(label="Documentation of this simulator", command=help_simulator_docu)
+    help_menu.menu.add_command(label="This Simulator Documentation", command=help_simulator_docu)
+
+
+def btn_step_init(toolbar):
+    '''Creates the run_step_by_step button which allows to simulate the code, one line at a time, on the computer.\n
+        Input: toolbar: Frame in which to place the button.'''
+
+    button_step = ctk.CTkButton(toolbar, text="Run Step by Step", command=run_step_by_step, width=100, height=15, font = ("Arial", 10), fg_color="gray")
+    button_step.pack(side="left", padx=20)
+
+
+def btn_reset_init(toolbar):
+    '''Creates the reset button which resets the registers, the memory, and the pipeline.\n
+        Input: toolbar: Frame in which to place the button.'''
+
+    button_reset = ctk.CTkButton(toolbar, text="Reset", command=reset, width=100, height=15, font = ("Arial", 10), fg_color="gray")
+    button_reset.pack(side="left", padx=0)
+
+
+def btn_connect_init(toolbar):
+    '''Creates the connect button which automatically connects the simulator to a connected board, if there's one.\n
+        Input: toolbar: Frame in which to place the button.'''
+
+    button_connect = ctk.CTkButton(toolbar, text="Connect Board", command=connect_board, width=100, height=15, font = ("Arial", 10), fg_color="gray")
+    button_connect.pack(side="left", padx=20)
+
+
+def btn_dowload_init(toolbar):
+    '''Creates the download button which downloads the code in the text window into the board, and executes it.\n
+        Input: toolbar: Frame in which to place the button.'''
+
+    button_download = ctk.CTkButton(toolbar, text="Download Code", command=download_code, width=100, height=15, font = ("Arial", 10), fg_color="gray")
+    button_download.pack(side="left", padx=0)
+    button_download.configure(state="disabled")
+    # To remove as soon as the simulator is connected to a board !
 
 
 
 
 
 
-# ---------- Button Control functions ---------- #
+# ---------- Button Control Functions ---------- #
 
 
 def new_file():
@@ -401,7 +400,7 @@ def import_code():
             save_as()
 
     # Open the file dialog to import code
-    file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
+    file_path = tk.filedialog.askopenfilename(filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
     if file_path:
         with open(file_path, 'r') as file:
             imported_code = file.read()
@@ -433,20 +432,11 @@ def save_as():
 
     global file_path
 
-    file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
+    file_path = tk.filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
     if file_path:
         with open(file_path, 'w') as file:
             saved_code = asm_zone.get("1.0", tk.END)  # Gets the code from the text area
             file.write(saved_code)
-
-
-# (To be implemented)
-def run():
-    '''Simulates on the computer the execution of the code, in one shot.'''
-
-    reset()
-
-    # ...
 
 
 # (To be implemented)
@@ -462,11 +452,11 @@ def run_step_by_step():
 def reset():
     '''Resets the registers, the memory, and the pipeline.'''
 
-    for i in range(16):
+    for i in range(8):
         reg_edit(i, 0, "black")
     for i in range(255):
         mem_edit(i, 0, "", "black")
-    for i in range(15):
+    for i in range(19):
         pip_edit_column(["", "", "",], i+1, ["black", "black", "black"])
 
 
@@ -484,20 +474,13 @@ def download_code():
     pass
 
 
-# (To be implemented)
-def settings():
-    '''Menu with user settings.'''
-
-    pass
-
-
 def help_asm_docu():
     '''Opens an online documentation of the ASM assembly code.'''
 
     open_link("https://example.com/asm_documentation")
 
 
-def help_lcm3_conv():
+def help_lcm3_docu():
     '''Onpens an online documentation of the LCM3 instructions.'''
     
     open_link("https://example.com/lcm3_conventions")
