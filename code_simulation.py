@@ -16,9 +16,11 @@
 import tkinter as tk
 from tkinter import ttk
 import customtkinter as ctk
+import random
 
 # Try to kill frames and re-init them on runsbs to lower the load
 # Write a doc for the simulator
+# Case change
 
 
 
@@ -32,6 +34,8 @@ file_path = None  # Stores whether the file is saved somewhere
 registers = []    # Registers' array
 
 run_state = 0     # Turns to 1 when run_step_by_step is clicked, back to 0 when stop is clicked
+
+
 
 ''' Some global variables are defined in functions:
 
@@ -92,11 +96,28 @@ def mem_edit(line: int, value: int, instruction: str, color: str):
     memory_tree.tag_configure("odd", background="whitesmoke", foreground=color)  # Other one on odd numbered lines
 
 
-def pip_edit(pip_column_text, color_array):
+def pip_edit(pip_text):
     '''Iterates the pipeline and adds a new instruction column'''
 
-    pip_shift_all()
-    pip_modify_column(pip_column_text, 1, color_array)
+    pip_shift_all_columns()
+
+    text_color = pip_get_column(1)
+
+    colors = ["black", "dimgray", "darkgray", "rosybrown", "lightcoral", "indianred", "brown", "maroon", "red", "tomato", "darksalmon", "coral", "sienna", "chocolate",
+              "peru", "darkorange", "darkgoldenrod", "darkkhaki", "olive", "olivedrab", "yellowgreen", "darkolivegreen", "darkseagreen", "forestgreen", "limegreen",
+              "seagreen", "turquoise", "lightseagreen", "teal", "deepskyblue", "skyblue", "lightskyblue", "steelblue", "dodgerblue", "slategray", "cornflowerblue",
+              "royalblue", "navy", "mediumblue", "blue", "slateblue", "blueviolet", "darkorchid", "mediumorchid", "plum", "purple", "m", "magenta", "orchid",
+              "mediumvioletred", "deeppink", "hotpink", "crimson"]
+    color = random.choice(colors)
+
+    column_frame = ttk.LabelFrame(pip_frame)
+    column_frame.grid(row=0, column=1, sticky="w")  # Creation of the column
+    column_label = ttk.Label(column_frame, text=pip_text, width=5, foreground=color)  # Column text and color
+    column_label.grid(padx=10, pady=8, sticky="w")
+    column_label = ttk.Label(column_frame, text=text_color[0][0], width=5, foreground=text_color[1][0])  # Column text and color
+    column_label.grid(padx=10, pady=8, sticky="w")
+    column_label = ttk.Label(column_frame, text=text_color[0][1], width=5, foreground=text_color[1][1])  # Column text and color
+    column_label.grid(padx=10, pady=8, sticky="w")
 
 
 # /!\ This function might not be necessary as asm_code should be accessible everywhere. It improves visibility though.
@@ -123,12 +144,21 @@ def main():
     # Examples of use
     reg_edit(6, 2526451350, "red")
     mem_edit(9, 2526451350, "MOV R1, R2", "red")
-    pip_edit(["MOV", "LDR", "STR"], ["red", "blue", "green"])
-    pip_edit(["uretre", "bruh", "bryan"], ["black", "yellow", "cyan"])
-    pip_edit(["test1", "", ""], ["black", "yellow", "cyan"])
-    pip_edit(["test2", "", ""], ["black", "yellow", "cyan"])
-    pip_edit(["test3", "", ""], ["black", "yellow", "cyan"])
-    pip_edit(["test4", "", ""], ["black", "yellow", "cyan"])
+    pip_edit("MOV")
+    pip_edit("LDR")
+    pip_edit("STR")
+    pip_edit("uretre")
+    pip_edit("bruh")
+    pip_edit("bryan")
+    pip_edit("1")
+    pip_edit("2")
+    pip_edit("3")
+    pip_edit("4")
+    pip_edit("5")
+    pip_edit("6")
+    pip_edit("7")
+    pip_edit("8")
+    pip_edit("9")
 
     # Call to Lael and Cyp's code
 
@@ -307,12 +337,26 @@ def pip_get_column(c: int):
     return None
 
 
-def pip_shift_all():
+def pip_shift_all_columns():
     '''Shifts all the columns of the pipeline to the left.'''
 
     for i in range(18):
         text_color = pip_get_column(18-i)
         pip_modify_column(text_color[0], 19-i, text_color[1])
+
+
+def pip_shift_lines():
+    ''''''
+
+    text_color = pip_get_column(1)
+
+    column_frame = ttk.LabelFrame(pip_frame)
+    column_frame.grid(row=0, column=0, sticky="w")  # Creation of the column
+    column_label = ttk.Label(column_frame, text=text_color[0][1], width=5, foreground=text_color[1][1])  # Column text and color
+    column_label.grid(padx=10, pady=8, sticky="w")
+    column_label = ttk.Label(column_frame, text=text_color[0][2], width=5, foreground=text_color[1][2])  # Column text and color
+    column_label.grid(padx=10, pady=8, sticky="w")
+
          
 
 def btn_file_menu_init(toolbar):
@@ -359,6 +403,8 @@ def btn_help_menu_init(toolbar):
     help_menu["menu"] = help_menu.menu
 
     help_menu.menu.add_command(label="This Simulator Documentation", command=help_simulator_docu)
+    help_menu.menu.add_separator()
+    help_menu.menu.add_command(label="ASM Documentation", command=help_asm_docu)
     help_menu.menu.add_separator()
     help_menu.menu.add_command(label="LCM3 Documentation", command=help_lcm3_docu)
 
@@ -547,10 +593,16 @@ def download_code():
     pass
 
 
+def help_asm_docu():
+    '''Opens an online documentation of the ASM assembly code.'''
+
+    open_link("https://example.com/asm_documentation")
+
+
 def help_lcm3_docu():
     '''Onpens an online documentation of the LCM3 instructions.'''
     
-    open_link("https://www.irif.fr/~carton/Enseignement/Architecture/Cours/LC3/")
+    open_link("https://example.com/lcm3_conventions")
 
 
 def help_simulator_docu():
