@@ -1,5 +1,4 @@
-from saut_ligne import*
-from DecToBin import DecToBinCom
+from treatment import*
 from label_recognition import*
 
 
