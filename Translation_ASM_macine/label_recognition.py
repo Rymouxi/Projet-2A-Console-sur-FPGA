@@ -1,4 +1,4 @@
-from saut_ligne import *
+from treatment import *
 
 def label_recognition(code_asm_brute):
     """Code ASM brute est le code en entier avec les sauts de ligne\n
