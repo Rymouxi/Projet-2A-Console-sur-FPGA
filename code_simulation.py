@@ -360,8 +360,6 @@ def btn_help_menu_init(toolbar):
 
     help_menu.menu.add_command(label="This Simulator Documentation", command=help_simulator_docu)
     help_menu.menu.add_separator()
-    help_menu.menu.add_command(label="ASM Documentation", command=help_asm_docu)
-    help_menu.menu.add_separator()
     help_menu.menu.add_command(label="LCM3 Documentation", command=help_lcm3_docu)
 
 
@@ -547,12 +545,6 @@ def download_code():
     '''Downloads the binary conversion of the asm code onto a connected board.'''
 
     pass
-
-
-def help_asm_docu():
-    '''Opens an online documentation of the ASM assembly code.'''
-
-    open_link("https://example.com/asm_documentation")
 
 
 def help_lcm3_docu():
