@@ -1,4 +1,4 @@
-from DecToBin import*
+from treatment import*
 
 def register_recognition(instruction:str):
     """Reconnaissance du ou des registres dans l'instruction dans l'ordre où ils sont écrits qui doit être de type str\n
