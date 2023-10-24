@@ -1,5 +1,5 @@
 from instruction_recognition import*
-from saut_ligne import*
+from treatment import*
 
 
 def instruction_translation(code_ASM:str):
