@@ -76,7 +76,7 @@ def reg_edit(Rx: int, value: int, color: str):
         registers[Rx] = reg_value  # Changes the value
 
 
-def mem_edit(line: int, value: int, instruction: str, color: str):
+def mem_edit(line: int, binary_value: str, instruction: str, color: str):
     '''Edits the memory values, corresponding instructions, and colors.\n
         Inputs:\n
         line: Number of the line to modify.\n
@@ -84,6 +84,7 @@ def mem_edit(line: int, value: int, instruction: str, color: str):
         instr: Text to insert in the third column.\n
         color: Name of the color in which the line will be displayed.'''
 
+    value = int(binary_value, 2)
     hex_value = "0x"+format(value, '04x')           # Changes from int to string hex display (0x08......)
     item_id = memory_tree.get_children()[line - 1]  # Gets the item ID for the line
     memory_tree.item(item_id, values=(memory_tree.item(item_id, "values")[0], hex_value, memory_tree.item(item_id, "values")[2]))    # Updates the value
@@ -164,7 +165,7 @@ def main():
 
     # Examples of use
     reg_edit(6, 2526451350, "red")
-    mem_edit(10, 6969, "MOV R1, R2", "red")
+    mem_edit(10, "0100111010101", "MOV R1, R2", "red")
     pip_edit("MOV")
     pip_edit("LDR")
     pip_edit("STR")
@@ -352,7 +353,14 @@ def pip_modify_column(pip_column_text, c: int, color_array):
             column_label = ttk.Label(column_frame, text=text, width=5, foreground=color_array[i])  # Column text and color
             column_label.grid(padx=10, pady=8, sticky="w")                                         # Column shape and place config
 
-         
+
+
+
+
+
+# ---------- Button Functions ---------- #
+
+
 def btn_file_menu_init(toolbar):
     '''Creates and initializes the file menu.\n
         Input: toolbar: Frame in which to place the button.'''
@@ -362,6 +370,73 @@ def btn_file_menu_init(toolbar):
 
     file_menu.menu = tk.Menu(file_menu, tearoff=0)  # File menu "menu"
     file_menu["menu"] = file_menu.menu
+
+    def new_file():
+        '''Creates a new blank code page. If code is present in the text window, asks if the user wants to save the current code.\n
+            If yes: Calls the 'save_as' function.\n
+            If not: The current code will be lost !'''
+    
+        global file_path
+
+        # Checks if the asm_zone contains text
+        if asm_zone.get("1.0", tk.END).strip():
+            # Asks the user if they want to save the current content before creating a new file
+            response = tk.messagebox.askyesno("Save Before Creating a New File?", "Do you want to save the current code before creating a blank page?")
+            if response:
+                save_as()
+        if file_path:
+            asm_zone.delete("1.0", tk.END)
+
+    def import_code():
+        '''Opens a dialog window to import a code. If code is present in the text window, asks if the user wants to save the current code.\n
+            If yes: Calls the 'save_as' function.\n
+            If not: The current code will be lost !'''
+
+        global file_path
+    
+        # Checks if the asm_zone contains text
+        if asm_zone.get("1.0", tk.END).strip():
+            # Asks the user if they want to save the current content before importing
+            response = tk.messagebox.askyesno("Save Before Import", "Do you want to save the current code before importing?")
+            if response:
+                save_as()
+
+        # Open the file dialog to import code
+        file_path = tk.filedialog.askopenfilename(filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
+        if file_path:
+            with open(file_path, 'r') as file:
+                imported_code = file.read()
+
+                # Pastes imported code into the text area
+                asm_zone.delete("1.0", tk.END)          # Clears the text area content
+                asm_zone.insert(tk.END, imported_code)  # Pastes the code
+
+    def save():
+        '''Overwrites the current save file, or opens a dialog window to create a one.'''
+
+        global file_path
+
+        # If the file hasn't been saved yet, asks the user where to save it
+        if file_path is None:
+            save_as()
+ 
+        # If the user selected a file location, saves the content of the text area to the file
+        if file_path:
+            with open(file_path, 'w') as file:
+                saved_code = asm_zone.get("1.0", tk.END)  # Gets the code from the text area
+                file.write(saved_code)
+
+    def save_as():
+        '''Opens a dialog window to save the current code into a new file.\n
+            It wont save it automatically like the 'save' function does.'''
+
+        global file_path
+
+        file_path = tk.filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
+        if file_path:
+            with open(file_path, 'w') as file:
+                saved_code = asm_zone.get("1.0", tk.END)  # Gets the code from the text area
+                file.write(saved_code)
 
     file_menu.menu.add_command(label="New File", command=new_file)
     file_menu.menu.add_command(label="Import", command=import_code)
@@ -381,6 +456,18 @@ def btn_settings_menu_init(toolbar):
     settings_menu.menu = tk.Menu(settings_menu, tearoff=0)  # File menu "menu"
     settings_menu["menu"] = settings_menu.menu
 
+    def theme_toggle_dark():
+        '''Toggles dark theme.'''
+
+        asm_zone.config(background="dimgray", fg="white")
+        ctk.set_appearance_mode("dark")
+
+    def theme_toggle_light():
+        '''Toggles light theme.'''
+
+        asm_zone.config(background="white", fg="black")
+        ctk.set_appearance_mode("light")
+
     settings_menu.menu.add_command(label="Dark mode", command=theme_toggle_dark)
     settings_menu.menu.add_command(label="Light mode", command=theme_toggle_light)
     settings_menu.pack()
@@ -395,6 +482,11 @@ def btn_help_menu_init(toolbar):
 
     help_menu.menu = tk.Menu(help_menu, tearoff=0)  # Help menu "menu"
     help_menu["menu"] = help_menu.menu
+
+    def help_lcm3_docu():
+        '''Onpens an online documentation of the LCM3 instructions.'''
+
+        webbrowser.open_new("https://www.irif.fr/~carton/Enseignement/Architecture/Cours/LC3/")
 
     help_menu.menu.add_command(label="This Simulator Documentation", command=help_simulator_docu)
     help_menu.menu.add_separator()
@@ -454,98 +546,6 @@ def btn_dowload_init(toolbar):
     # To remove as soon as the simulator is connected to a board !
 
 
-
-
-
-
-# ---------- Button Control Functions ---------- #
-
-
-def new_file():
-    '''Creates a new blank code page. If code is present in the text window, asks if the user wants to save the current code.\n
-        If yes: Calls the 'save_as' function.\n
-        If not: The current code will be lost !'''
-    
-    global file_path
-
-    # Checks if the asm_zone contains text
-    if asm_zone.get("1.0", tk.END).strip():
-        # Asks the user if they want to save the current content before creating a new file
-        response = tk.messagebox.askyesno("Save Before Creating a New File?", "Do you want to save the current code before creating a blank page?")
-        if response:
-            save_as()
-    if file_path:
-        asm_zone.delete("1.0", tk.END)
-
-
-def import_code():
-    '''Opens a dialog window to import a code. If code is present in the text window, asks if the user wants to save the current code.\n
-        If yes: Calls the 'save_as' function.\n
-        If not: The current code will be lost !'''
-
-    global file_path
-    
-    # Checks if the asm_zone contains text
-    if asm_zone.get("1.0", tk.END).strip():
-        # Asks the user if they want to save the current content before importing
-        response = tk.messagebox.askyesno("Save Before Import", "Do you want to save the current code before importing?")
-        if response:
-            save_as()
-
-    # Open the file dialog to import code
-    file_path = tk.filedialog.askopenfilename(filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
-    if file_path:
-        with open(file_path, 'r') as file:
-            imported_code = file.read()
-
-            # Pastes imported code into the text area
-            asm_zone.delete("1.0", tk.END)          # Clears the text area content
-            asm_zone.insert(tk.END, imported_code)  # Pastes the code
-
-
-def save():
-    '''Overwrites the current save file, or opens a dialog window to create a one.'''
-
-    global file_path
-
-    # If the file hasn't been saved yet, asks the user where to save it
-    if file_path is None:
-        save_as()
- 
-    # If the user selected a file location, saves the content of the text area to the file
-    if file_path:
-        with open(file_path, 'w') as file:
-            saved_code = asm_zone.get("1.0", tk.END)  # Gets the code from the text area
-            file.write(saved_code)
-
-
-def save_as():
-    '''Opens a dialog window to save the current code into a new file.\n
-        It wont save it automatically like the 'save' function does.'''
-
-    global file_path
-
-    file_path = tk.filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
-    if file_path:
-        with open(file_path, 'w') as file:
-            saved_code = asm_zone.get("1.0", tk.END)  # Gets the code from the text area
-            file.write(saved_code)
-
-
-def theme_toggle_dark():
-    '''Toggles dark theme.'''
-
-    asm_zone.config(background="dimgray", fg="white")
-    ctk.set_appearance_mode("dark")
-
-
-def theme_toggle_light():
-    '''Toggles light theme.'''
-
-    asm_zone.config(background="white", fg="black")
-    ctk.set_appearance_mode("light")
-
-
 def compile():
     '''Compiles the code'''
 
@@ -594,12 +594,6 @@ def connect_board():
 # (To be implemented)
 def download_code():
     '''Downloads the binary conversion of the asm code onto a connected board.'''
-
-
-def help_lcm3_docu():
-    '''Onpens an online documentation of the LCM3 instructions.'''
-
-    webbrowser.open_new("https://www.irif.fr/~carton/Enseignement/Architecture/Cours/LC3/")
 
 
 def help_simulator_docu():
