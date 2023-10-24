@@ -2,7 +2,7 @@
 #
 # Engineers :
 #
-# APPOURCHAUX Léo, BITTAUD CANOEN Lael, GABORIEAU Cyprien, JIN Clementine
+# APPOURCHAUX Léo, BITTAUD CANOEN Laël, GABORIEAU Cyprien, JIN Clémentine
 # LATRECHE Loubna, OULAD ALI Rym, XIANG Justine, YE Yumeng
 #
 # Professors :
@@ -17,10 +17,8 @@ import tkinter as tk
 from tkinter import ttk
 import customtkinter as ctk
 
-# /!\ customtkinter
-# file et help qui se rétractent au 2nd click
-# fenêtre pour settings
-# pip_shift_column
+# Try to kill frames and re-init them on runsbs to lower the load
+# Write a doc for the simulator
 
 
 
@@ -33,12 +31,16 @@ file_path = None  # Stores whether the file is saved somewhere
 
 registers = []    # Registers' array
 
+run_state = 0     # Turns to 1 when run_step_by_step is clicked, back to 0 when stop is clicked
+
 ''' Some global variables are defined in functions:
 
     asm_zone:       Text center zone defined in asm_zone_init().
     reg_frame:      Register frame defined in registers_init().
     memory_tree:    Memory arraydefined in memory_array_init().
     pip_frame:      Pipeline frame defined in pipeline_init().
+    button_runsbs:  Step_by_step button defined in btn_runsbs_init().
+    button_step:    Step button defined in btn_step_init().
     file_path:      Redefined as global in save(), import(), and save_as().
 '''
 
@@ -57,7 +59,7 @@ def reg_edit(Rx: int, value: int, color: str):
         value: New value to put into the register.\n
         color: Name of the color in which the register will be displayed.'''
 
-    if (Rx>=0) & (Rx<8):
+    if 0 <= Rx < 8:
         hex_value = "0x"+format(value, '08x')  # Changes from int to string hex display (0x08......)
         reg_value = tk.StringVar()             # Changes from string hex to tk.StringVar
         reg_value.set(hex_value)
@@ -90,26 +92,17 @@ def mem_edit(line: int, value: int, instruction: str, color: str):
     memory_tree.tag_configure("odd", background="whitesmoke", foreground=color)  # Other one on odd numbered lines
 
 
-def pip_edit_column(pip_column_text, c: int, color_array):
-    '''Creates or modifies an existing column in the pipeline array. \n
-        Inputs:
-        pip_column_text: Text data that will fill the column.\n
-        c: Number of the column to create/modify /!\ FDE is 0, MAX is 16.\n
-        color_aray: Array of 3 colors corresponding to the Fetch, Decode and execute lines in the column.'''
+def pip_edit(pip_column_text, color_array):
+    '''Iterates the pipeline and adds a new instruction column'''
 
-    if (c>0) & (c<20):
-        column_frame = ttk.LabelFrame(pip_frame)
-        column_frame.grid(row=0, column=c, sticky="w")  # Creation of the column
-
-        for i, text in enumerate(pip_column_text):
-            column_label = ttk.Label(column_frame, text=text, width=5, foreground=color_array[i])  # Column text and color
-            column_label.grid(padx=10, pady=8, sticky="w")                                         # Column shape and place config
+    pip_shift_all()
+    pip_modify_column(pip_column_text, 1, color_array)
 
 
 # /!\ This function might not be necessary as asm_code should be accessible everywhere. It improves visibility though.
 def asm_get_code():
     '''Gets the asm code in the asm zone.\n
-        Output: asm_code: Content of the asm zone.'''
+        Returns: Content of the asm zone.'''
 
     asm_code = asm_zone.get("1.0", tk.END)  # Copy of the asm_zone content into asm_code
     return(asm_code)
@@ -130,7 +123,12 @@ def main():
     # Examples of use
     reg_edit(6, 2526451350, "red")
     mem_edit(9, 2526451350, "MOV R1, R2", "red")
-    pip_edit_column(["MOV", "LDR", "STR"], 6, ["red", "blue", "green"])
+    pip_edit(["MOV", "LDR", "STR"], ["red", "blue", "green"])
+    pip_edit(["uretre", "bruh", "bryan"], ["black", "yellow", "cyan"])
+    pip_edit(["test1", "", ""], ["black", "yellow", "cyan"])
+    pip_edit(["test2", "", ""], ["black", "yellow", "cyan"])
+    pip_edit(["test3", "", ""], ["black", "yellow", "cyan"])
+    pip_edit(["test4", "", ""], ["black", "yellow", "cyan"])
 
     # Call to Lael and Cyp's code
 
@@ -146,7 +144,7 @@ def main():
 
 def main_window_init():
     '''This function initializes the main window and calls all the other initialisation functions.\n
-        Output: window: The window on which everything is happening.'''
+        Returns: The window on which everything is happening.'''
 
     # Creation of the main window
     window = ctk.CTk()
@@ -166,10 +164,11 @@ def main_window_init():
     btn_file_menu_init(toolbar)
     btn_settings_menu_init(toolbar)
     btn_help_menu_init(toolbar)
-    btn_step_init(toolbar)
-    btn_reset_init(toolbar)
-    btn_connect_init(toolbar)
     btn_dowload_init(toolbar)
+    btn_connect_init(toolbar)
+    btn_reset_init(toolbar)
+    btn_step_init(toolbar)
+    btn_runsbs_init(toolbar)
 
     ctk.set_appearance_mode("Light")
 
@@ -179,7 +178,7 @@ def main_window_init():
 def toolbar_init(main_frame):
     '''Creates the top toolbar frame.\n
         Input: main_frame: Frame in which the toolbar will be generated.\n
-        Output: toolbar_frame: Frame in which we will generate the buttons.'''
+        Returns: Frame in which we will generate the buttons.'''
 
     toolbar_frame = ctk.CTkFrame(main_frame)                  # Frame for the top toolbar
     toolbar_frame.pack(side="top", fill="x")
@@ -191,7 +190,7 @@ def memory_array_init(main_frame):
 
     # Frame for the memory section
     memory_frame = ttk.LabelFrame(main_frame, text="Memory")
-    memory_frame.pack(side="left", fill="y")
+    memory_frame.pack(side="left", fill="y", pady=10)
 
     # Creation of the Tree (array)
     global memory_tree
@@ -218,22 +217,21 @@ def memory_array_init(main_frame):
     memory_tree.tag_configure("row1", background="gainsboro", foreground="black")   # One color on even numbered lines
     memory_tree.tag_configure("row2", background="whitesmoke", foreground="black")  # Other one on odd numbered lines
 
-    memory_tree.pack(fill="both", expand=True)
+    memory_tree.pack(fill="both", expand=True, pady=5)
 
     mem_scrollbar = ttk.Scrollbar(main_frame, orient=tk.VERTICAL, command=memory_tree.yview)  # Creation of a vertical scrollbar
-    mem_scrollbar.pack(side="left", fill="y")
+    mem_scrollbar.pack(side="left", fill="y", pady=10)
     memory_tree.config(yscrollcommand=mem_scrollbar.set)
 
 
 def asm_zone_init(main_frame):
     '''Creates the asm text frame.\n
-        Input: main_frame: Frame in which the asm window will be created.\n
-        Output: asm_zone: Zone in which we can write ASM code.'''
+        Input: main_frame: Frame in which the asm window will be created.'''
 
     global asm_zone
     asm_zone = tk.Text(main_frame, width=40, height=20)
     asm_zone.pack(side="left", fill="both", expand=True, padx=10, pady=10)
-    asm_scrollbar = ttk.Scrollbar(asm_zone, orient="vertical", command=asm_zone.yview)  # Creation of a vertical scrollbar
+    asm_scrollbar = ttk.Scrollbar(asm_zone, orient=tk.VERTICAL, command=asm_zone.yview)  # Creation of a vertical scrollbar
     asm_scrollbar.pack(side="right", fill="y")
     asm_zone.config(yscrollcommand=asm_scrollbar.set)  # Configuration of the text widget to work with the scrollbar
 
@@ -243,7 +241,7 @@ def registers_init(main_frame):
 
     global reg_frame
     reg_frame = ttk.LabelFrame(main_frame, text="Registers")
-    reg_frame.pack(side="right", fill="y")
+    reg_frame.pack(side="right", fill="y", pady=10)
 
     # Creation of the register widgets
     for i in range(8):
@@ -263,7 +261,7 @@ def pipeline_init(window):
 
     # Fetch Decode Execute
     pip_fde_frame = ttk.LabelFrame(pip_frame)
-    pip_fde_frame.grid(row=0, column=0, sticky="w")  # Creation of the column
+    pip_fde_frame.grid(row=0, column=0, sticky="w", padx=5)  # Creation of the column
     pip_fde_lines = ["Fetch", "Decode", "Execute"]   # Text array to copy in the column
     for i, header in enumerate(pip_fde_lines):
         header_label = ttk.Label(pip_fde_frame, text=header, width=8)    # Column text
@@ -274,8 +272,48 @@ def pipeline_init(window):
         ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""]]
 
     for i, col_labels in enumerate(pip_column_text):
-        pip_edit_column(col_labels, i+1, ["black", "black", "black"])
+        pip_modify_column(col_labels, i+1, ["black", "black", "black"])
 
+
+def pip_modify_column(pip_column_text, c: int, color_array):
+    '''Creates or modifies an existing column in the pipeline array. \n
+        Inputs:
+        pip_column_text: Text data that will fill the column.\n
+        c: Number of the column to create/modify /!\ FDE is 0, MAX is 16.\n
+        color_aray: Array of 3 colors corresponding to the Fetch, Decode and execute lines in the column.'''
+
+    if 0 <= c < 20:
+        column_frame = ttk.LabelFrame(pip_frame)
+        column_frame.grid(row=0, column=c, sticky="w")  # Creation of the column
+
+        for i, text in enumerate(pip_column_text):
+            column_label = ttk.Label(column_frame, text=text, width=5, foreground=color_array[i])  # Column text and color
+            column_label.grid(padx=10, pady=8, sticky="w")                                         # Column shape and place config
+
+
+def pip_get_column(c: int):
+    '''Retrieves the content of a specific column in the pipeline array.
+        Input: c: Number of the column to retrieve /!\ FDE is 0, MAX is 16.
+        Returns: A list of lists, where each inner list contains the content of the specified column (array of 3 strings).
+    '''
+    if 0 < c < 20:
+        column_frame = pip_frame.grid_slaves(row=0, column=c)
+        if column_frame:
+            column_labels = column_frame[0].grid_slaves()
+            column_labels.reverse()
+            column_text = [[label.cget("text") for label in column_labels[i:i + 3]] for i in range(0, len(column_labels), 3)]
+            column_color = [[label.cget("foreground") for label in column_labels[i:i + 3]] for i in range(0, len(column_labels), 3)]
+            return [column_text[0], column_color[0]]
+    return None
+
+
+def pip_shift_all():
+    '''Shifts all the columns of the pipeline to the left.'''
+
+    for i in range(18):
+        text_color = pip_get_column(18-i)
+        pip_modify_column(text_color[0], 19-i, text_color[1])
+         
 
 def btn_file_menu_init(toolbar):
     '''Creates and initializes the file menu.\n
@@ -305,8 +343,8 @@ def btn_settings_menu_init(toolbar):
     settings_menu.menu = tk.Menu(settings_menu, tearoff=0)  # File menu "menu"
     settings_menu["menu"] = settings_menu.menu
 
-    settings_menu.menu.add_command(label="Dark mode")
-    settings_menu.menu.add_command(label="Light mode")
+    settings_menu.menu.add_command(label="Dark mode", command=theme_toggle_dark)
+    settings_menu.menu.add_command(label="Light mode", command=theme_toggle_light)
     settings_menu.pack()
 
 
@@ -320,43 +358,54 @@ def btn_help_menu_init(toolbar):
     help_menu.menu = tk.Menu(help_menu, tearoff=0)  # Help menu "menu"
     help_menu["menu"] = help_menu.menu
 
+    help_menu.menu.add_command(label="This Simulator Documentation", command=help_simulator_docu)
+    help_menu.menu.add_separator()
     help_menu.menu.add_command(label="ASM Documentation", command=help_asm_docu)
     help_menu.menu.add_separator()
     help_menu.menu.add_command(label="LCM3 Documentation", command=help_lcm3_docu)
-    help_menu.menu.add_separator()
-    help_menu.menu.add_command(label="This Simulator Documentation", command=help_simulator_docu)
+
+
+def btn_runsbs_init(toolbar):
+    '''Creates the run_step_by_step button which allows to simulate the code, one line at a time, on the computer.\n
+        Input: toolbar: Frame in which to place the button.'''
+
+    global button_runsbs
+    button_runsbs = ctk.CTkButton(toolbar, text="Run Step by Step", command=run_step_by_step, width=100, height=18, font = ("Arial", 10), fg_color="forestgreen", state="!disabled")
+    button_runsbs.pack(side="right", padx=20)
 
 
 def btn_step_init(toolbar):
     '''Creates the run_step_by_step button which allows to simulate the code, one line at a time, on the computer.\n
         Input: toolbar: Frame in which to place the button.'''
 
-    button_step = ctk.CTkButton(toolbar, text="Run Step by Step", command=run_step_by_step, width=100, height=15, font = ("Arial", 10), fg_color="gray")
-    button_step.pack(side="left", padx=20)
+    global button_step
+    button_step = ctk.CTkButton(toolbar, text="Step ->", command=step_iter, width=100, height=18, font = ("Arial", 10), fg_color="gray")
+    button_step.pack(side="right", padx=0)
+    button_step.configure(state="disabled")
 
 
 def btn_reset_init(toolbar):
     '''Creates the reset button which resets the registers, the memory, and the pipeline.\n
         Input: toolbar: Frame in which to place the button.'''
 
-    button_reset = ctk.CTkButton(toolbar, text="Reset", command=reset, width=100, height=15, font = ("Arial", 10), fg_color="gray")
-    button_reset.pack(side="left", padx=0)
+    button_reset = ctk.CTkButton(toolbar, text="Reset", command=reset, width=100, height=18, font = ("Arial", 10), fg_color="gray")
+    button_reset.pack(side="right", padx=20)
 
 
 def btn_connect_init(toolbar):
     '''Creates the connect button which automatically connects the simulator to a connected board, if there's one.\n
         Input: toolbar: Frame in which to place the button.'''
 
-    button_connect = ctk.CTkButton(toolbar, text="Connect Board", command=connect_board, width=100, height=15, font = ("Arial", 10), fg_color="gray")
-    button_connect.pack(side="left", padx=20)
+    button_connect = ctk.CTkButton(toolbar, text="Connect Board", command=connect_board, width=100, height=18, font = ("Arial", 10), fg_color="gray")
+    button_connect.pack(side="right", padx=0)
 
 
 def btn_dowload_init(toolbar):
     '''Creates the download button which downloads the code in the text window into the board, and executes it.\n
         Input: toolbar: Frame in which to place the button.'''
 
-    button_download = ctk.CTkButton(toolbar, text="Download Code", command=download_code, width=100, height=15, font = ("Arial", 10), fg_color="gray")
-    button_download.pack(side="left", padx=0)
+    button_download = ctk.CTkButton(toolbar, text="Download Code", command=download_code, width=100, height=18, font = ("Arial", 10), fg_color="gray")
+    button_download.pack(side="right", padx=20)
     button_download.configure(state="disabled")
     # To remove as soon as the simulator is connected to a board !
 
@@ -439,11 +488,37 @@ def save_as():
             file.write(saved_code)
 
 
-# (To be implemented)
+def theme_toggle_dark():
+
+    asm_zone.config(background="dimgray", fg="white")
+    ctk.set_appearance_mode("dark")
+
+
+def theme_toggle_light():
+
+    asm_zone.config(background="white", fg="black")
+    ctk.set_appearance_mode("light")
+
+
 def run_step_by_step():
     '''Simulates on the computer the execution of the code, step by step.'''
 
     reset()
+
+    global run_state
+    if run_state == 0:
+        button_runsbs.configure(text="S T O P", fg_color="firebrick")
+        run_state = 1
+        button_step.configure(state="normal")
+    else:
+        button_runsbs.configure(text="Run Step by Step", fg_color="forestgreen")
+        run_state = 0
+        button_step.configure(state="disabled")
+
+
+# (To be implemented)
+def step_iter():
+    '''Simulates on the computer the execution of the code, step by step.'''
 
     # ...
 
@@ -457,7 +532,7 @@ def reset():
     for i in range(255):
         mem_edit(i, 0, "", "black")
     for i in range(19):
-        pip_edit_column(["", "", "",], i+1, ["black", "black", "black"])
+        pip_modify_column(["", "", "",], i+1, ["black", "black", "black"])
 
 
 # (To be implemented)
@@ -489,7 +564,21 @@ def help_lcm3_docu():
 def help_simulator_docu():
     '''Onpens an online documentation of the simulator.'''
 
-    pass
+    documentation_text = ("---------- ENSEA's Python LCM3 Simulator ----------\n\n"+
+                          "Engineers :\n\n"+
+                          "APPOURCHAUX Léo, BITTAUD CANOEN Laël, GABORIEAU Cyprien, JIN Clémentine\n"+
+                          "LATRECHE Loubna, OULAD ALI Rym, XIANG Justine, YE Yumeng\n\n"+
+                          "Professors :\n\n"+
+                          "Mr. Kessal, Mr. Laroche, Mr. Monchal\n\n"+
+                          "---------------------------------------------------------------------\n\n\n"+
+                          "Br0 It'S E4sY jUsT Writ3 soME Code & cL1CK oN 7Ne StEp bY STep Bu7Ton")
+
+    popup = tk.Toplevel()
+    popup.geometry("800x400")
+    popup.title("ENSEA's Python LCM3 Simulator - Documentation")
+
+    documentation_label = tk.Label(popup, text=documentation_text, font=("Arial", 12))
+    documentation_label.pack(expand=True, fill="both", padx=20, pady=20, side="left")
 
 
 def open_link(url: str):
