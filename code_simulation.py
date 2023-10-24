@@ -558,7 +558,7 @@ def help_asm_docu():
 def help_lcm3_docu():
     '''Onpens an online documentation of the LCM3 instructions.'''
     
-    open_link("https://example.com/lcm3_conventions")
+    open_link("https://www.irif.fr/~carton/Enseignement/Architecture/Cours/LC3/")
 
 
 def help_simulator_docu():
