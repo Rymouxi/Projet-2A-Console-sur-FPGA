@@ -16,11 +16,10 @@
 import tkinter as tk
 from tkinter import ttk
 import customtkinter as ctk
-import random
+import textwrap
 
 # Try to kill frames and re-init them on runsbs to lower the load
 # Write a doc for the simulator
-# Case change
 
 
 
@@ -34,8 +33,6 @@ file_path = None  # Stores whether the file is saved somewhere
 registers = []    # Registers' array
 
 run_state = 0     # Turns to 1 when run_step_by_step is clicked, back to 0 when stop is clicked
-
-
 
 ''' Some global variables are defined in functions:
 
@@ -96,28 +93,11 @@ def mem_edit(line: int, value: int, instruction: str, color: str):
     memory_tree.tag_configure("odd", background="whitesmoke", foreground=color)  # Other one on odd numbered lines
 
 
-def pip_edit(pip_text):
+def pip_edit(pip_column_text, color_array):
     '''Iterates the pipeline and adds a new instruction column'''
 
-    pip_shift_all_columns()
-
-    text_color = pip_get_column(1)
-
-    colors = ["black", "dimgray", "darkgray", "rosybrown", "lightcoral", "indianred", "brown", "maroon", "red", "tomato", "darksalmon", "coral", "sienna", "chocolate", "peru",
-              "darkorange", "darkgoldenrod", "darkkhaki", "olive", "olivedrab", "yellowgreen", "darkolivegreen", "darkseagreen", "forestgreen", "limegreen", "seagreen", "turquoise",
-              "lightseagreen", "teal", "deepskyblue", "skyblue", "lightskyblue", "steelblue", "dodgerblue", "slategray", "cornflowerblue", "royalblue", "navy", "mediumblue", "blue",
-              "slateblue", "blueviolet", "darkorchid", "mediumorchid", "plum", "purple", "magenta", "orchid", "mediumvioletred", "deeppink", "hotpink", "crimson"]
-    
-    color = random.choice(colors)
-
-    column_frame = ttk.LabelFrame(pip_frame)
-    column_frame.grid(row=0, column=1, sticky="w")  # Creation of the column
-    column_label = ttk.Label(column_frame, text=pip_text, width=5, foreground=color)  # Column text and color
-    column_label.grid(padx=10, pady=8, sticky="w")
-    column_label = ttk.Label(column_frame, text=text_color[0][0], width=5, foreground=text_color[1][0])  # Column text and color
-    column_label.grid(padx=10, pady=8, sticky="w")
-    column_label = ttk.Label(column_frame, text=text_color[0][1], width=5, foreground=text_color[1][1])  # Column text and color
-    column_label.grid(padx=10, pady=8, sticky="w")
+    pip_shift_all()
+    pip_modify_column(pip_column_text, 1, color_array)
 
 
 # /!\ This function might not be necessary as asm_code should be accessible everywhere. It improves visibility though.
@@ -144,21 +124,12 @@ def main():
     # Examples of use
     reg_edit(6, 2526451350, "red")
     mem_edit(9, 2526451350, "MOV R1, R2", "red")
-    pip_edit("MOV")
-    pip_edit("LDR")
-    pip_edit("STR")
-    pip_edit("uretre")
-    pip_edit("bruh")
-    pip_edit("bryan")
-    pip_edit("1")
-    pip_edit("2")
-    pip_edit("3")
-    pip_edit("4")
-    pip_edit("5")
-    pip_edit("6")
-    pip_edit("7")
-    pip_edit("8")
-    pip_edit("9")
+    pip_edit(["MOV", "LDR", "STR"], ["red", "blue", "green"])
+    pip_edit(["uretre", "bruh", "bryan"], ["black", "yellow", "cyan"])
+    pip_edit(["test1", "", ""], ["black", "yellow", "cyan"])
+    pip_edit(["test2", "", ""], ["black", "yellow", "cyan"])
+    pip_edit(["test3", "", ""], ["black", "yellow", "cyan"])
+    pip_edit(["test4", "", ""], ["black", "yellow", "cyan"])
 
     # Call to Lael and Cyp's code
 
@@ -337,26 +308,12 @@ def pip_get_column(c: int):
     return None
 
 
-def pip_shift_all_columns():
+def pip_shift_all():
     '''Shifts all the columns of the pipeline to the left.'''
 
     for i in range(18):
         text_color = pip_get_column(18-i)
         pip_modify_column(text_color[0], 19-i, text_color[1])
-
-
-def pip_shift_lines():
-    ''''''
-
-    text_color = pip_get_column(1)
-
-    column_frame = ttk.LabelFrame(pip_frame)
-    column_frame.grid(row=0, column=0, sticky="w")  # Creation of the column
-    column_label = ttk.Label(column_frame, text=text_color[0][1], width=5, foreground=text_color[1][1])  # Column text and color
-    column_label.grid(padx=10, pady=8, sticky="w")
-    column_label = ttk.Label(column_frame, text=text_color[0][2], width=5, foreground=text_color[1][2])  # Column text and color
-    column_label.grid(padx=10, pady=8, sticky="w")
-
          
 
 def btn_file_menu_init(toolbar):
@@ -594,27 +551,82 @@ def download_code():
 def help_lcm3_docu():
     '''Onpens an online documentation of the LCM3 instructions.'''
     
-    open_link("www.irif.fr/~carton/Enseignement/Architecture/Cours/LC3/")
+    open_link("https://www.irif.fr/~carton/Enseignement/Architecture/Cours/LC3/")
 
 
 def help_simulator_docu():
     '''Onpens an online documentation of the simulator.'''
 
-    documentation_text = ("---------- ENSEA's Python LCM3 Simulator ----------\n\n"+
-                          "Engineers :\n\n"+
-                          "APPOURCHAUX Léo, BITTAUD CANOEN Laël, GABORIEAU Cyprien, JIN Clémentine\n"+
-                          "LATRECHE Loubna, OULAD ALI Rym, XIANG Justine, YE Yumeng\n\n"+
-                          "Professors :\n\n"+
-                          "Mr. Kessal, Mr. Laroche, Mr. Monchal\n\n"+
-                          "---------------------------------------------------------------------\n\n\n"+
-                          "Br0 It'S E4sY jUsT Writ3 soME Code & cL1CK oN 7Ne StEp bY STep Bu7Ton")
+    documentation_text = (
+    "---------- ENSEA's Python LCM3 Simulator ----------\n\n"
+    "Engineers :\n\n"
+    "APPOURCHAUX Léo, BITTAUD CANOEN Laël, GABORIEAU Cyprien, JIN Clémentine\n"
+    "LATRECHE Loubna, OULAD ALI Rym, XIANG Justine, YE Yumeng\n\n"
+    "Professors :\n\n"
+    "Mr. Kessal, Mr. Laroche, Mr. Monchal\n\n"
+    "---------------------------------------------------------------------\n\n\n"
+    "ENSEA's Python LCM3 Simulator Documentation\n\n"
+    "1. Introduction\n"
+    "   Ensea's Python LCM3 Simulator is a tool that simulates the execution of programs "
+    "written in LCM3 assembly language. This documentation will guide you through all the "
+    "features and capabilities of the simulator.\n\n"
+    "2. User Interface\n"
+    "   2.1 Toolbar\n"
+    "       The toolbar provides quick access to essential features.\n\n"
+    "       New File: Creates a new LCM3 code file\n"
+    "       Import: Imports LCM3 code from an external file\n"
+    "       Save: Saves the current file\n"
+    "       Save as: Saves the code to a new file or update the existing one\n"
+    "       Run Step-by-Step: Starts a line-by-line execution\n"
+    "       Step->: Executes the next line of code\n"
+    "       Reset: Resets the simulator to its initial state\n"
+    "       Setting: Customizes the simulator's appearance using theme options (light mode / dark mode)\n\n"
+    "   2.2 Assembly code area\n"
+    "       In this area, you can write your LCM3 assembly code. Each instruction must be on a separate line.\n\n"
+    "   2.3 Memory\n"
+    "       The memory display shows the current state of the simulator's memory, including addresses, "
+    "values, and corresponding instructions.\n\n"
+    "   2.4 Registers\n"
+    "       The register panel displays the current values of the simulator's registers.\n\n"
+    "   2.5 Pipeline\n"
+    "       The pipeline section illustrates the currently executing instructions' steps (Fetch, Decode, Execute) and the history.\n\n"
+    "3. Using the Simulator\n"
+    "   3.1 Writing LCM3 Code\n"
+    "       Each instruction must be on a separate line.\n\n"
+    "   3.2 Running the Simulator\n"
+    "       Step-by-step execution\n"
+    "       1) Click Run Step by Step to execute the code one step at a time\n"
+    "       2) Observe changes in memory, registers, and the pipeline at each step\n\n"
+    "       Executing a step\n"
+    "       1) Click Step-> to execute the next line of code\n"
+    "       2) Monitor changes in memory, registers and the pipeline\n\n"
+    "   3.3 Monitoring Execution\n"
+    "       Checking memory Contents\n"
+    "       Check the memory panel to view current values and instructions stored in memory\n\n"
+    "       Observing register values\n"
+    "       Check the register panel to observe values stored in each register during program execution\n\n"
+    "4. Troubleshooting\n"
+    "   4.1 Common Errors\n"
+    "       1) Invalid Syntax: Check the syntax of your LCM3 instructions.\n"
+    "       2) Undefined Labels: Ensure all labels are defined before use.\n"
+    "       3) Incorrect Operator Types: Verify operator types for each instruction.\n\n"
+    "   4.2 Debugging Tips\n"
+    "       Check the debug window\n")
+
+   
 
     popup = tk.Toplevel()
-    popup.geometry("800x400")
+    popup.geometry("1200x800")
     popup.title("ENSEA's Python LCM3 Simulator - Documentation")
+    label_widget = tk.Label(popup, text=documentation_text, justify="left")
+    label_widget.pack(padx=10, pady=10)
 
     documentation_label = tk.Label(popup, text=documentation_text, font=("Arial", 12))
     documentation_label.pack(expand=True, fill="both", padx=20, pady=20, side="left")
+    
+    #documentation_scrollbar = ttk.Scrollbar(), orient=tk.VERTICAL, command=memory_tree.yview)  # Creation of a vertical scrollbar
+    #documentation_scrollbar.pack(side="left", fill="y", pady=10)
+    #.config(yscrollcommand=documentation_scrollbar.set)
 
 
 def open_link(url: str):
