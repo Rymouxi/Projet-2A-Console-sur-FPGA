@@ -16,10 +16,13 @@
 import tkinter as tk
 from tkinter import ttk
 import customtkinter as ctk
-import textwrap
+import random
+import webbrowser
 
 # Try to kill frames and re-init them on runsbs to lower the load
-# Write a doc for the simulator
+# Valeurs dans la mémoire c'est le code en hexa de l'intruction
+# Rajouter un bouton compilation et calculer tous les 0 et les 1 ainsi que le schangements de valeurs des registres lors de l'appui sur le bouton.
+# initialiser la taille de la mémoire en fonction du code
 
 
 
@@ -33,6 +36,8 @@ file_path = None  # Stores whether the file is saved somewhere
 registers = []    # Registers' array
 
 run_state = 0     # Turns to 1 when run_step_by_step is clicked, back to 0 when stop is clicked
+
+
 
 ''' Some global variables are defined in functions:
 
@@ -79,7 +84,7 @@ def mem_edit(line: int, value: int, instruction: str, color: str):
         instr: Text to insert in the third column.\n
         color: Name of the color in which the line will be displayed.'''
 
-    hex_value = "0x"+format(value, '08x')           # Changes from int to string hex display (0x08......)
+    hex_value = "0x"+format(value, '04x')           # Changes from int to string hex display (0x08......)
     item_id = memory_tree.get_children()[line - 1]  # Gets the item ID for the line
     memory_tree.item(item_id, values=(memory_tree.item(item_id, "values")[0], hex_value, memory_tree.item(item_id, "values")[2]))    # Updates the value
     memory_tree.item(item_id, values=(memory_tree.item(item_id, 'values')[0], memory_tree.item(item_id, 'values')[1], instruction))  # Updates the instruction
@@ -93,11 +98,47 @@ def mem_edit(line: int, value: int, instruction: str, color: str):
     memory_tree.tag_configure("odd", background="whitesmoke", foreground=color)  # Other one on odd numbered lines
 
 
-def pip_edit(pip_column_text, color_array):
+def pip_edit(pip_text):
     '''Iterates the pipeline and adds a new instruction column'''
 
-    pip_shift_all()
-    pip_modify_column(pip_column_text, 1, color_array)
+    def pip_get_column(c: int):
+        '''Retrieves the content of a specific column in the pipeline array.
+            Input: c: Number of the column to retrieve /!\ FDE is 0, MAX is 16.
+            Returns: A list of lists, where each inner list contains the content of the specified column (array of 3 strings).
+        '''
+        
+        column_frame = pip_frame.grid_slaves(row=0, column=c)
+        if column_frame:
+            column_labels = column_frame[0].grid_slaves()
+            column_labels.reverse()
+            column_text = [[label.cget("text") for label in column_labels[i:i + 3]] for i in range(0, len(column_labels), 3)]         # Pastes the text
+            column_color = [[label.cget("foreground") for label in column_labels[i:i + 3]] for i in range(0, len(column_labels), 3)]  # Puts the old color back
+            return [column_text[0], column_color[0]]
+        return None
+
+    # Shift all the columns of the pipeline to the left.
+    for i in range(18):
+        text_color = pip_get_column(18-i)
+        pip_modify_column(text_color[0], 19-i, text_color[1])
+
+    text_color = pip_get_column(1)  # Gets the colors of each text in the first column
+
+    # defines an array of colors we can pick into
+    colors = ["black", "dimgray", "darkgray", "rosybrown", "lightcoral", "indianred", "brown", "maroon", "red", "tomato", "darksalmon", "coral", "sienna", "chocolate", "peru",
+              "darkorange", "darkgoldenrod", "darkkhaki", "olive", "olivedrab", "yellowgreen", "darkolivegreen", "darkseagreen", "forestgreen", "limegreen", "seagreen", "turquoise",
+              "lightseagreen", "teal", "deepskyblue", "skyblue", "lightskyblue", "steelblue", "dodgerblue", "slategray", "cornflowerblue", "royalblue", "navy", "mediumblue", "blue",
+              "slateblue", "blueviolet", "darkorchid", "mediumorchid", "plum", "purple", "magenta", "orchid", "mediumvioletred", "deeppink", "hotpink", "crimson"]
+    
+    color = random.choice(colors)  # Choses a random color from 'colors'
+
+    column_frame = ttk.LabelFrame(pip_frame)
+    column_frame.grid(row=0, column=1, sticky="w")  # Creation of the column
+    column_label = ttk.Label(column_frame, text=pip_text, width=5, foreground=color)  # Inserts the new element
+    column_label.grid(padx=10, pady=8, sticky="w")
+    column_label = ttk.Label(column_frame, text=text_color[0][0], width=5, foreground=text_color[1][0])  # Pastes the former first element in the 2nd line
+    column_label.grid(padx=10, pady=8, sticky="w")
+    column_label = ttk.Label(column_frame, text=text_color[0][1], width=5, foreground=text_color[1][1])  # Pastes the former second element in the 3rd line
+    column_label.grid(padx=10, pady=8, sticky="w")
 
 
 # /!\ This function might not be necessary as asm_code should be accessible everywhere. It improves visibility though.
@@ -123,13 +164,22 @@ def main():
 
     # Examples of use
     reg_edit(6, 2526451350, "red")
-    mem_edit(9, 2526451350, "MOV R1, R2", "red")
-    pip_edit(["MOV", "LDR", "STR"], ["red", "blue", "green"])
-    pip_edit(["uretre", "bruh", "bryan"], ["black", "yellow", "cyan"])
-    pip_edit(["test1", "", ""], ["black", "yellow", "cyan"])
-    pip_edit(["test2", "", ""], ["black", "yellow", "cyan"])
-    pip_edit(["test3", "", ""], ["black", "yellow", "cyan"])
-    pip_edit(["test4", "", ""], ["black", "yellow", "cyan"])
+    mem_edit(10, 6969, "MOV R1, R2", "red")
+    pip_edit("MOV")
+    pip_edit("LDR")
+    pip_edit("STR")
+    pip_edit("uretre")
+    pip_edit("bruh")
+    pip_edit("bryan")
+    pip_edit("1")
+    pip_edit("2")
+    pip_edit("3")
+    pip_edit("4")
+    pip_edit("5")
+    pip_edit("6")
+    pip_edit("7")
+    pip_edit("8")
+    pip_edit("9")
 
     # Call to Lael and Cyp's code
 
@@ -170,6 +220,7 @@ def main_window_init():
     btn_reset_init(toolbar)
     btn_step_init(toolbar)
     btn_runsbs_init(toolbar)
+    btn_compile_init(toolbar)
 
     ctk.set_appearance_mode("Light")
 
@@ -200,13 +251,13 @@ def memory_array_init(main_frame):
     memory_tree.heading("Value", text="Value")
     memory_tree.heading("Instruction", text="Instruction")
     memory_tree.column("Address", width=70)         # Column widths
-    memory_tree.column("Value", width=70)
+    memory_tree.column("Value", width=50)
     memory_tree.column("Instruction", width=180)
 
     # Initialization of the memory
     for i in range(2048):
         address = "0x"+format(i*2+134217728, '08x')  # Creates the iterable adress 2 by 2 with a 0x0800000 offset
-        value = "0x"+format(0, '08x') 
+        value = "0x"+format(0, '04x') 
         instruction = ""
 
         tags = ()  # Tags are used to add a background color inside the array to improve visibility
@@ -228,6 +279,14 @@ def memory_array_init(main_frame):
 def asm_zone_init(main_frame):
     '''Creates the asm text frame.\n
         Input: main_frame: Frame in which the asm window will be created.'''
+    
+    def on_key(event):
+        if event.char.islower():
+            # If the typed character is lowercase, replace it with uppercase
+            asm_zone.insert(tk.INSERT, event.char.upper())
+            return "break"  # Prevent the default action for lowercase characters
+        else:
+            return None  # Let the default action proceed for other keys
 
     global asm_zone
     asm_zone = tk.Text(main_frame, width=40, height=20)
@@ -235,6 +294,8 @@ def asm_zone_init(main_frame):
     asm_scrollbar = ttk.Scrollbar(asm_zone, orient=tk.VERTICAL, command=asm_zone.yview)  # Creation of a vertical scrollbar
     asm_scrollbar.pack(side="right", fill="y")
     asm_zone.config(yscrollcommand=asm_scrollbar.set)  # Configuration of the text widget to work with the scrollbar
+
+    asm_zone.bind("<Key>", on_key)
 
 
 def registers_init(main_frame):
@@ -291,31 +352,7 @@ def pip_modify_column(pip_column_text, c: int, color_array):
             column_label = ttk.Label(column_frame, text=text, width=5, foreground=color_array[i])  # Column text and color
             column_label.grid(padx=10, pady=8, sticky="w")                                         # Column shape and place config
 
-
-def pip_get_column(c: int):
-    '''Retrieves the content of a specific column in the pipeline array.
-        Input: c: Number of the column to retrieve /!\ FDE is 0, MAX is 16.
-        Returns: A list of lists, where each inner list contains the content of the specified column (array of 3 strings).
-    '''
-    if 0 < c < 20:
-        column_frame = pip_frame.grid_slaves(row=0, column=c)
-        if column_frame:
-            column_labels = column_frame[0].grid_slaves()
-            column_labels.reverse()
-            column_text = [[label.cget("text") for label in column_labels[i:i + 3]] for i in range(0, len(column_labels), 3)]
-            column_color = [[label.cget("foreground") for label in column_labels[i:i + 3]] for i in range(0, len(column_labels), 3)]
-            return [column_text[0], column_color[0]]
-    return None
-
-
-def pip_shift_all():
-    '''Shifts all the columns of the pipeline to the left.'''
-
-    for i in range(18):
-        text_color = pip_get_column(18-i)
-        pip_modify_column(text_color[0], 19-i, text_color[1])
          
-
 def btn_file_menu_init(toolbar):
     '''Creates and initializes the file menu.\n
         Input: toolbar: Frame in which to place the button.'''
@@ -362,6 +399,14 @@ def btn_help_menu_init(toolbar):
     help_menu.menu.add_command(label="This Simulator Documentation", command=help_simulator_docu)
     help_menu.menu.add_separator()
     help_menu.menu.add_command(label="LCM3 Documentation", command=help_lcm3_docu)
+
+
+def btn_compile_init(toolbar):
+    '''Compiles the code'''
+
+    global button_compile
+    button_compile = ctk.CTkButton(toolbar, text="Compile", command=compile, width=100, height=18, font = ("Arial", 10), fg_color="gray")
+    button_compile.pack(side="right", padx=0)
 
 
 def btn_runsbs_init(toolbar):
@@ -488,15 +533,23 @@ def save_as():
 
 
 def theme_toggle_dark():
+    '''Toggles dark theme.'''
 
     asm_zone.config(background="dimgray", fg="white")
     ctk.set_appearance_mode("dark")
 
 
 def theme_toggle_light():
+    '''Toggles light theme.'''
 
     asm_zone.config(background="white", fg="black")
     ctk.set_appearance_mode("light")
+
+
+def compile():
+    '''Compiles the code'''
+
+    # ...
 
 
 def run_step_by_step():
@@ -522,7 +575,6 @@ def step_iter():
     # ...
 
 
-# (To be implemented)
 def reset():
     '''Resets the registers, the memory, and the pipeline.'''
 
@@ -538,36 +590,32 @@ def reset():
 def connect_board():
     '''Connects the simulator with a board plugged on the computer.'''
 
-    pass
-
 
 # (To be implemented)
 def download_code():
     '''Downloads the binary conversion of the asm code onto a connected board.'''
 
-    pass
-
 
 def help_lcm3_docu():
     '''Onpens an online documentation of the LCM3 instructions.'''
-    
-    open_link("https://www.irif.fr/~carton/Enseignement/Architecture/Cours/LC3/")
+
+    webbrowser.open_new("https://www.irif.fr/~carton/Enseignement/Architecture/Cours/LC3/")
 
 
 def help_simulator_docu():
     '''Onpens an online documentation of the simulator.'''
 
-    documentation_text = (
-    "---------- ENSEA's Python LCM3 Simulator ----------\n\n"
-    "Engineers :\n\n"
-    "APPOURCHAUX Léo, BITTAUD CANOEN Laël, GABORIEAU Cyprien, JIN Clémentine\n"
-    "LATRECHE Loubna, OULAD ALI Rym, XIANG Justine, YE Yumeng\n\n"
-    "Professors :\n\n"
-    "Mr. Kessal, Mr. Laroche, Mr. Monchal\n\n"
-    "---------------------------------------------------------------------\n\n\n"
+    documentation_text = ( "\n"+
+    "------------------------ ENSEA's Python LCM3 Simulator ------------------------\n\n"
+    "    Engineers :\n\n"
+    "    APPOURCHAUX Léo, BITTAUD CANOEN Laël, GABORIEAU Cyprien, JIN Clémentine\n"
+    "    LATRECHE Loubna, OULAD ALI Rym, XIANG Justine, YE Yumeng\n\n"
+    "    Professors :\n\n"
+    "    Mr. Kessal, Mr. Laroche, Mr. Monchal\n\n"
+    "-------------------------------------------------------------------------------\n\n\n"
     "ENSEA's Python LCM3 Simulator Documentation\n\n"
     "1. Introduction\n"
-    "   Ensea's Python LCM3 Simulator is a tool that simulates the execution of programs "
+    "   ENSEA's Python LCM3 Simulator is a tool that simulates the execution of programs "
     "written in LCM3 assembly language. This documentation will guide you through all the "
     "features and capabilities of the simulator.\n\n"
     "2. User Interface\n"
@@ -613,28 +661,26 @@ def help_simulator_docu():
     "   4.2 Debugging Tips\n"
     "       Check the debug window\n")
 
-   
-
-    popup = tk.Toplevel()
-    popup.geometry("1200x800")
+    popup = tk.Tk()
     popup.title("ENSEA's Python LCM3 Simulator - Documentation")
-    label_widget = tk.Label(popup, text=documentation_text, justify="left")
-    label_widget.pack(padx=10, pady=10)
+    popup.geometry("1200x800")
 
-    documentation_label = tk.Label(popup, text=documentation_text, font=("Arial", 12))
-    documentation_label.pack(expand=True, fill="both", padx=20, pady=20, side="left")
-    
-    #documentation_scrollbar = ttk.Scrollbar(), orient=tk.VERTICAL, command=memory_tree.yview)  # Creation of a vertical scrollbar
-    #documentation_scrollbar.pack(side="left", fill="y", pady=10)
-    #.config(yscrollcommand=documentation_scrollbar.set)
+    # Frame to hold the text widget and scrollbar
+    popup_frame = ttk.Frame(popup)
+    popup_frame.pack(fill=tk.BOTH, expand=True)
 
+    # Text widget for the documentation
+    documentation_text_widget = tk.Text(popup_frame, wrap=tk.WORD, height=20, width=60)
+    documentation_text_widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-def open_link(url: str):
-    '''Opens the provided url.\n
-        Input: url: The online adress to open.'''
-    
-    import webbrowser
-    webbrowser.open_new(url)
+    # Scrollbar for the Text widget
+    scrollbar = ttk.Scrollbar(popup_frame, command=documentation_text_widget.yview)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+    documentation_text_widget.config(yscrollcommand=scrollbar.set)
+
+    # Insert the text
+    documentation_text_widget.insert(tk.END, documentation_text)
+    documentation_text_widget.configure(state='disabled')  # Make it un-editable
 
 
 
