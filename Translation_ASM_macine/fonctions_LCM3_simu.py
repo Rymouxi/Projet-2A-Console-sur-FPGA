@@ -1,113 +1,185 @@
-from register_recognition import*
-from treatment import*
+from register_recognition import *
+from treatment import *
 
-def ADD_simu(instruction,line):
+
+#On travaille toujours avec des chaînes de caractères
+#Les fonctions appelées renvoient des chaînes de caractère
+
+def AND(instruction:str,line:int):
+    """ Fonction renvoyant le code machine de l'instruction AND\n
+    En partant du principe qu'il est de la forme: AND Rd,Rm
+    """
+    liste_instruction.append(instruction)
+    ligne_instruction.append(line)
+    #AND Rd,Rm
+    if len(register_recognition(instruction))==2:
+
+        register[int(register_recognition(instruction)[0],2)]=int((DecToBin(register[int(register_recognition(instruction)[0],2)]) and DecToBin(register[int(register_recognition(instruction)[1],2)])),2)
+        register_update.append((int(register_recognition(instruction)[0],2),register[int(register_recognition(instruction)[0],2)]))
+        return '0100000000'+register_recognition(instruction)[1]+register_recognition(instruction)[0]
+    else:
+        print("Number of arguments in AND line ",line," doesn't match")
+        exit()
+
+
+def LSL(instruction:str,line:int):
+    """ Fonction renvoyant le code machine de l'instruction LSL \n
+    En partant du principe qu'il est de la forme: LSL Rd,Rm,#imm5
+    """
+    liste_instruction.append(instruction)
+    ligne_instruction.append(line)
+    #LSL Rd,Rm,#imm5
+    if len(register_recognition(instruction))==2:
+        return '00000'+register_recognition(instruction)[0]+register_recognition(instruction)[1]+imm_recognition(instruction,5)
+    else:
+        print("Number of argument in LSL line ",line," doesn't match")
+        exit()
+
+
+def STR(instruction:str,line:int):
+    """ Fonction renvoyant le code machine de l'instruction STR \n
+    En partant du principe qu'il est de la forme: STR Rt,[Rn]
+    """
+    liste_instruction.append(instruction)
+    ligne_instruction.append(line)
+    #STR Rt,[Rn]
+    if len(register_recognition(instruction))==2:
+        return '0110000000'+register_recognition(instruction)[1]+register_recognition(instruction)[0]
+    else:
+        print("Number of arguments in STR line ",line," doesn't match")
+        exit()
+
+
+def LDR(instructions:str,line:int):
+    """Fonction renvoyant le code machine de l'instruction LDR\n
+    En partant du principe qu'il est de la forme: LDR Rt,[Rn]
+    """
+    liste_instruction.append(instructions)
+    ligne_instruction.append(line)
+    if len(register_recognition(instructions))==2:
+        machine='0110100000'+(register_recognition(instructions)[1])+(register_recognition(instructions)[0])
+        return(machine)
+    else:
+        print("Number of arguments in LDR line ",line," doesn't match")
+
+
+def EOR(instructions:str,line:int):
+    """Fonction renvoyant le code machine de l'instruction EOR\n
+    En partant du principe qu'il est de la forme: EOR Rd,Rm
+    """   
+    liste_instruction.append(instructions) 
+    ligne_instruction.append(line)
+    if len(register_recognition(instructions))==2:
+        machine='0100000001'+(register_recognition(instructions)[1])+(register_recognition(instructions)[0])
+        return(machine)
+    else:
+        print("Number of arguments in EOR line ",line," doesn't match")
+        exit()
+
+
+def CMP(instructions:str,line:int):
+    """Traduction de l'instruction and en langage machine de 0 et de 1\n
+    L'instruction qu'elle renvoie est de type str"""
+    liste_instruction.append(instructions)
+    ligne_instruction.append(line)
+    #CMP Rn,#imm8
+    if len(register_recognition(instructions))==1:
+        return '00101'+(register_recognition(instructions)[0])+(imm_recognition(instructions,8))
+    else:
+        print("Number of arguments in CMP line ", line," doesn't match")
+
+
+def ADD(instructions:str,line:int):
     """ 3 modes de fonctionnement pour la fonction ADD
     """
-    n=len(register_recognition(instruction))
+    liste_instruction.append(instructions)
+    ligne_instruction.append(line)
     #ADD Rd,Rn,Rm
-    if n==3:
-        registers=[int(register_recognition(instruction)[i],2) for i in range(n)]
-        register_value=[reg_read(register) for register in registers]
-        reg_edit(registers[0],register_value[1]+register_value[2])
+    if len(register_recognition(instructions))==3:
+        register[int(register_recognition(instructions)[0],2)]=(register[int(register_recognition(instructions)[1],2)]+register[int(register_recognition(instructions)[2],2)])
+        register_update.append((int(register_recognition(instructions)[0],2),register[int(register_recognition(instructions)[0],2)]))
+        return '0001100'+register_recognition(instructions)[2]+register_recognition(instructions)[1]+register_recognition(instructions)[0]
     
     #ADD Rd,Rn,#immm3
-    if n==2:
+    if len(register_recognition(instructions))==2:
         if imm_recognition(instructions,3)==-1:
             print("There must be a #imm with imm<8 in ADD instruction line ",line)
             exit()
-        registers=[int(register_recognition(instruction)[i],2) for i in range(n)]
-        imm_value=int(imm_recognition(instruction,3),2)
-        register_value=[reg_read(register) for register in registers]
-        reg_edit(registers[0],register_value[1]+imm_value)
-
+        register[int(register_recognition(instructions)[0],2)]=(register[int(register_recognition(instructions)[1],2)]+int(imm_recognition(instructions,3),2))
+        register_update.append((int(register_recognition(instructions)[0],2),register[int(register_recognition(instructions)[0],2)]))
+        return '0001110'+imm_recognition(instructions,3)+register_recognition(instructions)[1]+register_recognition(instructions)[0]
+    
     #ADD Rd,#imm8
-    if n==1:
+    if len(register_recognition(instructions))==1:
         if imm_recognition(instructions,8)==-1:
             print("There must be a #imm with imm<256 in ADD instruction line ",line)
             exit()
-        registers=int(register_recognition(instruction)[0],2)
-        imm_value=int(imm_recognition(instruction,8),2)
-        register_value=reg_read(registers)
-        reg_edit(registers[0],register_value[0]+imm_value)    
+        register[int(register_recognition(instructions)[0],2)]=(register[int(register_recognition(instructions)[0],2)]+int(imm_recognition(instructions,8),2))
+        register_update.append((int(register_recognition(instructions)[0],2),register[int(register_recognition(instructions)[0],2)]))
+        return '00110'+register_recognition(instructions)[0]+imm_recognition(instructions,8)
+    
     #ADD
     else:
         print("There is not enough/too much arguments in ADD instruction line ",line)
         exit()
 
- 
-def SUB_simu(instruction,line):
-    """ 3 modes de fonctionnement pour la fonction SUB
+
+def SUB(instructions:str,line:int):
+    """3 modes de fonctionnement pour la fonction SUB
     """
-    n=len(register_recognition(instruction))
+    liste_instruction.append(instructions)
+    ligne_instruction.append(line)
     #SUB Rd,Rn,Rm
-    if n==3:
-        registers=[int(register_recognition(instruction)[i],2) for i in range(n)]
-        register_value=[reg_read(register) for register in registers]
-        reg_edit(registers[0],register_value[1]-register_value[2])
+    if len(register_recognition(instructions))==3:
+        register[int(register_recognition(instructions)[0],2)]=(register[int(register_recognition(instructions)[1],2)]-register[int(register_recognition(instructions)[2],2)])
+        register_update.append((int(register_recognition(instructions)[0],2),register[int(register_recognition(instructions)[0],2)]))
+        return '0001101'+register_recognition(instructions)[2]+register_recognition(instructions)[1]+register_recognition(instructions)[0]
     
-    #SUB Rd,Rn,#immm3
-    if n==2:
+    #SUB Rd,Rn,#imm3
+    if len(register_recognition(instructions))==2:
         if imm_recognition(instructions,3)==-1:
             print("There must be a #imm with imm<8 in SUB instruction line ",line)
             exit()
-        registers=[int(register_recognition(instruction)[i],2) for i in range(n)]
-        imm_value=int(imm_recognition(instruction,3),2)
-        register_value=[reg_read(register) for register in registers]
-        reg_edit(registers[0],register_value[1]-imm_value)
-
+        register[int(register_recognition(instructions)[0],2)]=(register[int(register_recognition(instructions)[1],2)]-int(imm_recognition(instructions,3),2))
+        register_update.append((int(register_recognition(instructions)[0],2),register[int(register_recognition(instructions)[0],2)]))
+        return '0001111'+imm_recognition(instructions,3)+register_recognition(instructions)[1]+register_recognition(instructions)[0]
+    
     #SUB Rd,#imm8
-    if n==1:
+    if len(register_recognition(instructions))==1:
         if imm_recognition(instructions,8)==-1:
             print("There must be a #imm with imm<256 in SUB instruction line ",line)
             exit()
-        registers=int(register_recognition(instruction)[0],2)
-        imm_value=int(imm_recognition(instruction,8),2)
-        register_value=reg_read(registers)
-        reg_edit(registers[0],register_value[0]-imm_value)    
+        register[int(register_recognition(instructions)[0],2)]=(register[int(register_recognition(instructions)[0],2)]-int(imm_recognition(instructions,8),2))
+        register_update.append((int(register_recognition(instructions)[0],2),register[int(register_recognition(instructions)[0],2)]))
+        return '00111'+register_recognition(instructions)[0]+imm_recognition(instructions,8)
+    
     #SUB
     else:
-        print("There is not enough/too much arguments in ADD instruction line ",line)
+        print("There is not enough/too much arguments in SUB instruction line ",line)
         exit()
 
-def MOV_simu(instructions:str,line:int):
+
+def MOV(instructions:str,line:int):
     """ Fonctions MOV qui à 2 modes de fonctionnement, 
     2 registres en entrée ou 1 registre et un nombre compris entre 0 et 255
     Notre fonctions prend en entrée une chaine de carractére qui correspond a une ligne d'instruction contenant "MOV" et renvoie l'instruction machine en bianire correspondante.
     """
+    liste_instruction.append(instructions)
+    ligne_instruction.append(line)
     #MOV Rd,Rm
     if len(register_recognition(instructions))==2:
-        registers=register_recognition(instructions)
-        register_value=reg_read(int(registers[1],2))
-        reg_edit(registers[0],register_value)
+        register[int(register_recognition(instructions)[0],2)]=register[int(register_recognition(instructions)[1],2)]
+        register_update.append((int(register_recognition(instructions)[0],2),register[int(register_recognition(instructions)[0],2)]))
+        return '0000000000'+register_recognition(instructions)[1]+register_recognition(instructions)[0]
+    
     #MOV Rd,#imm8
     if len(register_recognition(instructions))==1:
         if imm_recognition(instructions,8)==-1:
             print("There must be a #imm with imm<256 in MOV instruction line ",line)
             exit()
-        reg_edit(int(register_recognition(instructions)[0],2),int(imm_recognition(instructions,8),2))
+        register[int(register_recognition(instructions)[0],2)]=int(imm_recognition(instructions,8),2)
+        register_update.append((int(register_recognition(instructions)[0],2),register[int(register_recognition(instructions)[0],2)]))
+        return '00100'+(register_recognition(instructions)[0])+(imm_recognition(instructions,8))
     else:
         print("There is not enough/too much arguments in MOV instruction line ",line)
-        exit()
-
-def AND_simu(instruction,line):
-    """ Fonction renvoyant le code machine de l'instruction AND\n
-    En partant du principe qu'il est de la forme: AND Rd,Rm
-    """
-    #AND Rd,Rm
-    if len(register_recognition(instruction))==2:
-        registers_value=[DecToBin(reg_read(int(register_recognition(instruction)[0],2))),DecToBin(reg_read(int(register_recognition(instruction)[1],2)))]
-        reg_edit(int(register_recognition(instruction),2),int(registers_value[0] and registers_value[1],2))
-    else:
-        print("Number of arguments in AND line ",line," doesn't match")
-        exit()
-
-def EOR_simu(instructions:str,line:int):
-    """Fonction renvoyant le code machine de l'instruction EOR\n
-    En partant du principe qu'il est de la forme: EOR Rd,Rm
-    """    
-    if len(register_recognition(instructions))==2:
-        return(machine)
-    else:
-        print("Number of arguments in EOR line ",line," doesn't match")
         exit()
