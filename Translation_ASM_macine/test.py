@@ -1,9 +1,9 @@
-#from Fonctions_LCM3 import *
-from DecToBin import *
+#from fonctions_LCM3 import *
+#from treatment import *
 from instruction_translation import *
 from label_recognition import*
 
-code='ADD R1,R5,#3\nAND R5,R3\nlabel:\nMOV R9,R4\nSTR R5,[R0]\nlol:\nBNE lol'
+code='MOV R0,#10\nADD R0,#10\nAND R7,R3\nlabel:\nSTR R5,[R0]\nlol:\nBNE lol'
 
 Number=-32
 Binary='01001'
