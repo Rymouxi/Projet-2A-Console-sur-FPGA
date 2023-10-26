@@ -8,8 +8,12 @@ def instruction_translation(code_ASM:str):
     code-machine renvoie une liste instruction par instruction du code transcrit en code machine selon la convention LCM3
     """
     code_machine=[]
-    line=0
+    
+    
     for instruction in saut_ligne(code_ASM):
         line+=1
         code_machine.append(instruction_recognition(instruction,code_ASM,line))
-    return code_machine
+        
+    return (code_machine,liste_instruction,ligne_instruction,register_update)
+
+
