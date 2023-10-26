@@ -24,18 +24,24 @@ def B_instruct(instruction:str,code_ASM:str,line:int):
 def B_label(instruction:str,label_list,line:int):
     """Traduction de l'instruction B label
     """ 
+    liste_instruction.append(instruction)
+    ligne_instruction.append(line)
     n=len(instruction)
     return '11100'+jump_length(instruction[2:n+1],label_list,line,10)
 
 def BNE_label(instruction:str,label_list,line:int):
     """Traduction de l'instruction B label
     """
+    liste_instruction.append(instruction)
+    ligne_instruction.append(line)
     n=len(instruction)
     return '11010001'+jump_length(instruction[4:n+1],label_list,line,7)
 
 def BEQ_label(instruction:str,label_list,code_ASM,line:int):
     """Traduction de l'instruction B label
     """
+    liste_instruction.append(instruction)
+    ligne_instruction.append(line)
     n=len(instruction)
     return '11010000'+jump_length(instruction[4:n+1],label_list,line,7)
 
