@@ -79,6 +79,24 @@ def reg_edit(Rx: int, value: int, color: str):
         registers[Rx] = reg_value  # Changes the value
 
 
+def reg_read(Rx: int):
+    '''Reads the value of a specific register and returns it as a binary string.
+        Input: Rx: Index of the register
+        Returns: '''
+    if 0 <= Rx < len(registers):
+        register_value_hex = registers[Rx].get()
+        try:
+            # Convert the hexadecimal string to an integer
+            register_value_int = int(register_value_hex, 16)
+            # Convert the integer to a binary string
+            binary_representation = bin(register_value_int)[2:].zfill(32)  # Adjust the width as needed
+            return binary_representation
+        except ValueError:
+            return None
+    else:
+        return None
+
+
 def mem_edit(line: int, binary_value: str, instruction: str, color: str):
     '''Edits the memory values, corresponding instructions, and colors.\n
         Inputs:\n
@@ -249,7 +267,7 @@ def asm_zone_init(main_frame):
         Input: main_frame: Frame in which the asm window will be created.'''
     
     def on_key(event):
-        if event.char.islower():
+        if event.char.islower() and event.char.isalpha():
             # If the typed character is lowercase, replace it with uppercase
             asm_zone.insert(tk.INSERT, event.char.upper())
             return "break"  # Prevent the default action for lowercase characters
@@ -467,15 +485,6 @@ def btn_compile_init(toolbar):
         '''Compiles the code'''
 
         reset()
-
-        global line
-        global liste_instruction
-        global ligne_instruction
-        global register_update
-        liste_instruction=[]
-        ligne_instruction=[]
-        register_update=[]
-        line=0
 
         code = asm_get_code()
         liste_instruction, ligne_instruction, line, register_update = instruction_translation(code)
