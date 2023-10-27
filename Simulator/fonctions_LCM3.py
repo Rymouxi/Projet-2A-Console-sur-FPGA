@@ -9,16 +9,29 @@ def AND(instruction:str,line:int):
     """ Fonction renvoyant le code machine de l'instruction AND\n
     En partant du principe qu'il est de la forme: AND Rd,Rm
     """
-    liste_instruction.append(instruction)
-    ligne_instruction.append(line)
+    register_update=[]
+    bitstream=''
+    error=''
+
     #AND Rd,Rm
     if len(register_recognition(instruction))==2:
+        
+        #Rd et Rm sont les numéros (en décimal) des registres dans AND
+        Rd=int(register_recognition(instruction)[0],2)
+        Rm=int(register_recognition(instruction)[1],2)
 
-        register[int(register_recognition(instruction)[0],2)]=int((DecToBin(register[int(register_recognition(instruction)[0],2)]) and DecToBin(register[int(register_recognition(instruction)[1],2)])),2)
-        register_update.append((int(register_recognition(instruction)[0],2),register[int(register_recognition(instruction)[0],2)]))
-        return '0100000000'+register_recognition(instruction)[1]+register_recognition(instruction)[0]
+        #Les valeurs de Rd et Rm en binaire
+        Rd_value=reg_read(Rd)
+        Rm_value=reg_read(Rm)
+
+        #Opération simulée sur Rd et Rm
+        register_update.append(Rd)
+        register_update.append(int(Rd_value and Rm_value,2))
+        bitstream='0100000000'+Rm+Rd
+
+        return bitstream,register_update
     else:
-        print("Number of arguments in AND line ",line," doesn't match")
+        error='Number of arguments in AND line '+str(line)+" doesn't match"
         exit()
 
 
@@ -26,11 +39,26 @@ def LSL(instruction:str,line:int):
     """ Fonction renvoyant le code machine de l'instruction LSL \n
     En partant du principe qu'il est de la forme: LSL Rd,Rm,#imm5
     """
-    liste_instruction.append(instruction)
-    ligne_instruction.append(line)
+    register_update=[]
+    bitstream=''
+    error=''
     #LSL Rd,Rm,#imm5
     if len(register_recognition(instruction))==2:
-        return '00000'+register_recognition(instruction)[0]+register_recognition(instruction)[1]+imm_recognition(instruction,5)
+
+        #Rd, Rm et imm5 sont les numéros (en décimal) des registres dans AND
+        Rd=int(register_recognition(instruction)[0],2)
+        Rm=int(register_recognition(instruction)[1],2)
+        imm5=int(imm_recognition(instruction,5)[0],2)
+
+        #Les valeurs de Rd et Rm en binaire
+        Rd_value=reg_read(Rd)
+        Rm_value=reg_read(Rm)
+
+        #Opération simulée sur Rd et Rm
+        register_update.append(Rd)
+        register_update.append(int(Rm_value,2)<< imm5)
+        bitstream='00000'+Rm+Rd+imm5
+        return bitstream,register_update
     else:
         print("Number of argument in LSL line ",line," doesn't match")
         exit()
@@ -40,11 +68,20 @@ def STR(instruction:str,line:int):
     """ Fonction renvoyant le code machine de l'instruction STR \n
     En partant du principe qu'il est de la forme: STR Rt,[Rn]
     """
-    liste_instruction.append(instruction)
-    ligne_instruction.append(line)
+    register_update=[]
+    bitstream=''
+    error=''
+
     #STR Rt,[Rn]
     if len(register_recognition(instruction))==2:
-        return '0110000000'+register_recognition(instruction)[1]+register_recognition(instruction)[0]
+
+        #Rt et Rn sont les numéros (en décimal) des registres dans STR
+        Rt=int(register_recognition(instruction)[0],2)
+        Rm=int(register_recognition(instruction)[1],2)
+
+        bitstream= '0110000000'+Rn+Rt
+
+        return bitstream,register_update
     else:
         print("Number of arguments in STR line ",line," doesn't match")
         exit()
@@ -54,11 +91,20 @@ def LDR(instructions:str,line:int):
     """Fonction renvoyant le code machine de l'instruction LDR\n
     En partant du principe qu'il est de la forme: LDR Rt,[Rn]
     """
-    liste_instruction.append(instructions)
-    ligne_instruction.append(line)
-    if len(register_recognition(instructions))==2:
-        machine='0110100000'+(register_recognition(instructions)[1])+(register_recognition(instructions)[0])
-        return(machine)
+    register_update=[]
+    bitstream=''
+    error=''
+
+    #LDR Rt,[Rn]
+    if len(register_recognition(instruction))==2:
+
+        #Rt et Rn sont les numéros (en décimal) des registres dans LDR
+        Rt=int(register_recognition(instruction)[0],2)
+        Rm=int(register_recognition(instruction)[1],2)
+
+        bitstream= '0110100000'+Rn+Rt
+        
+        return bitstream,register_update
     else:
         print("Number of arguments in LDR line ",line," doesn't match")
 
