@@ -26,6 +26,7 @@ from treatment import *
 # Valeurs dans la mémoire c'est le code en hexa de l'intruction
 # Rajouter un bouton compilation et calculer tous les 0 et les 1 ainsi que les changements de valeurs des registres lors de l'appui sur le bouton.
 # initialiser la taille de la mémoire en fonction du code
+# Changer fond debugger lorsqu'on passe en step-by-step
 
 
 
@@ -45,6 +46,7 @@ run_state = 0     # Turns to 1 when run_step_by_step is clicked, back to 0 when 
 ''' Some global variables are defined in functions:
 
     asm_zone:       Text center zone defined in asm_zone_init().
+    debugger_text:  Debugger frame defined in debugger_init().
     reg_frame:      Register frame defined in registers_init().
     memory_tree:    Memory arraydefined in memory_array_init().
     pip_frame:      Pipeline frame defined in pipeline_init().
@@ -193,7 +195,21 @@ def main_window_init():
     # Creation of the other frames
     toolbar = toolbar_init(main_frame)    # Top toolbar
     memory_array_init(main_frame)         # Memory array frame on the left of the assembly zone
-    asm_zone_init(main_frame)  # Assembly code area in the middle
+
+    texts_frame = ctk.CTkFrame(main_frame)  # Main frame
+    texts_frame.pack(side="left", fill="both", expand=True, padx=8, pady=8)
+    paned_window = ttk.Panedwindow(texts_frame, orient=tk.VERTICAL)
+    paned_window.pack(expand=True, fill="both")
+
+    asm_zone_frame = ttk.LabelFrame(paned_window, text="ASM Zone")
+    asm_zone_frame.grid(row=0, column=0, sticky="nsew")
+    debugger_frame = ttk.LabelFrame(paned_window, text="Debugger")
+    debugger_frame.grid(row=1, column=0, sticky="nsew")
+    paned_window.add(asm_zone_frame, weight=4)
+    paned_window.add(debugger_frame, weight=1)
+
+    asm_zone_init(asm_zone_frame)         # Assembly code area in the middle
+    debugger_init(debugger_frame)         # Debugger in the middle
     registers_init(main_frame)            # Register list frame on the right of the assembly zone
     pipeline_init(window)                 # Pipeline array frame at the bottom
 
@@ -262,7 +278,7 @@ def memory_array_init(main_frame):
     memory_tree.config(yscrollcommand=mem_scrollbar.set)
 
 
-def asm_zone_init(main_frame):
+def asm_zone_init(texts_frame):
     '''Creates the asm text frame.\n
         Input: main_frame: Frame in which the asm window will be created.'''
     
@@ -275,8 +291,8 @@ def asm_zone_init(main_frame):
             return None  # Let the default action proceed for other keys
 
     global asm_zone
-    asm_zone = tk.Text(main_frame, width=40, height=20)
-    asm_zone.pack(side="left", fill="both", expand=True, padx=10, pady=10)
+    asm_zone = tk.Text(texts_frame, width=40, height=30)
+    asm_zone.pack(side="top", fill="both", expand=True)
     asm_scrollbar = ttk.Scrollbar(asm_zone, orient=tk.VERTICAL, command=asm_zone.yview)  # Creation of a vertical scrollbar
     asm_scrollbar.pack(side="right", fill="y")
     asm_zone.config(yscrollcommand=asm_scrollbar.set)  # Configuration of the text widget to work with the scrollbar
@@ -310,7 +326,7 @@ def pipeline_init(window):
     # Fetch Decode Execute
     pip_fde_frame = ttk.LabelFrame(pip_frame)
     pip_fde_frame.grid(row=0, column=0, sticky="w", padx=5)  # Creation of the column
-    pip_fde_lines = ["Fetch", "Decode", "Execute"]   # Text array to copy in the column
+    pip_fde_lines = ["Fetch", "Decode", "Execute"]           # Text array to copy in the column
     for i, header in enumerate(pip_fde_lines):
         header_label = ttk.Label(pip_fde_frame, text=header, width=8)    # Column text
         header_label.grid(row=i, column=0, padx=12, pady=8, sticky="w")  # Column shape and place config
@@ -337,6 +353,18 @@ def pip_modify_column(pip_column_text, c: int, color_array):
         for i, text in enumerate(pip_column_text):
             column_label = ttk.Label(column_frame, text=text, width=5, foreground=color_array[i])  # Column text and color
             column_label.grid(padx=10, pady=8, sticky="w")                                         # Column shape and place config
+
+
+def debugger_init(texts_frame):
+    '''Creates the debugger text frame.\n
+        Input: main_frame: Frame in which the debugger window will be created.'''
+
+    global debugger_text
+    debugger_text = tk.Text(texts_frame, width=40, height=10, state=tk.DISABLED, background="gainsboro")
+    debugger_text.pack(side="left", fill="both", expand=True, padx=6, pady=6)
+    debugger_scrollbar = ttk.Scrollbar(debugger_text, orient=tk.VERTICAL, command=debugger_text.yview)
+    debugger_scrollbar.pack(side="right", fill="y")
+    debugger_text.config(yscrollcommand=debugger_scrollbar.set)
 
 
 
@@ -499,7 +527,7 @@ def btn_compile_init(toolbar):
 
 
     global button_compile
-    button_compile = ctk.CTkButton(toolbar, text="Compile", command=compile, width=100, height=18, font = ("Arial", 10), fg_color="gray")
+    button_compile = ctk.CTkButton(toolbar, text="Compile & Debug", command=compile, width=100, height=18, font = ("Arial", 10), fg_color="gray")
     button_compile.pack(side="right", padx=0)
 
 
@@ -595,7 +623,7 @@ def download_code():
 def help_simulator_docu():
     '''Onpens an online documentation of the simulator.'''
 
-    documentation_text = ( "\n"+
+    documentation_text = ("\n"+
     "------------------------ ENSEA's Python LCM3 Simulator ------------------------\n\n"
     "    Engineers :\n\n"
     "    APPOURCHAUX Léo, BITTAUD CANOEN Laël, GABORIEAU Cyprien, JIN Clémentine\n"
@@ -670,7 +698,7 @@ def help_simulator_docu():
 
     # Insert the text
     documentation_text_widget.insert(tk.END, documentation_text)
-    documentation_text_widget.configure(state='disabled')  # Make it un-editable
+    documentation_text_widget.configure(state='disabled', font=("Helvetica",12))  # Make it un-editable
 
 
 
