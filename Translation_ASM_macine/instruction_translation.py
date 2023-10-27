@@ -1,5 +1,6 @@
 from instruction_recognition import*
 from treatment import*
+from treatment import line
 
 
 def instruction_translation(code_ASM:str):
@@ -7,8 +8,9 @@ def instruction_translation(code_ASM:str):
     code_ASM correspond au code brut tel qu'il est mis dans le terminal
     code-machine renvoie une liste instruction par instruction du code transcrit en code machine selon la convention LCM3
     """
-    code_machine=[]
     
+    code_machine=[]
+    global line
     
     for instruction in saut_ligne(code_ASM):
         line+=1
