@@ -11,7 +11,8 @@ def instruction_translation(code_ASM:str):
     
     for instruction in saut_ligne(code_ASM):
         line+=1
-        code_machine.append(instruction_recognition(instruction,code_ASM,line))
+        if instruction_recognition(instruction,code_ASM,line)!='':
+            code_machine.append(instruction_recognition(instruction,code_ASM,line))
         
     return (code_machine,liste_instruction,ligne_instruction,register_update)
 
