@@ -5,8 +5,8 @@ def instruction_recognition(instruction:str,code_asm,line:int):
     """Reconnaissance des instructions données
     """
     n=len(instruction)
+    machine=''
     if n>0:
-        machine=''
         if instruction.count(':')==1:
             return machine
         if instruction[0:3]=='ADD':
@@ -29,8 +29,10 @@ def instruction_recognition(instruction:str,code_asm,line:int):
             machine=STR(instruction,line)
         elif instruction[0:3]=='SUB':
             machine=SUB(instruction,line)
+        elif instruction=='':
+            return machine
         else:
             print("Error Syntax")
             exit()
-        return machine
+    return machine
     
