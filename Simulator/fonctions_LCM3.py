@@ -6,226 +6,467 @@ from treatment import *
 #Les fonctions appelées renvoient des chaînes de caractère
 
 def AND(instruction:str,line:int):
-    """ Fonction renvoyant le code machine de l'instruction AND\n
-    En partant du principe qu'il est de la forme: AND Rd,Rm
+    """ Fonction renvoyant le bitstream, la mise à jour de registres\n
+    Ainsi que les erreurs éventuelles pour l'instruction AND
     """
     register_update=[]
     bitstream=''
-    error=''
+    error=[]
 
     #AND Rd,Rm
-    if len(register_recognition(instruction))==2:
-        
-        #Rd et Rm sont les numéros (en décimal) des registres dans AND
-        Rd=int(register_recognition(instruction)[0],2)
-        Rm=int(register_recognition(instruction)[1],2)
+    if len(register_recognition(instruction)[0])==2:
+        if len(register_recognition(instruction)[1])!=0:
+            for i in range(len(register_recognition(instruction)[1])):
+                error.append(register_recognition(instruction)[1][i])
+                error.append(line)
+        else:#Rd et Rm sont les numéros (en binaire) des registres dans AND
+            Rd=register_recognition(instruction)[0][0]
+            Rm=register_recognition(instruction)[0][1]
 
-        #Les valeurs de Rd et Rm en binaire
-        Rd_value=reg_read(Rd)
-        Rm_value=reg_read(Rm)
+            #Les valeurs de Rd et Rm en binaire
+            Rd_value=reg_read(int(Rd,2))
+            Rm_value=reg_read(int(Rm,2))
 
-        #Opération simulée sur Rd et Rm
-        register_update.append(Rd)
-        register_update.append(int(Rd_value and Rm_value,2))
-        bitstream='0100000000'+Rm+Rd
+            #Opération simulée sur Rd et Rm
+            register_update.append(int(Rd,2))
+            register_update.append(int(Rd_value and Rm_value,2))
 
-        return bitstream,register_update
+            bitstream='0100000000'+Rm+Rd
+
     else:
-        error='Number of arguments in AND line '+str(line)+" doesn't match"
+        error.append('Number of arguments in AND line '+str(line)+" doesn't match. AND instructions must be of form 'AND Rd,Rm'.")
+        error.append(line)
         exit()
+    
+    return bitstream,register_update,error
 
 
 def LSL(instruction:str,line:int):
-    """ Fonction renvoyant le code machine de l'instruction LSL \n
-    En partant du principe qu'il est de la forme: LSL Rd,Rm,#imm5
+    """ Fonction renvoyant le bitstream, la mise à jour de registres\n
+    Ainsi que les erreurs éventuelles pour l'instruction LSL
     """
     register_update=[]
     bitstream=''
-    error=''
+    error=[]
+
     #LSL Rd,Rm,#imm5
-    if len(register_recognition(instruction))==2:
+    if (len(register_recognition(instruction)[0])==2) and (instruction.count('#')>0):
+        if len(register_recognition(instruction)[1])!=0:
+            for i in range(len(register_recognition(instruction)[1])):
+                error.append(register_recognition(instruction)[1][i])
+                error.append(line)
+        elif len(imm_recognition(instruction,5)[1])!=0:
+            for i in range(len(imm_recognition(instruction,5)[1])):
+                error.append(imm_recognition(instruction,5)[1][i])
+                error.append(line)            
+        else:
+            #Rd, Rm et imm5 sont les numéros (en binaire) des registres dans AND
+            Rd=register_recognition(instruction)[0][0]
+            Rm=register_recognition(instruction)[0][1]
+            imm5=imm_recognition(instruction,5)[0]
 
-        #Rd, Rm et imm5 sont les numéros (en décimal) des registres dans AND
-        Rd=int(register_recognition(instruction)[0],2)
-        Rm=int(register_recognition(instruction)[1],2)
-        imm5=int(imm_recognition(instruction,5)[0],2)
+            #Les valeurs de Rd et Rm en binaire
+            Rd_value=reg_read(int(Rd,2))
+            Rm_value=reg_read(int(Rm,2))
 
-        #Les valeurs de Rd et Rm en binaire
-        Rd_value=reg_read(Rd)
-        Rm_value=reg_read(Rm)
+            #Opération simulée sur Rd et Rm
+            register_update.append(int(Rd,2))
+            register_update.append(int(Rm_value,2)<< int(imm5,2))
 
-        #Opération simulée sur Rd et Rm
-        register_update.append(Rd)
-        register_update.append(int(Rm_value,2)<< imm5)
-        bitstream='00000'+Rm+Rd+imm5
-        return bitstream,register_update
+            bitstream='00000'+Rm+Rd+imm5
+
     else:
-        print("Number of argument in LSL line ",line," doesn't match")
-        exit()
+        error.append("Number of argument in LSL line "+str(line)+" doesn't match. LSL instructions must be of form 'LSL Rd,Rm,#imm5'.")
+        error.append(line)
 
+    return bitstream,register_update,error
+
+
+#---------Les instructions STR et LDR seront simulées en manipulant une mémoire virtuelle--------#
 
 def STR(instruction:str,line:int):
-    """ Fonction renvoyant le code machine de l'instruction STR \n
-    En partant du principe qu'il est de la forme: STR Rt,[Rn]
+    """ Fonction renvoyant le bitstream, la mise à jour de la mémoire virtuelle(en attente)\n
+    Ainsi que les erreurs éventuelles pour l'instruction STR
     """
     register_update=[]
     bitstream=''
-    error=''
+    error=[]
 
     #STR Rt,[Rn]
-    if len(register_recognition(instruction))==2:
+    if len(register_recognition(instruction)[0])==2:
+        if len(register_recognition(instruction)[1])!=0:
+            for i in range(len(register_recognition(instruction)[1])):
+                error.append(register_recognition(instruction)[1][i])
+                error.append(line)
+        else:
+            #Rt et Rn sont les numéros (en binaire) des registres dans STR
+            Rt=register_recognition(instruction)[0][0]
+            Rn=register_recognition(instruction)[0][1]
 
-        #Rt et Rn sont les numéros (en décimal) des registres dans STR
-        Rt=int(register_recognition(instruction)[0],2)
-        Rm=int(register_recognition(instruction)[1],2)
+            #Les valeurs de Rd et Rm en binaire
+            Rt_value=reg_read(int(Rt,2))
+            Rn_value=reg_read(int(Rn,2))
 
-        bitstream= '0110000000'+Rn+Rt
-
-        return bitstream,register_update
+            bitstream= '0110000000'+Rn+Rt
+        
     else:
-        print("Number of arguments in STR line ",line," doesn't match")
-        exit()
+        error.append("Number of arguments in STR line "+str(line)+" doesn't match. STR instructions must be of form 'STR Rt,[Rn]'.")
+        error.append(line)
+
+    return bitstream,register_update,error
 
 
-def LDR(instructions:str,line:int):
-    """Fonction renvoyant le code machine de l'instruction LDR\n
-    En partant du principe qu'il est de la forme: LDR Rt,[Rn]
+def LDR(instruction:str,line:int):
+    """ Fonction renvoyant le bitstream, la mise à jour de la mémoire virtuelle (en attente)\n
+    Ainsi que les erreurs éventuelles pour l'instruction LDR
     """
     register_update=[]
     bitstream=''
-    error=''
+    error=[]
 
     #LDR Rt,[Rn]
-    if len(register_recognition(instruction))==2:
+    if len(register_recognition(instruction)[0])==2:
+        if len(register_recognition(instruction)[1])!=0:
+            for i in range(len(register_recognition(instruction)[1])):
+                error.append(register_recognition(instruction)[1][i])
+                error.append(line)
+        else:
+            #Rt et Rn sont les numéros (en binaire) des registres dans LDR
+            Rt=register_recognition(instruction)[0][0]
+            Rn=register_recognition(instruction)[0][1]
 
-        #Rt et Rn sont les numéros (en décimal) des registres dans LDR
-        Rt=int(register_recognition(instruction)[0],2)
-        Rm=int(register_recognition(instruction)[1],2)
+            #Les valeurs de Rt et Rn en binaire
+            Rt_value=reg_read(int(Rt,2))
+            Rn_value=reg_read(int(Rn,2))
 
-        bitstream= '0110100000'+Rn+Rt
+            bitstream= '0110100000'+Rn+Rt
         
-        return bitstream,register_update
+        
     else:
-        print("Number of arguments in LDR line ",line," doesn't match")
+        error.append("Number of arguments in LDR line "+str(line)+" doesn't match")
+        error.append(line)
+
+    return bitstream,register_update,error
 
 
-def EOR(instructions:str,line:int):
-    """Fonction renvoyant le code machine de l'instruction EOR\n
-    En partant du principe qu'il est de la forme: EOR Rd,Rm
-    """   
-    liste_instruction.append(instructions) 
-    ligne_instruction.append(line)
-    if len(register_recognition(instructions))==2:
-        machine='0100000001'+(register_recognition(instructions)[1])+(register_recognition(instructions)[0])
-        return(machine)
+def EOR(instruction:str,line:int):
+    """ Fonction renvoyant le bitstream, la mise à jour de registres\n
+    Ainsi que les erreurs éventuelles pour l'instruction EOR
+    """  
+    register_update=[]
+    bitstream=''
+    error=[]
+
+    #EOR Rd,Rm
+    if len(register_recognition(instruction)[0])==2:
+        if len(register_recognition(instruction)[1])!=0:
+            for i in range(len(register_recognition(instruction)[1])):
+                error.append(register_recognition(instruction)[1][i])
+                error.append(line)
+        else:
+            #Rd et Rm sont les numéros (en binaire) des registres dans LDR
+            Rd=register_recognition(instruction)[0][0]
+            Rm=register_recognition(instruction)[0][1]
+
+            #Les valeurs de Rd et Rm en binaire
+            Rd_value=reg_read(int(Rd,2))
+            Rm_value=reg_read(int(Rm,2))
+
+            #Opération simulée sur Rd
+            register_update.append(int(Rd,2))
+            register_update.append(int(Rm_value,2)^ int(Rd_value,2))
+
+            bitstream= '0100000001'+Rm+Rd
+        
     else:
-        print("Number of arguments in EOR line ",line," doesn't match")
-        exit()
+        error.append("Number of arguments in EOR line "+str(line)+" doesn't match. EOR instructions must be of form 'EOR Rd,Rm'.")
+        error.append(line)
+
+    return bitstream,register_update,error
 
 
-def CMP(instructions:str,line:int):
-    """Traduction de l'instruction and en langage machine de 0 et de 1\n
-    L'instruction qu'elle renvoie est de type str"""
-    liste_instruction.append(instructions)
-    ligne_instruction.append(line)
-    #CMP Rn,#imm8
-    if len(register_recognition(instructions))==1:
-        return '00101'+(register_recognition(instructions)[0])+(imm_recognition(instructions,8))
-    else:
-        print("Number of arguments in CMP line ", line," doesn't match")
-
-
-def ADD(instructions:str,line:int):
-    """ 3 modes de fonctionnement pour la fonction ADD
+def CMP(instruction:str,line:int):
+    """ Fonction renvoyant le bitstream, la mise à jour de registres\n
+    Ainsi que les erreurs éventuelles pour l'instruction CMP\n
+    Pour la simulation, on stocke le résultat de la comparaison dans le registre temporaire NZVC\n
+    Le registre NZVC est le 9ème 
     """
-    liste_instruction.append(instructions)
-    ligne_instruction.append(line)
+    register_update=[]
+    bitstream=''
+    error=[]
+
+    #CMP Rn,#imm8
+    if (len(register_recognition(instruction)[0])==1)and(instruction.count('#')>0):
+        #Détection d'erreurs
+        if len(register_recognition(instruction)[1])!=0:
+            for i in range(len(register_recognition(instruction)[1])):
+                error.append(register_recognition(instruction)[1][i])
+                error.append(line)
+        elif len(imm_recognition(instruction,8)[1])!=0:
+            for i in range(len(imm_recognition(instruction,8)[1])):
+                error.append(imm_recognition(instruction,8)[1][i])
+                error.append(line)
+        
+        else:
+
+            #Rn et imm8 sont les numéros (en binaire) des registres dans CMP
+            Rn=register_recognition(instruction)[0][0]
+            imm8=register_recognition(instruction,8)[0]
+
+            #Valeur de Rn en binaire
+            Rn_value=reg_read(int(Rn,2))
+
+            register_update.append(8)#Le registre 8 correspond au NZVC
+            register_update.append(abs(int(Rn_value,2)-int(imm8,2)))
+
+            bitstream='00101'+Rn+imm8
+        
+    else:
+        error.append("Number of arguments in CMP line "+str(line)+" doesn't match. CMP instructions must be of form 'CMP Rn,#imm8'.")
+
+    return bitstream,register_update,error
+
+
+def ADD(instruction:str,line:int):
+    """ Fonction renvoyant le bitstream, la mise à jour de registres\n
+    Ainsi que les erreurs éventuelles pour l'instruction ADD
+    """
+    register_update=[]
+    bitstream=''
+    error=[]
+
     #ADD Rd,Rn,Rm
-    if len(register_recognition(instructions))==3:
-        register[int(register_recognition(instructions)[0],2)]=(register[int(register_recognition(instructions)[1],2)]+register[int(register_recognition(instructions)[2],2)])
-        register_update.append((int(register_recognition(instructions)[0],2),register[int(register_recognition(instructions)[0],2)]))
-        return '0001100'+register_recognition(instructions)[2]+register_recognition(instructions)[1]+register_recognition(instructions)[0]
+    if (len(register_recognition(instruction)[0])==3)and (instruction.count('#')==0):
+        #Détection d'erreurs
+        if len(register_recognition(instruction)[1])!=0:
+            for i in range(len(register_recognition(instruction)[1])):
+                error.append(register_recognition(instruction)[1][i])
+                error.append(line)
+        else:
+            #Rd, Rn et Rm sont les numéros (en binaire) des registres dans ADD
+            Rd=register_recognition(instruction)[0][0]
+            Rn=register_recognition(instruction)[0][1]
+            Rm=register_recognition(instruction)[0][2]
+
+            #Les valeurs de Rn et Rm en binaire
+            Rn_value=reg_read(int(Rn,2))
+            Rm_value=reg_read(int(Rm,2))
+
+
+            #Opération simulée sur Rd
+            register_update.append(int(Rd,2))
+            register_update.append(int(Rn_value,2) + int(Rm_value,2))
+
+            bitstream='0001100'+Rm+Rn+Rd
     
     #ADD Rd,Rn,#immm3
-    if len(register_recognition(instructions))==2:
-        if imm_recognition(instructions,3)==-1:
-            print("There must be a #imm with imm<8 in ADD instruction line ",line)
-            exit()
-        register[int(register_recognition(instructions)[0],2)]=(register[int(register_recognition(instructions)[1],2)]+int(imm_recognition(instructions,3),2))
-        register_update.append((int(register_recognition(instructions)[0],2),register[int(register_recognition(instructions)[0],2)]))
-        return '0001110'+imm_recognition(instructions,3)+register_recognition(instructions)[1]+register_recognition(instructions)[0]
+    elif (len(register_recognition(instruction)[0])==2)and(instruction.count('#')>0):
+        #Détection d'erreurs
+        if len(register_recognition(instruction)[1])!=0:
+            for i in range(len(register_recognition(instruction)[1])):
+                error.append(register_recognition(instruction)[1][i])
+                error.append(line)
+        elif len(imm_recognition(instruction,3)[1])!=0:
+            for i in range(len(imm_recognition(instruction,3)[1])):
+                error.append(imm_recognition(instruction,3)[1][i])
+                error.append(line)
+        else:
+            #Rd, Rn et imm sont les numéros (en binaire) des registres dans ADD
+            Rd=register_recognition(instruction)[0][0]
+            Rn=register_recognition(instruction)[0][1]
+            imm=imm_recognition(instruction,3)[0]
+
+            #La valeur de Rn en binaire
+            Rn_value=reg_read(int(Rn,2))
+
+            #Opération simulée sur Rd
+            register_update.append(int(Rd,2))
+            register_update.append(int(Rn_value,2) + int(imm,2))
+
+            bitstream='0001110'+imm+Rn+Rd
     
     #ADD Rd,#imm8
-    if len(register_recognition(instructions))==1:
-        if imm_recognition(instructions,8)==-1:
-            print("There must be a #imm with imm<256 in ADD instruction line ",line)
-            exit()
-        register[int(register_recognition(instructions)[0],2)]=(register[int(register_recognition(instructions)[0],2)]+int(imm_recognition(instructions,8),2))
-        register_update.append((int(register_recognition(instructions)[0],2),register[int(register_recognition(instructions)[0],2)]))
-        return '00110'+register_recognition(instructions)[0]+imm_recognition(instructions,8)
-    
-    #ADD
+    elif (len(register_recognition(instruction)[0])==1) and (instruction.count('#')>0):
+        #Détection d'erreurs
+        if len(register_recognition(instruction)[1])!=0:
+            for i in range(len(register_recognition(instruction)[1])):
+                error.append(register_recognition(instruction)[1][i])
+                error.append(line)
+        elif len(imm_recognition(instruction,8)[1])!=0:
+            for i in range(len(imm_recognition(instruction,8)[1])):
+                error.append(imm_recognition(instruction,8)[1][i])
+                error.append(line)
+        else:
+            #Rd et imm sont les numéros (en binaire) des registres dans ADD
+            Rd=register_recognition(instruction)[0][0]
+            imm=imm_recognition(instruction,8)[0]
+
+            #La valeur de Rd en binaire
+            Rd_value=reg_read(int(Rd,2))
+
+            #Opération simulée sur Rd
+            register_update.append(int(Rd,2))
+            register_update.append(int(Rd_value,2) + int(imm,2))
+
+            bitstream='00110'+Rd+imm    
+
     else:
-        print("There is not enough/too much arguments in ADD instruction line ",line)
-        exit()
+        error.append("There is not enough/too much arguments in ADD instruction line "+str(line))
+        error.append(line)
+    return bitstream,register_update,error
 
-
-def SUB(instructions:str,line:int):
-    """3 modes de fonctionnement pour la fonction SUB
+def SUB(instruction:str,line:int):
+    """ Fonction renvoyant le bitstream, la mise à jour de registres\n
+    Ainsi que les erreurs éventuelles pour l'instruction SUB
     """
-    liste_instruction.append(instructions)
-    ligne_instruction.append(line)
+
+    register_update=[]
+    bitstream=''
+    error=[]
+
     #SUB Rd,Rn,Rm
-    if len(register_recognition(instructions))==3:
-        register[int(register_recognition(instructions)[0],2)]=(register[int(register_recognition(instructions)[1],2)]-register[int(register_recognition(instructions)[2],2)])
-        register_update.append((int(register_recognition(instructions)[0],2),register[int(register_recognition(instructions)[0],2)]))
-        return '0001101'+register_recognition(instructions)[2]+register_recognition(instructions)[1]+register_recognition(instructions)[0]
+    if (len(register_recognition(instruction)[0])==3)and (instruction.count('#')==0):
+        #Détection d'erreurs
+        if len(register_recognition(instruction)[1])!=0:
+            for i in range(len(register_recognition(instruction)[1])):
+                error.append(register_recognition(instruction)[1][i])
+                error.append(line)
+        else:
+            #Rd, Rn et Rm sont les numéros (en binaire) des registres dans SUB
+            Rd=register_recognition(instruction)[0][0]
+            Rn=register_recognition(instruction)[0][1]
+            Rm=register_recognition(instruction)[0][2]
+
+            #Les valeurs de Rn et Rm en binaire
+            Rn_value=reg_read(int(Rn,2))
+            Rm_value=reg_read(int(Rm,2))
+
+
+            #Opération simulée sur Rd
+            register_update.append(int(Rd,2))
+            register_update.append(int(Rn_value,2) - int(Rm_value,2))
+
+            bitstream='0001101'+Rm+Rn+Rd
     
-    #SUB Rd,Rn,#imm3
-    if len(register_recognition(instructions))==2:
-        if imm_recognition(instructions,3)==-1:
-            print("There must be a #imm with imm<8 in SUB instruction line ",line)
-            exit()
-        register[int(register_recognition(instructions)[0],2)]=(register[int(register_recognition(instructions)[1],2)]-int(imm_recognition(instructions,3),2))
-        register_update.append((int(register_recognition(instructions)[0],2),register[int(register_recognition(instructions)[0],2)]))
-        return '0001111'+imm_recognition(instructions,3)+register_recognition(instructions)[1]+register_recognition(instructions)[0]
+    #SUB Rd,Rn,#immm3
+    elif (len(register_recognition(instruction)[0])==2)and(instruction.count('#')>0):
+        #Détection d'erreurs
+        if len(register_recognition(instruction)[1])!=0:
+            for i in range(len(register_recognition(instruction)[1])):
+                error.append(register_recognition(instruction)[1][i])
+                error.append(line)
+        elif len(imm_recognition(instruction,3)[1])!=0:
+            for i in range(len(imm_recognition(instruction,3)[1])):
+                error.append(imm_recognition(instruction,3)[1][i])
+                error.append(line)
+        else:
+            #Rd, Rn et imm sont les numéros (en binaire) des registres dans SUB
+            Rd=register_recognition(instruction)[0][0]
+            Rn=register_recognition(instruction)[0][1]
+            imm=imm_recognition(instruction,3)[0]
+
+            if int(imm,2)>int(Rd_value,2):
+                error.append("imm number is too big to substract to register R"+int(Rd,2))
+                error.append(line)
+            else:
+                #La valeur de Rn et en binaire
+                Rn_value=reg_read(int(Rn,2))
+
+                #Opération simulée sur Rd
+                register_update.append(int(Rd,2))
+                register_update.append(int(Rn_value,2) - int(imm,2))
+
+                bitstream='0001111'+imm+Rn+Rd
     
     #SUB Rd,#imm8
-    if len(register_recognition(instructions))==1:
-        if imm_recognition(instructions,8)==-1:
-            print("There must be a #imm with imm<256 in SUB instruction line ",line)
-            exit()
-        register[int(register_recognition(instructions)[0],2)]=(register[int(register_recognition(instructions)[0],2)]-int(imm_recognition(instructions,8),2))
-        register_update.append((int(register_recognition(instructions)[0],2),register[int(register_recognition(instructions)[0],2)]))
-        return '00111'+register_recognition(instructions)[0]+imm_recognition(instructions,8)
-    
-    #SUB
+    elif (len(register_recognition(instruction)[0])==1) and (instruction.count('#')>0):
+        #Détection d'erreurs
+        if len(register_recognition(instruction)[1])!=0:
+            for i in range(len(register_recognition(instruction)[1])):
+                error.append(register_recognition(instruction)[1][i])
+                error.append(line)
+        elif len(imm_recognition(instruction,8)[1])!=0:
+            for i in range(len(imm_recognition(instruction,8)[1])):
+                error.append(imm_recognition(instruction,8)[1][i])
+                error.append(line)
+        else:
+            #Rd et imm sont les numéros (en binaire) des registres dans SUB
+            Rd=register_recognition(instruction)[0][0]
+            imm=imm_recognition(instruction,8)[0]
+
+            #La valeur de Rd et en binaire
+            Rd_value=reg_read(int(Rd,2))
+            
+            if int(imm,2)>int(Rd_value,2):
+                error.append("imm number is too big to substract to register R"+int(Rd,2))
+                error.append(line)
+            else:
+                #Opération simulée sur Rd
+                register_update.append(int(Rd,2))
+                register_update.append(int(Rd_value,2) - int(imm,2))
+
+                bitstream='00111'+Rd+imm    
+
     else:
-        print("There is not enough/too much arguments in SUB instruction line ",line)
-        exit()
+        error.append("There is not enough/too much arguments in SUB instruction line "+str(line))
+        error.append(line)
+    return bitstream,register_update,error
 
 
-def MOV(instructions:str,line:int):
-    """ Fonctions MOV qui à 2 modes de fonctionnement, 
-    2 registres en entrée ou 1 registre et un nombre compris entre 0 et 255
-    Notre fonctions prend en entrée une chaine de carractére qui correspond a une ligne d'instruction contenant "MOV" et renvoie l'instruction machine en bianire correspondante.
+def MOV(instruction:str,line:int):
+    """ Fonction renvoyant le bitstream, la mise à jour de registres\n
+    Ainsi que les erreurs éventuelles pour l'instruction MOV
     """
-    liste_instruction.append(instructions)
-    ligne_instruction.append(line)
+
+    register_update=[]
+    bitstream=''
+    error=[]
+
     #MOV Rd,Rm
-    if len(register_recognition(instructions))==2:
-        register[int(register_recognition(instructions)[0],2)]=register[int(register_recognition(instructions)[1],2)]
-        register_update.append((int(register_recognition(instructions)[0],2),register[int(register_recognition(instructions)[0],2)]))
-        return '0000000000'+register_recognition(instructions)[1]+register_recognition(instructions)[0]
+    if (len(register_recognition(instruction))==2)and(instruction.find('#')==0):
+        #Détection d'erreurs
+        if len(register_recognition(instruction)[1])!=0:
+            for i in range(len(register_recognition(instruction)[1])):
+                error.append(register_recognition(instruction)[1][i])
+                error.append(line)
+
+        else:
+            #Rd et Rn sont les numéros (en binaire) des registres dans MOV
+            Rd=register_recognition(instruction)[0][0]
+            Rm=register_recognition(instruction)[0][1]
+
+            #La valeur de Rm en binaire
+            Rm_value=reg_read(int(Rm,2))
+
+            #Opération simulée sur Rd
+            register_update.append(int(Rd,2))
+            register_update.append(int(Rm_value,2))
+
+            bitstream='0000000000'+Rm+Rd
     
     #MOV Rd,#imm8
-    if len(register_recognition(instructions))==1:
-        if imm_recognition(instructions,8)==-1:
-            print("There must be a #imm with imm<256 in MOV instruction line ",line)
-            exit()
-        register[int(register_recognition(instructions)[0],2)]=int(imm_recognition(instructions,8),2)
-        register_update.append((int(register_recognition(instructions)[0],2),register[int(register_recognition(instructions)[0],2)]))
-        return '00100'+(register_recognition(instructions)[0])+(imm_recognition(instructions,8))
+    elif (len(register_recognition(instruction))==1)and(instruction.count('#')>0):
+        #Détection d'erreurs
+        if len(register_recognition(instruction)[1])!=0:
+            for i in range(len(register_recognition(instruction)[1])):
+                error.append(register_recognition(instruction)[1][i])
+                error.append(line)
+        elif len(imm_recognition(instruction,8)[1])!=0:
+            for i in range(len(imm_recognition(instruction,8)[1])):
+                error.append(imm_recognition(instruction,8)[1][i])
+                error.append(line)
+
+        else:
+            #Rd et imm sont les numéros (en binaire) des registres dans MOV
+            Rd=register_recognition(instruction)[0][0]
+            imm=imm_recognition(instruction,8)[0]          
+            
+            #Opération simulée sur Rd
+            register_update.append(int(Rd,2))
+            register_update.append(int(imm,2))
+
+            bitstream='00100'+Rd+imm  
     else:
-        print("There is not enough/too much arguments in MOV instruction line ",line)
-        exit()
+        error.append("There is not enough/too much arguments in MOV instruction line "+str(line))
+        error.append(line)
+    return bitstream,register_update,error
