@@ -12,12 +12,14 @@ def virtual_memory_write(address,value):
     """
     global virtual_memory
     addresses=[ad[0] for ad in virtual_memory]    
+    new_address=hex(int(address,16)+4-int(address,16)%4) 
     virtual_memory[addresses.index(address)][1]=value
 
 def virtual_memory_read(address):
     """Retourne la valeur présente à address
     """
     global virtual_memory
-    addresses=[ad[0] for ad in virtual_memory]   
+    addresses=[ad[0] for ad in virtual_memory]  
+    new_address=hex(int(address,16)+4-int(address,16)%4) 
     value=virtual_memory[addresses.index(address)][1]
     return value
