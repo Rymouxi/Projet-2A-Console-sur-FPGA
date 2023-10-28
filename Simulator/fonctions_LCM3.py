@@ -1,5 +1,6 @@
 from register_recognition import *
 from treatment import *
+from Interface import reg_read
 
 
 #On travaille toujours avec des chaînes de caractères
