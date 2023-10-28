@@ -16,7 +16,7 @@ def register_recognition(instruction:str):
     error=[]
 
     if iteration==0:
-        error.append("Il n'y a pas de registres dans cette instruction")
+        error.append("There's no register in this instruction")
     
     else:
         for i in range(iteration):
@@ -43,7 +43,7 @@ def register_recognition(instruction:str):
                 j='0'+j
             register_final.append(j)
         elif d<0:
-            error.append('Le registre R'+str(register_dec[i])+' est trop grand pour la convention LCM3')
+            error.append('Register R'+str(register_dec[i])+' is too big.')
         else:
             register_final.append(j)
 
@@ -56,14 +56,14 @@ def imm_recognition(instruction:str,size:int):
     Ainsi que les erreurs éventuelles"""
     
     n=len(instruction)
-    index=instruction.find('#')
+    count=instruction.count('#')
     error=[]
 
-    if index==-1:
-        error.append("Il n'y a pas de #avant le numéro dans l'instruction")
+    if count==0:
+        error.append("There's no # before the number in this instruction.")
     #Acquisition du nombre de imm
-    elif index>1:
-        error.append("Il y a trop de # dans l'instruction")
+    elif count>1:
+        error.append("There's too much # in the instruction.")
     else:
         m=1
         imm=''
@@ -72,19 +72,19 @@ def imm_recognition(instruction:str,size:int):
                 imm+=instruction[instruction.find('#')+m:instruction.find('#')+m+1]
                 m+=1
         else:
-            error.append("Il n'y a pas de nombre après le #")
+            error.append("There's no number after #.")
     #Mise en binaire du nombre
     imm_bin=DecToBin(int(imm)) #imm_bin est un str
 
     #Complétion des numéros binaires de imm par des 0, si nécessaires
-    imm_final=[]
+    imm_final=''
     d=size-len(imm_bin) #Différence entre la taille des numéros binaires des imm souhaités et obtenues précedemment
     if d>0:
         for k in range(d):
             imm_bin='0'+imm_bin
         imm_final=imm_bin
     elif d<0:
-        error.append('Le nombre #'+imm+' est trop grand pour cette instruction')
+        error.append('Number #'+imm+' is too big for this instruction.')
     else:
         imm_final=imm_bin
     
