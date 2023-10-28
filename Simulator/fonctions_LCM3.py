@@ -139,9 +139,13 @@ def LDR(instruction:str,line:int):
             #Les valeurs de Rt et Rn en binaire
             Rt_value=reg_read(int(Rt,2))
             Rn_value=reg_read(int(Rn,2))
-
+            
+            #Simulation interne de la mémoire préalablement initialisée
+            value=virtual_memory_read(hex(int(Rn_value)))
+            register_update.append(Rt)
+            register_update.append(int(value,16))
+            
             bitstream= '0110100000'+Rn+Rt
-        
         
     else:
         error.append("Number of arguments in LDR line "+str(line)+" doesn't match")
