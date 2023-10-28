@@ -108,6 +108,9 @@ def STR(instruction:str,line:int):
             Rt_value=reg_read(int(Rt,2))
             Rn_value=reg_read(int(Rn,2))
 
+            #Simulation interne de la mémoire préalablement initialisée
+            virtual_memory_write(hex(int(Rn_value)),hex(int(Rt_value)))
+
             bitstream= '0110000000'+Rn+Rt
         
     else:
