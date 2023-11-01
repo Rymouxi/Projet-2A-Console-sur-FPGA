@@ -1,38 +1,44 @@
 from fonctions_LCM3 import*
 from B_instruct import B_instruct
 
-def instruction_recognition(instruction:str,code_asm,line:int):
+def instruction_recognition(instruction:str,line:int):
     """Reconnaissance des instructions données
+    line_update pointe vers la prochaine ligne qui va être simulée par le programme
     """
     n=len(instruction)
-    machine=''
+    bitstream=''
+    register_update=[]
+    error=[]
+    line_update=line+1
+
     if n>0:
-        if instruction.count(':')==1:
-            return machine
-        if instruction[0:3]=='ADD':
-            machine=ADD(instruction,line)
+        if instruction=='':
+            return bitstream,register_update,error,line_update
+        elif instruction.count(':')==1:
+            return bitstream,register_update,error,line_update
+        elif instruction[0:3]=='ADD':
+            bitstream,register_update,error=ADD(instruction,line)
         elif instruction[0:3]=='AND':
-            machine=AND(instruction,line)
+            bitstream,error,line_update=AND(instruction,line)
         elif instruction[0]=='B':
-            machine=B_instruct(instruction,code_asm,line)
+            bitstream,register_update,error=B_instruct(instruction,line)
         elif instruction[0:3]=='CMP':
-            machine=CMP(instruction,line)
+            bitstream,register_update,error=CMP(instruction,line)
         elif instruction[0:3]=='EOR':
-            machine=EOR(instruction,line)
+            bitstream,register_update,error=EOR(instruction,line)
         elif instruction[0:3]=='LDR':
-            machine=LDR(instruction,line)
+            bitstream,register_update,error=LDR(instruction,line)
         elif instruction[0:3]=='LSL':
-            machine=LSL(instruction,line)
+            bitstream,register_update,error=LSL(instruction,line)
         elif instruction[0:3]=='MOV':
-            machine=MOV(instruction,line)
+            bitstream,register_update,error=MOV(instruction,line)
         elif instruction[0:3]=='STR':
-            machine=STR(instruction,line)
+            bitstream,register_update,error=STR(instruction,line)
         elif instruction[0:3]=='SUB':
-            machine=SUB(instruction,line)
-        elif instruction=='':
-            return machine
+            bitstream,register_update,error=SUB(instruction,line)
+
         else:
-            print("Error Syntax")
-            exit()
-    return machine
+            error.append("Syntax error")
+            error.append(line)
+    return bitstream,register_update,error,line_update
     
