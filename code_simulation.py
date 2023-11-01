@@ -24,8 +24,8 @@ import webbrowser
 # Rajouter un bouton compilation et calculer tous les 0 et les 1 ainsi que le schangements de valeurs des registres lors de l'appui sur le bouton.
 # initialiser la taille de la mémoire en fonction du code
 
-# Add the current directory to the system path
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+
 
 # Import the connect_board module
 from connection_board import *
