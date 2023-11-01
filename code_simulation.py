@@ -24,7 +24,11 @@ import webbrowser
 # Rajouter un bouton compilation et calculer tous les 0 et les 1 ainsi que le schangements de valeurs des registres lors de l'appui sur le bouton.
 # initialiser la taille de la mémoire en fonction du code
 
+# Add the current directory to the system path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
+# Import the connect_board module
+from connection_board import *
 
 
 
@@ -586,9 +590,31 @@ def reset():
         pip_modify_column(["", "", "",], i+1, ["black", "black", "black"])
 
 
-# (To be implemented)
 def connect_board():
-    '''Connects the simulator with a board plugged on the computer.'''
+    '''Connects the board.'''
+    com_port = select_com_port()
+    baudrate = select_baudrate()
+    timeout = select_timeout()
+    parity = select_parity()
+    stopbits = select_stopbits()
+    bytesize = select_bytesize()
+    
+
+    
+    
+    print(f"Paramètres de connexion :\n"
+          f"Port COM : {com_port}\n"
+          f"Baudrate : {baudrate}\n"
+          f"Timeout : {timeout}\n"
+          f"Parity : {parity}\n"
+          f"Stopbits : {stopbits}\n"
+          f"Bytesize : {bytesize}")
+
+
+# Button "Connect Board"
+connect_button = tk.Button(root, text="Connect Board", command=connect_board)
+connect_button.pack()
+
 
 
 # (To be implemented)
