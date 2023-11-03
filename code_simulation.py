@@ -222,6 +222,7 @@ def main_window_init():
     btn_help_menu_init(toolbar)
     btn_dowload_init(toolbar)
     btn_connect_init(toolbar)
+    btn_disconnect_init(toolbar)
     btn_reset_init(toolbar)
     btn_step_init(toolbar)
     btn_runsbs_init(toolbar)
@@ -539,6 +540,15 @@ def btn_connect_init(toolbar):
     button_connect = ctk.CTkButton(toolbar, text="Connect Board", command=connect_board, width=100, height=18, font = ("Arial", 10), fg_color="gray")
     button_connect.pack(side="right", padx=0)
 
+def btn_disconnect_init(toolbar):
+    '''Creates the disconnect button which automatically disconnects the simulator from a connected board, if there's one.\n
+        Input: toolbar: Frame in which to place the button.'''
+
+    button_disconnect = ctk.CTkButton(toolbar, text="Disconnect Board", command=disconnect_board, width=100, height=18, font = ("Arial", 10), fg_color="gray")
+    button_disconnect.pack(side="right", padx=0)
+
+
+
 
 def btn_dowload_init(toolbar):
     '''Creates the download button which downloads the code in the text window into the board, and executes it.\n
@@ -598,10 +608,24 @@ def connect_board():
     parity = select_parity()
     stopbits = select_stopbits()
     bytesize = select_bytesize()
-    
 
-    
-    
+    # Create a serial connection and configure it
+    ser = serial.Serial(
+        port=com_port,
+        baudrate=baudrate,
+        timeout=timeout,
+        parity=parity,
+        stopbits=stopbits,
+        bytesize=bytesize
+    )
+    # Veify connection
+    if ser.is_open:
+        print(f"Connexion établie avec succès sur le port {com_port}")
+        # You can now send and receive data with the port
+        
+    else:
+        print(f"Échec de la connexion sur le port {com_port}")
+    #The user can eneter the parameters
     print(f"Paramètres de connexion :\n"
           f"Port COM : {com_port}\n"
           f"Baudrate : {baudrate}\n"
@@ -610,10 +634,19 @@ def connect_board():
           f"Stopbits : {stopbits}\n"
           f"Bytesize : {bytesize}")
 
+def disconnect_board():
+    '''Disconnects the board.'''
+    close_serial = input("Voulez-vous fermer la connexion série? (Oui/Non)").lower()
 
-# Button "Connect Board"
-connect_button = tk.Button(root, text="Connect Board", command=connect_board)
-connect_button.pack()
+    if close_serial == "oui":
+        global ser
+        ser.close()
+        print("Connexion série fermée.")
+    else:
+        print("Connexion série non fermée.")
+
+
+
 
 
 
