@@ -74,5 +74,5 @@ def instruction_recognition(instruction:str,line:int,split_instructions:list,sim
             else:
                 error.append("Syntax error")
                 error.append(line)
-        return register_update,error,line_update
+        return register_update,line_update,error
     
