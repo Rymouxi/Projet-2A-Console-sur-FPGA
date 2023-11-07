@@ -1,10 +1,12 @@
 from fonctions_LCM3_simu import*
 from fonctions_LCM3_bitstream import*
-from B_instruct import B_instruct
+from B_instruct_simu import B_instruct_simu
+from B_instruct_bitstream import B_instruct_bitstream
 
-"""Fichier contenant la fonction premettant d'identifier les differentes instruction (MOV, ADD ...)\n
-Elle réaliser les appels aux fonction permettant de traduire ces instructions en bianire si nous sommes en mode bitstream, ou remplie le tableaux de l'évolution des registres et de la mémoire si nous sommes en mode simulation.\n
-La fonction prend donc en arguments "ON" ou "OFF" selon le mode.\n 
+"""Fichier contenant la fonction permettant d'identifier les differentes instructions (MOV, ADD ...)\n
+Elle réalise les appels aux fonctions permettant de traduire ces instructions en binaire si nous sommes en mode bitstream 
+ou remplit le tableaux de l'évolution des registres et de la mémoire si nous sommes en mode simulation.\n
+La fonction prend donc en arguments "ON" ou "OFF" selon le mode.
 """
 
 
