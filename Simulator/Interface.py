@@ -499,7 +499,7 @@ def btn_help_menu_init(toolbar):
     def help_lcm3_docu():
         '''Onpens an online documentation of the LCM3 instructions.'''
 
-        webbrowser.open_new("https://www.irif.fr/~carton/Enseignement/Architecture/Cours/LC3/")
+        webbrowser.open_new("https://moodle.ensea.fr/pluginfile.php/24675/mod_resource/content/1/LCM3_Instructions_2017.pdf")
 
     help_menu.menu.add_command(label="This Simulator Documentation", command=help_simulator_docu)
     help_menu.menu.add_separator()
