@@ -3,7 +3,7 @@ from treatment import *
 from virtual_memory_fct import *
 from virtual_register_fct import*
 
-"""Il s'agit du fichier qui gère toutes les fonctions LCM3 à part les branchements B.\n
+"""Il s'agit du fichier qui gère toutes les fonctions LCM3 en mode simulation à part les branchements B.\n
 Quand les registres sont modifiés ils agissent sur la les registres virtuels pour savoir où ils en sont 
 et renvoient un tableau indiquant quel(s) registre(s) il faut modifier et comment.\n
 Quand une fonction modifie la mémoire de la carte c'est la même chose sauf que cette fois-ci, c'est seulement interne.
@@ -11,7 +11,7 @@ Quand une fonction modifie la mémoire de la carte c'est la même chose sauf que
 
 
 def AND_simu(instruction:str,line:int):
-    """ Fonction renvoyant le bitstream, la mise à jour de registres\n
+    """ Fonction renvoyant la mise à jour de registres\n
     Ainsi que les erreurs éventuelles pour l'instruction AND
     """
     register_update=[]
@@ -52,7 +52,7 @@ def AND_simu(instruction:str,line:int):
 
 
 def LSL_simu(instruction:str,line:int):
-    """ Fonction renvoyant le bitstream, la mise à jour de registres\n
+    """ Fonction renvoyant la mise à jour de registres\n
     Ainsi que les erreurs éventuelles pour l'instruction LSL
     """
     register_update=[]
@@ -98,7 +98,7 @@ def LSL_simu(instruction:str,line:int):
 #---------Les instructions STR et LDR seront simulées en manipulant une mémoire virtuelle--------#
 
 def STR_simu(instruction:str,line:int):
-    """ Fonction renvoyant le bitstream, la mise à jour de la mémoire virtuelle(en attente)\n
+    """ Fonction renvoyant la mise à jour de la mémoire virtuelle(en attente)\n
     Ainsi que les erreurs éventuelles pour l'instruction STR
     """
     register_update=[]
@@ -132,7 +132,7 @@ def STR_simu(instruction:str,line:int):
 
 
 def LDR_simu(instruction:str,line:int):
-    """ Fonction renvoyant le bitstream, la mise à jour de la mémoire virtuelle (en attente)\n
+    """ Fonction renvoyant la mise à jour de la mémoire virtuelle (en attente)\n
     Ainsi que les erreurs éventuelles pour l'instruction LDR
     """
     register_update=[]
@@ -173,7 +173,7 @@ def LDR_simu(instruction:str,line:int):
 
 
 def EOR_simu(instruction:str,line:int):
-    """ Fonction renvoyant le bitstream, la mise à jour de registres\n
+    """ Fonction renvoyant la mise à jour de registres\n
     Ainsi que les erreurs éventuelles pour l'instruction EOR
     """  
     register_update=[]
@@ -213,7 +213,7 @@ def EOR_simu(instruction:str,line:int):
 
 
 def CMP_simu(instruction:str,line:int):
-    """ Fonction renvoyant le bitstream, la mise à jour de registres\n
+    """ Fonction renvoyant la mise à jour de registres\n
     Ainsi que les erreurs éventuelles pour l'instruction CMP\n
     Pour la simulation, on stocke le résultat de la comparaison dans le registre temporaire NZVC\n
     Le registre NZVC est le 9ème 
@@ -261,7 +261,7 @@ def CMP_simu(instruction:str,line:int):
 
 
 def ADD_simu(instruction:str,line:int):
-    """ Fonction renvoyant le bitstream, la mise à jour de registres\n
+    """ Fonction renvoyant la mise à jour de registres\n
     Ainsi que les erreurs éventuelles pour l'instruction ADD
     """
     register_update=[]
@@ -366,7 +366,7 @@ def ADD_simu(instruction:str,line:int):
 
 
 def SUB_simu(instruction:str,line:int):
-    """ Fonction renvoyant le bitstream, la mise à jour de registres\n
+    """ Fonction renvoyant la mise à jour de registres\n
     Ainsi que les erreurs éventuelles pour l'instruction SUB
     """
 
@@ -483,7 +483,7 @@ def SUB_simu(instruction:str,line:int):
 
 
 def MOV_simu(instruction:str,line:int):
-    """ Fonction renvoyant le bitstream, la mise à jour de registres\n
+    """ Fonction renvoyant la mise à jour de registres\n
     Ainsi que les erreurs éventuelles pour l'instruction MOV
     """
 
