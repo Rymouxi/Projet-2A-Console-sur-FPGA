@@ -1,10 +1,4 @@
 
-liste_instruction=[]
-ligne_instruction=[]
-register_update=[]
-line=0
-register=[0,0,0,0,0,0,0,0]
-
 def saut_ligne(code_text:str): 
     """Cette fonction prend le code ASM en entier et le convertit en liste d'instruction où le séparateur est le retour à la ligne
     """
