@@ -67,7 +67,7 @@ def imm_recognition(instruction:str,size:int):
     else:
         m=1
         imm=''
-        if instruction[(instruction.find('#')+1)].isdigit==True:
+        if instruction[instruction.find('#')+1].isdigit()==True:
             while (instruction.find('#')+m<n)and(instruction[instruction.find('#')+m].isdigit()):
                 imm+=instruction[instruction.find('#')+m:instruction.find('#')+m+1]
                 m+=1
