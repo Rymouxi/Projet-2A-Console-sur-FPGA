@@ -48,7 +48,7 @@ def instruction_recognition(instruction:str,line:int,split_instructions:list,sim
 
     elif simu=='ON':
         if n>0:
-            elif instruction.count(':')==1:
+            if instruction.count(':')==1:
                 return register_update,error,line_update
             elif instruction[0:3]=='ADD':
                 register_update,error=ADD_simu(instruction,line)
