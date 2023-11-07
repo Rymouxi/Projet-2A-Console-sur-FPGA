@@ -6,7 +6,7 @@ from serial.tools.list_ports import comports
 ser = None
 
 def connect_board():
-    popup = ctk.Tk()
+    popup = tk.Tk()
     popup.title("Paramètres de la carte")
 
     ports = [port.device for port in comports()]
