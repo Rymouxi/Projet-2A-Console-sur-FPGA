@@ -29,7 +29,8 @@ from treatment import *
 # Changer fond debugger lorsqu'on passe en step-by-step
 
 
-
+# Import the connect_board module
+from connection_board import connect_board, disconnect_board
 
 
 
@@ -608,11 +609,6 @@ def reset():
         mem_edit(i, "0", "", "black")
     for i in range(19):
         pip_modify_column(["", "", "",], i+1, ["black", "black", "black"])
-
-
-# (To be implemented)
-def connect_board():
-    '''Connects the simulator with a board plugged on the computer.'''
 
 
 # (To be implemented)
