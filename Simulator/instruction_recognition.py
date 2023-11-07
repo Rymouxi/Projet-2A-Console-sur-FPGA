@@ -1,7 +1,8 @@
-from fonctions_LCM3 import*
+from fonctions_LCM3_simu import*
+from fonctions_LCM3_bitstream import*
 from B_instruct import B_instruct
 
-def instruction_recognition(instruction:str,line:int):
+def instruction_recognition(instruction:str,line:int,simu='OFF'):
     """Reconnaissance des instructions données
     line_update pointe vers la prochaine ligne qui va être simulée par le programme
     """
@@ -11,34 +12,59 @@ def instruction_recognition(instruction:str,line:int):
     error=[]
     line_update=line+1
 
-    if n>0:
-        if instruction=='':
-            return bitstream,register_update,error,line_update
-        elif instruction.count(':')==1:
-            return bitstream,register_update,error,line_update
-        elif instruction[0:3]=='ADD':
-            bitstream,register_update,error=ADD(instruction,line)
-        elif instruction[0:3]=='AND':
-            bitstream,register_update,error=AND(instruction,line)
-        elif instruction[0]=='B':
-            bitstream,error,line_update=B_instruct(instruction,line)
-        elif instruction[0:3]=='CMP':
-            bitstream,register_update,error=CMP(instruction,line)
-        elif instruction[0:3]=='EOR':
-            bitstream,register_update,error=EOR(instruction,line)
-        elif instruction[0:3]=='LDR':
-            bitstream,register_update,error=LDR(instruction,line)
-        elif instruction[0:3]=='LSL':
-            bitstream,register_update,error=LSL(instruction,line)
-        elif instruction[0:3]=='MOV':
-            bitstream,register_update,error=MOV(instruction,line)
-        elif instruction[0:3]=='STR':
-            bitstream,register_update,error=STR(instruction,line)
-        elif instruction[0:3]=='SUB':
-            bitstream,register_update,error=SUB(instruction,line)
+    if simu=='OFF':
+        if n>0:
+            if instruction.count(':')==1:
+                return bitstream
+            elif instruction[0:3]=='ADD':
+                bitstream=ADD_bitstream(instruction,line)
+            elif instruction[0:3]=='AND':
+                bitstream=AND_bitstream(instruction,line)
+            elif instruction[0]=='B':
+                bitstream=B_instruct_bitstream(instruction,line)
+            elif instruction[0:3]=='CMP':
+                bitstream=CMP_bitstream(instruction,line)
+            elif instruction[0:3]=='EOR':
+                bitstream=EOR_bitstream(instruction,line)
+            elif instruction[0:3]=='LDR':
+                bitstream=LDR_bitstream(instruction,line)
+            elif instruction[0:3]=='LSL':
+                bitstream=LSL_bitstream(instruction,line)
+            elif instruction[0:3]=='MOV':
+                bitstream=MOV_bitstream(instruction,line)
+            elif instruction[0:3]=='STR':
+                bitstream=STR_bitstream(instruction,line)
+            elif instruction[0:3]=='SUB':
+                bitstream=SUB_bitstream(instruction,line)
+        return bitstream
 
-        else:
-            error.append("Syntax error")
-            error.append(line)
-    return bitstream,register_update,error,line_update
+    elif simu=='ON':
+        if n>0:
+            elif instruction.count(':')==1:
+                return register_update,error,line_update
+            elif instruction[0:3]=='ADD':
+                register_update,error=ADD_simu(instruction,line)
+            elif instruction[0:3]=='AND':
+                register_update,error=AND_simu(instruction,line)
+            elif instruction[0]=='B':
+                error,line_update=B_instruct_simu(instruction,line)
+            elif instruction[0:3]=='CMP':
+                register_update,error=CMP_simu(instruction,line)
+            elif instruction[0:3]=='EOR':
+                register_update,error=EOR_simu(instruction,line)
+            elif instruction[0:3]=='LDR':
+                register_update,error=LDR_simu(instruction,line)
+            elif instruction[0:3]=='LSL':
+                register_update,error=LSL_simu(instruction,line)
+            elif instruction[0:3]=='MOV':
+                register_update,error=MOV_simu(instruction,line)
+            elif instruction[0:3]=='STR':
+                register_update,error=STR_simu(instruction,line)
+            elif instruction[0:3]=='SUB':
+                register_update,error=SUB_simu(instruction,line)
+
+            else:
+                error.append("Syntax error")
+                error.append(line)
+        return register_update,error,line_update
     
