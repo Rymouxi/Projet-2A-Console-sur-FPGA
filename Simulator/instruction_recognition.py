@@ -2,6 +2,10 @@ from fonctions_LCM3_simu import*
 from fonctions_LCM3_bitstream import*
 from B_instruct import B_instruct
 
+"""Fichier contenant la fonction premettant d'identifier les differentes instruction (MOV, ADD ...) 
+"""
+
+
 def instruction_recognition(instruction:str,line:int,split_instructions:list,simu='OFF'):
     """Reconnaissance des instructions données
     line_update pointe vers la prochaine ligne qui va être simulée par le programme
