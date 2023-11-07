@@ -2,7 +2,7 @@ from fonctions_LCM3_simu import*
 from fonctions_LCM3_bitstream import*
 from B_instruct import B_instruct
 
-def instruction_recognition(instruction:str,line:int,simu='OFF'):
+def instruction_recognition(instruction:str,line:int,split_instructions:list,simu='OFF'):
     """Reconnaissance des instructions données
     line_update pointe vers la prochaine ligne qui va être simulée par le programme
     """
@@ -21,7 +21,7 @@ def instruction_recognition(instruction:str,line:int,simu='OFF'):
             elif instruction[0:3]=='AND':
                 bitstream=AND_bitstream(instruction,line)
             elif instruction[0]=='B':
-                bitstream=B_instruct_bitstream(instruction,line)
+                bitstream=B_instruct_bitstream(instruction,split_instructions,line)
             elif instruction[0:3]=='CMP':
                 bitstream=CMP_bitstream(instruction,line)
             elif instruction[0:3]=='EOR':
@@ -47,7 +47,7 @@ def instruction_recognition(instruction:str,line:int,simu='OFF'):
             elif instruction[0:3]=='AND':
                 register_update,error=AND_simu(instruction,line)
             elif instruction[0]=='B':
-                error,line_update=B_instruct_simu(instruction,line)
+                error,line_update=B_instruct_simu(instruction,split_instructions,line)
             elif instruction[0:3]=='CMP':
                 register_update,error=CMP_simu(instruction,line)
             elif instruction[0:3]=='EOR':
