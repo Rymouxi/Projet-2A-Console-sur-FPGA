@@ -211,7 +211,7 @@ def MOV_bitstream(instruction:str,line:int):
 
 
     #MOV Rd,Rm
-    if (len(register_recognition(instruction))==2)and(instruction.find('#')==0):
+    if (len(register_recognition(instruction)[0])==2)and(instruction.find('#')==0):
         
         #Rd et Rn sont les numéros (en binaire) des registres dans MOV
         Rd=register_recognition(instruction)[0][0]
@@ -221,7 +221,7 @@ def MOV_bitstream(instruction:str,line:int):
         bitstream='0000000000'+Rm+Rd
     
     #MOV Rd,#imm8
-    elif (len(register_recognition(instruction))==1)and(instruction.count('#')>0):
+    elif (len(register_recognition(instruction)[0])==1)and(instruction.count('#')>0):
        
         #Rd et imm sont les numéros (en binaire) des registres dans MOV
         Rd=register_recognition(instruction)[0][0]
