@@ -491,7 +491,7 @@ def MOV_simu(instruction:str,line:int):
     error=[]
 
     #MOV Rd,Rm
-    if (len(register_recognition(instruction))==2)and(instruction.find('#')==0):
+    if (len(register_recognition(instruction)[0])==2)and(instruction.find('#')==0):
         #Détection d'erreurs
         if len(register_recognition(instruction)[1])!=0:
             for i in range(len(register_recognition(instruction)[1])):
@@ -516,7 +516,7 @@ def MOV_simu(instruction:str,line:int):
 
     
     #MOV Rd,#imm8
-    elif (len(register_recognition(instruction))==1)and(instruction.count('#')>0):
+    elif (len(register_recognition(instruction)[0])==1)and(instruction.count('#')>0):
         #Détection d'erreurs
         if len(register_recognition(instruction)[1])!=0:
             for i in range(len(register_recognition(instruction)[1])):
