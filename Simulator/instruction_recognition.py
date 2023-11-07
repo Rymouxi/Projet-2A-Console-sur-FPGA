@@ -19,9 +19,9 @@ def instruction_recognition(instruction:str,line:int):
         elif instruction[0:3]=='ADD':
             bitstream,register_update,error=ADD(instruction,line)
         elif instruction[0:3]=='AND':
-            bitstream,error,line_update=AND(instruction,line)
+            bitstream,register_update,error=AND(instruction,line)
         elif instruction[0]=='B':
-            bitstream,register_update,error=B_instruct(instruction,line)
+            bitstream,error,line_update=B_instruct(instruction,line)
         elif instruction[0:3]=='CMP':
             bitstream,register_update,error=CMP(instruction,line)
         elif instruction[0:3]=='EOR':
