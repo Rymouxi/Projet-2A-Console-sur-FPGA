@@ -3,16 +3,13 @@ from treatment import *
 from virtual_memory_fct import *
 from virtual_register_fct import*
 
-"""Il s'agit du fichier qui gère toutes les fonctions LCM3 à part les branchements B.\n
-Quand les registres sont modifiés ils agissent sur la les registres virtuels pour savoir où ils en sont 
-et renvoient un tableau indiquant quel(s) registre(s) il faut modifier et comment.\n
-Quand une fonction modifie la mémoire de la carte c'est la même chose sauf que cette fois-ci, c'est seulement interne.
+"""Il s'agit du fichier qui gère toutes les fonctions LCM3 lors de la génération du BitStream à part les branchements B.\n
+Chaque fonction renvoie le code binaire correspondant à l'instruction qui lui et propre.\n
 """
 
 
 def AND_bitstream(instruction:str,line:int):
-    """ Fonction renvoyant le bitstream, la mise à jour de registres\n
-    Ainsi que les erreurs éventuelles pour l'instruction AND
+    """ Fonction renvoyant le bitstream pour l'instruction AND
     """
     bitstream=''
 
@@ -90,8 +87,7 @@ def LDR_bitstream(instruction:str,line:int):
 
 
 def EOR_bitstream(instruction:str,line:int):
-    """ Fonction renvoyant le bitstream, la mise à jour de registres\n
-    Ainsi que les erreurs éventuelles pour l'instruction EOR
+    """ Fonction renvoyant le bitstream pour l'instruction EOR
     """  
     bitstream=''
 
@@ -108,10 +104,7 @@ def EOR_bitstream(instruction:str,line:int):
 
 
 def CMP_bitstream(instruction:str,line:int):
-    """ Fonction renvoyant le bitstream, la mise à jour de registres\n
-    Ainsi que les erreurs éventuelles pour l'instruction CMP\n
-    Pour la simulation, on stocke le résultat de la comparaison dans le registre temporaire NZVC\n
-    Le registre NZVC est le 9ème 
+    """ Fonction renvoyant le bitstream pour l'instruction CMP\n 
     """
     bitstream=''
 
@@ -128,8 +121,7 @@ def CMP_bitstream(instruction:str,line:int):
 
 
 def ADD_bitstream(instruction:str,line:int):
-    """ Fonction renvoyant le bitstream, la mise à jour de registres\n
-    Ainsi que les erreurs éventuelles pour l'instruction ADD
+    """ Fonction renvoyant le bitstream pour l'instruction ADD
     """
 
     bitstream=''
@@ -171,8 +163,7 @@ def ADD_bitstream(instruction:str,line:int):
 
 
 def SUB_bitstream(instruction:str,line:int):
-    """ Fonction renvoyant le bitstream, la mise à jour de registres\n
-    Ainsi que les erreurs éventuelles pour l'instruction SUB
+    """ Fonction renvoyant le bitstream pour l'instruction SUB
     """
 
     bitstream=''
@@ -213,8 +204,7 @@ def SUB_bitstream(instruction:str,line:int):
 
 
 def MOV_bitstream(instruction:str,line:int):
-    """ Fonction renvoyant le bitstream, la mise à jour de registres\n
-    Ainsi que les erreurs éventuelles pour l'instruction MOV
+    """ Fonction renvoyant le bitstream pour l'instruction MOV
     """
 
     bitstream=''
