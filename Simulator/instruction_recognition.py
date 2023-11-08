@@ -55,7 +55,7 @@ def instruction_recognition(instruction:str,line:int,split_instructions:list,sim
             elif instruction[0:3]=='AND':
                 register_update,error=AND_simu(instruction,line)
             elif instruction[0]=='B':
-                error,line_update=B_instruct_simu(instruction,split_instructions,line)
+                line_update,error=B_instruct_simu(instruction,split_instructions,line)
             elif instruction[0:3]=='CMP':
                 register_update,error=CMP_simu(instruction,line)
             elif instruction[0:3]=='EOR':
