@@ -20,17 +20,16 @@ import random
 import webbrowser
 
 from instruction_translation import *
-from treatment import *
+#from connection_board import *
 
 # Try to kill frames and re-init them on runsbs to lower the load
 # Valeurs dans la mémoire c'est le code en hexa de l'intruction
 # Rajouter un bouton compilation et calculer tous les 0 et les 1 ainsi que les changements de valeurs des registres lors de l'appui sur le bouton.
 # initialiser la taille de la mémoire en fonction du code
 # Changer fond debugger lorsqu'on passe en step-by-step
-
-
-# Import the connect_board module
-from connection_board import connect_board, disconnect_board
+# Masquer les boutons downloads et tout quand il faut
+# Fenetre mémoire ROM à droite
+# Rajouter fenêtre RAM
 
 
 
@@ -99,6 +98,8 @@ def reg_read(Rx: int):
     else:
         return None
 
+
+# mem_edit to delete and replace by ram_edit and rom_edit
 
 def mem_edit(line: int, binary_value: str, instruction: str, color: str):
     '''Edits the memory values, corresponding instructions, and colors.\n
@@ -195,10 +196,9 @@ def main_window_init():
 
     # Creation of the other frames
     toolbar = toolbar_init(main_frame)    # Top toolbar
-    memory_array_init(main_frame)         # Memory array frame on the left of the assembly zone
 
     texts_frame = ctk.CTkFrame(main_frame)  # Main frame
-    texts_frame.pack(side="left", fill="both", expand=True, padx=8, pady=8)
+    texts_frame.pack(side="left", fill="both", expand=True, pady=8)
     paned_window = ttk.Panedwindow(texts_frame, orient=tk.VERTICAL)
     paned_window.pack(expand=True, fill="both")
 
@@ -209,6 +209,7 @@ def main_window_init():
     paned_window.add(asm_zone_frame, weight=4)
     paned_window.add(debugger_frame, weight=1)
 
+    memory_arrays_init(main_frame)         # Memory array frame on the left of the assembly zone
     asm_zone_init(asm_zone_frame)         # Assembly code area in the middle
     debugger_init(debugger_frame)         # Debugger in the middle
     registers_init(main_frame)            # Register list frame on the right of the assembly zone
@@ -240,43 +241,75 @@ def toolbar_init(main_frame):
     return(toolbar_frame)
 
 
-def memory_array_init(main_frame):
+def memory_arrays_init(main_frame):
     '''Creates the left memory frame and fills it with an array.'''
 
-    # Frame for the memory section
-    memory_frame = ttk.LabelFrame(main_frame, text="Memory")
-    memory_frame.pack(side="left", fill="y", pady=10)
+    # Creation of the two tabs (RAM and ROM)
+    notebook = ttk.Notebook(main_frame)
+    notebook.pack(side="right", fill="both", pady=10)
+    ram_frame = ttk.Frame(notebook)
+    rom_frame = ttk.Frame(notebook)
+    notebook.add(ram_frame, text="RAM")  # Display "RAM" on the tab
+    notebook.add(rom_frame, text="ROM")  # Display "ROM" on the tab
 
-    # Creation of the Tree (array)
-    global memory_tree
-    memory_tree = ttk.Treeview(memory_frame, columns=("Address", "Value", "Instruction"), show='headings')
-    memory_tree.heading("Address", text="Address")  # Title/heading text
-    memory_tree.heading("Value", text="Value")
-    memory_tree.heading("Instruction", text="Instruction")
-    memory_tree.column("Address", width=70)         # Column widths
-    memory_tree.column("Value", width=50)
-    memory_tree.column("Instruction", width=180)
+    # Creation of the RAM Tree (array)
+    global ram_tree
+    ram_tree = ttk.Treeview(ram_frame, columns=("Address", "Value", "Instruction"), show='headings')
+    ram_tree.heading("Address", text="Address")  # Title/heading text
+    ram_tree.heading("Value", text="Value")
+    ram_tree.heading("Instruction", text="Instruction")
+    ram_tree.column("Address", width=70)         # Column widths
+    ram_tree.column("Value", width=50)
+    ram_tree.column("Instruction", width=180)
 
-    # Initialization of the memory
+    ram_scrollbar = ttk.Scrollbar(ram_frame, orient=tk.VERTICAL, command=ram_tree.yview)  # Creation of a vertical scrollbar
+    ram_scrollbar.pack(side="right", fill="y", pady=0)
+    ram_tree.config(yscrollcommand=ram_scrollbar.set)
+
+    # Initialization of the RAM
     for i in range(2048):
-        address = "0x"+format(i*2+134217728, '08x')  # Creates the iterable adress 2 by 2 with a 0x0800000 offset
-        value = "0x"+format(0, '04x') 
-        instruction = ""
+        ram_address = "0x"+format(i*2+134217728, '08x')  # Creates the iterable adress 2 by 2 with a 0x0800000 offset
+        ram_value = "0x"+format(0, '04x') 
+        ram_instruction = ""
 
         tags = ()  # Tags are used to add a background color inside the array to improve visibility
         if i % 2 == 0:
             tags = ("row1")
         else:
             tags = ("row2")
-        memory_tree.insert("", tk.END, values=(address, value, instruction), tags=tags)
-    memory_tree.tag_configure("row1", background="gainsboro", foreground="black")   # One color on even numbered lines
-    memory_tree.tag_configure("row2", background="whitesmoke", foreground="black")  # Other one on odd numbered lines
+        ram_tree.insert("", tk.END, values=(ram_address, ram_value, ram_instruction), tags=tags)
+    ram_tree.tag_configure("row1", background="gainsboro", foreground="black")   # One color on even numbered lines
+    ram_tree.tag_configure("row2", background="whitesmoke", foreground="black")  # Other one on odd numbered lines
+    
+    ram_tree.pack(fill="both", expand=True, pady=5)
 
-    memory_tree.pack(fill="both", expand=True, pady=5)
+    # Creation of the ROM Tree (array)
+    global rom_tree
+    rom_tree = ttk.Treeview(rom_frame, columns=("Address", "Value"), show='headings')
+    rom_tree.heading("Address", text="Address")  # Title/heading text
+    rom_tree.heading("Value", text="Value")
+    rom_tree.column("Address", width=150)         # Column widths
+    rom_tree.column("Value", width=150)
 
-    mem_scrollbar = ttk.Scrollbar(main_frame, orient=tk.VERTICAL, command=memory_tree.yview)  # Creation of a vertical scrollbar
-    mem_scrollbar.pack(side="left", fill="y", pady=10)
-    memory_tree.config(yscrollcommand=mem_scrollbar.set)
+    rom_scrollbar = ttk.Scrollbar(rom_frame, orient=tk.VERTICAL, command=rom_tree.yview)  # Creation of a vertical scrollbar
+    rom_scrollbar.pack(side="right", fill="y", pady=0)
+    rom_tree.config(yscrollcommand=rom_scrollbar.set)
+
+    # Initialization of the ROM
+    for i in range(2048):
+        rom_address = "0x"+format(i*2+134217728, '08x')  # Creates the iterable adress 2 by 2 with a 0x0800000 offset
+        rom_value = "0x"+format(0, '08x')
+
+        tags = ()  # Tags are used to add a background color inside the array to improve visibility
+        if i % 2 == 0:
+            tags = ("row1")
+        else:
+            tags = ("row2")
+        rom_tree.insert("", tk.END, values=(rom_address, rom_value), tags=tags)
+    rom_tree.tag_configure("row1", background="gainsboro", foreground="black")   # One color on even numbered lines
+    rom_tree.tag_configure("row2", background="whitesmoke", foreground="black")  # Other one on odd numbered lines
+    
+    rom_tree.pack(fill="both", expand=True, pady=5)
 
 
 def asm_zone_init(texts_frame):
@@ -306,7 +339,7 @@ def registers_init(main_frame):
 
     global reg_frame
     reg_frame = ttk.LabelFrame(main_frame, text="Registers")
-    reg_frame.pack(side="right", fill="y", pady=10)
+    reg_frame.pack(side="right", fill="y", pady=10, padx=5)
 
     # Creation of the register widgets
     for i in range(8):
@@ -516,14 +549,12 @@ def btn_compile_init(toolbar):
         reset()
 
         code = asm_get_code()
-        liste_instruction, ligne_instruction, line, register_update = instruction_translation(code)
+        split_instructions,line_instruction,bitstream,register_update,line_update,error = instruction_translation(code)
         print(instruction_translation(code))
-        for l in range(len(liste_instruction)):
-            if liste_instruction[l] != None:
-                print(line[l], liste_instruction[l], ligne_instruction[l], register_update)
-                mem_edit(line[l], liste_instruction[l], ligne_instruction[l], "black")
-                reg_edit(register_update[l][0], register_update[l][1], "black")
-                pip_edit(ligne_instruction[l])
+        for l in range(len(line_update)):
+            mem_edit(line_update[l], bitstream, line_instruction[l], "black")
+            reg_edit(register_update[l][0], register_update[l][1], "black")
+            pip_edit(line_instruction[l])
 
 
 
@@ -563,8 +594,8 @@ def btn_connect_init(toolbar):
     '''Creates the connect button which automatically connects the simulator to a connected board, if there's one.\n
         Input: toolbar: Frame in which to place the button.'''
 
-    button_connect = ctk.CTkButton(toolbar, text="Connect Board", command=connect_board, width=100, height=18, font = ("Arial", 10), fg_color="gray")
-    button_connect.pack(side="right", padx=0)
+    #button_connect = ctk.CTkButton(toolbar, text="Connect Board", command=connect_board, width=100, height=18, font = ("Arial", 10), fg_color="gray")
+    #button_connect.pack(side="right", padx=0)
 
 
 def btn_dowload_init(toolbar):
