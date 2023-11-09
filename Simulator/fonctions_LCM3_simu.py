@@ -102,6 +102,7 @@ def STR_simu(instruction:str,line:int):
     Ainsi que les erreurs éventuelles pour l'instruction STR
     """
     register_update=[]
+    memory_update=[]
     error=[]
 
     #STR Rt,[Rn]
@@ -122,13 +123,16 @@ def STR_simu(instruction:str,line:int):
             #Simulation interne de la mémoire préalablement initialisée
             virtual_memory_write(hex(Rn_value),hex(Rt_value))
 
+            #Rendu externe de la mémoire
+            memory_update.append(Rn_value)
+            memory_update.append(Rt_value)
 
         
     else:
         error.append("Number of arguments in STR line "+str(line)+" doesn't match. STR instructions must be of form 'STR Rt,[Rn]'.")
         error.append(line)
 
-    return register_update,error
+    return register_update,memory_update,error
 
 
 def LDR_simu(instruction:str,line:int):
