@@ -23,13 +23,11 @@ from instruction_translation import *
 #from connection_board import *
 
 # Try to kill frames and re-init them on runsbs to lower the load
-# Valeurs dans la mémoire c'est le code en hexa de l'intruction
-# Rajouter un bouton compilation et calculer tous les 0 et les 1 ainsi que les changements de valeurs des registres lors de l'appui sur le bouton.
 # initialiser la taille de la mémoire en fonction du code
 # Changer fond debugger lorsqu'on passe en step-by-step
 # Masquer les boutons downloads et tout quand il faut
-# Fenetre mémoire ROM à droite
-# Rajouter fenêtre RAM
+# Bouton deci-hexa pour registres
+
 
 
 
@@ -63,7 +61,7 @@ run_state = 0     # Turns to 1 when run_step_by_step is clicked, back to 0 when 
 # ---------- Interface Edition Functions (for Lael and Cyprien) ---------- #
 
 
-def reg_edit(Rx: int, value: int, color: str):
+def reg_edit(Rx: int, value: int, color="black"):
     '''Edits the registers' values and colors.\n
         Inputs:\n
         Rx: Index of the register (between 0 and 15).\n
@@ -80,29 +78,20 @@ def reg_edit(Rx: int, value: int, color: str):
         reg_field.grid(row=Rx, column=1, sticky="w", padx=5, pady=2)                # Register's value Config and size
         registers[Rx] = reg_value  # Changes the value
 
+    elif Rx == 8:
 
-def reg_read(Rx: int):
-    '''Reads the value of a specific register and returns it as a binary string.
-        Input: Rx: Index of the register
-        Returns: '''
-    if 0 <= Rx < len(registers):
-        register_value_hex = registers[Rx].get()
-        try:
-            # Convert the hexadecimal string to an integer
-            register_value_int = int(register_value_hex, 16)
-            # Convert the integer to a binary string
-            binary_representation = bin(register_value_int)[2:].zfill(32)  # Adjust the width as needed
-            return binary_representation
-        except ValueError:
-            return None
-    else:
-        return None
+        hex_value = "0b"+format(value, '04b')  # Changes from int to string hex display (0x08......)
+        reg_value = tk.StringVar()             # Changes from string hex to tk.StringVar
+        reg_value.set(hex_value)
+        reg_label = ttk.Label(reg_frame, text=f"NZVC:", foreground=color)          # Register name and its color
+        reg_field = ttk.Label(reg_frame, textvariable=reg_value, foreground=color)  # Register value and its color
+        reg_label.grid(row=Rx, column=0, sticky="w", padx=5, pady=2)                # Register's name Config and size
+        reg_field.grid(row=Rx, column=1, sticky="w", padx=5, pady=2)                # Register's value Config and size
+        registers[Rx] = reg_value  # Changes the value
 
 
-# mem_edit to delete and replace by ram_edit and rom_edit
-
-def mem_edit(line: int, binary_value: str, instruction: str, color: str):
-    '''Edits the memory values, corresponding instructions, and colors.\n
+def ram_code_edit(line: int, binary_value: str, instruction: str, color="black"):
+    '''Edits the code ram values, corresponding instructions, and colors.\n
         Inputs:\n
         line: Number of the line to modify.\n
         value: Hex value to insert in the second column.\n
@@ -111,17 +100,51 @@ def mem_edit(line: int, binary_value: str, instruction: str, color: str):
 
     value = int(binary_value, 2)
     hex_value = "0x"+format(value, '04x')           # Changes from int to string hex display (0x08......)
-    item_id = memory_tree.get_children()[line - 1]  # Gets the item ID for the line
-    memory_tree.item(item_id, values=(memory_tree.item(item_id, "values")[0], hex_value, memory_tree.item(item_id, "values")[2]))    # Updates the value
-    memory_tree.item(item_id, values=(memory_tree.item(item_id, 'values')[0], memory_tree.item(item_id, 'values')[1], instruction))  # Updates the instruction
+    item_id = ram_code_tree.get_children()[line]  # Gets the item ID for the line
+    ram_code_tree.item(item_id, values=(ram_code_tree.item(item_id, "values")[0], hex_value, ram_code_tree.item(item_id, "values")[2]))    # Updates the value
+    ram_code_tree.item(item_id, values=(ram_code_tree.item(item_id, 'values')[0], ram_code_tree.item(item_id, 'values')[1], instruction))  # Updates the instruction
 
-    if line % 2 == 1:  # Following part to ensure the background doesn't change color
+    if line % 2 != 1:  # Following part to ensure the background doesn't change color
         tags = "even"
     else:
         tags = "odd"
-    memory_tree.item(item_id, tags=tags)
-    memory_tree.tag_configure("even", background="gainsboro", foreground=color)  # One color on even numbered lines
-    memory_tree.tag_configure("odd", background="whitesmoke", foreground=color)  # Other one on odd numbered lines
+    ram_code_tree.item(item_id, tags=tags)
+    ram_code_tree.tag_configure("even", background="gainsboro", foreground=color)  # One color on even numbered lines
+    ram_code_tree.tag_configure("odd", background="whitesmoke", foreground=color)  # Other one on odd numbered lines
+
+
+def ram_user_edit(line: int, binary_value: str, color="black"):
+    '''Edits the user ram values and colors.\n
+        Inputs:\n
+        line: Number of the line to modify.\n
+        value: Hex value to insert in the second column.\n
+        color: Name of the color in which the line will be displayed.'''
+
+    value = int(binary_value, 2)
+    hex_value = "0x"+format(value, '08x')           # Changes from int to string hex display (0x08......)
+    item_id = ram_user_tree.get_children()[line]  # Gets the item ID for the line
+    ram_user_tree.item(item_id, values=(ram_user_tree.item(item_id, "values")[0], hex_value))    # Updates the value
+
+    if line % 2 != 1:  # Following part to ensure the background doesn't change color
+        tags = "even"
+    else:
+        tags = "odd"
+    ram_user_tree.item(item_id, tags=tags)
+    ram_user_tree.tag_configure("even", background="gainsboro", foreground=color)  # One color on even numbered lines
+    ram_user_tree.tag_configure("odd", background="whitesmoke", foreground=color)  # Other one on odd numbered lines
+
+
+def binary_add_line(binary_line):
+    binary_text.configure(state='normal')  # Set the widget to normal state to allow editing
+    binary_text.insert('end', binary_line + '\n')  # Append the line and a newline character
+    binary_text.configure(state='disabled')  # Set the widget back to disabled state
+
+
+def debugger_add_line(line, color="black"):
+    debugger_text.configure(state='normal')  # Set the widget to normal state to allow editing
+    debugger_text.tag_configure(color, foreground=color)  # Configure a tag with the specified color
+    debugger_text.insert('end', line + '\n', (color,))  # Add the line to the end and include a newline character
+    debugger_text.configure(state='disabled')  # Set the widget back to disabled state
 
 
 def pip_edit(pip_text):
@@ -167,13 +190,11 @@ def pip_edit(pip_text):
     column_label.grid(padx=10, pady=8, sticky="w")
 
 
-# /!\ This function might not be necessary as asm_code should be accessible everywhere. It improves visibility though.
-def asm_get_code():
-    '''Gets the asm code in the asm zone.\n
-        Returns: Content of the asm zone.'''
-
-    asm_code = asm_zone.get("1.0", tk.END)  # Copy of the asm_zone content into asm_code
-    return(asm_code)
+def asm_highlight_line(line_number):
+    start_index = asm_zone.index(f"{line_number}.0 linestart")
+    end_index = asm_zone.index(f"{line_number}.0 lineend")
+    asm_zone.tag_add("highlight", start_index, end_index)
+    asm_zone.tag_configure("highlight", background="red")
 
 
 
@@ -195,7 +216,8 @@ def main_window_init():
     main_frame.pack(expand=True, fill="both")
 
     # Creation of the other frames
-    toolbar = toolbar_init(main_frame)    # Top toolbar
+    toolbar_frame = ctk.CTkFrame(main_frame)  # Frame for the top toolbar
+    toolbar_frame.pack(side="top", fill="x")
 
     texts_frame = ctk.CTkFrame(main_frame)  # Main frame
     texts_frame.pack(side="left", fill="both", expand=True, pady=8)
@@ -216,100 +238,99 @@ def main_window_init():
     pipeline_init(window)                 # Pipeline array frame at the bottom
 
     # Creation of the toolbar buttons
-    btn_file_menu_init(toolbar)
-    btn_settings_menu_init(toolbar)
-    btn_help_menu_init(toolbar)
-    btn_dowload_init(toolbar)
-    btn_connect_init(toolbar)
-    btn_reset_init(toolbar)
-    btn_step_init(toolbar)
-    btn_runsbs_init(toolbar)
-    btn_compile_init(toolbar)
+    btn_file_menu_init(toolbar_frame)
+    btn_settings_menu_init(toolbar_frame)
+    btn_help_menu_init(toolbar_frame)
+    btn_dowload_init(toolbar_frame)
+    btn_connect_init(toolbar_frame)
+    btn_reset_init(toolbar_frame)
+    btn_step_init(toolbar_frame)
+    btn_runsbs_init(toolbar_frame)
+    btn_compile_init(toolbar_frame)
 
     ctk.set_appearance_mode("Light")
 
     window.mainloop()
 
 
-def toolbar_init(main_frame):
-    '''Creates the top toolbar frame.\n
-        Input: main_frame: Frame in which the toolbar will be generated.\n
-        Returns: Frame in which we will generate the buttons.'''
-
-    toolbar_frame = ctk.CTkFrame(main_frame)                  # Frame for the top toolbar
-    toolbar_frame.pack(side="top", fill="x")
-    return(toolbar_frame)
-
-
 def memory_arrays_init(main_frame):
-    '''Creates the left memory frame and fills it with an array.'''
+    '''Creates the left frames with memory arrays and the bitstream.'''
 
-    # Creation of the two tabs (RAM and ROM)
+    # Creation of the two tabs (Code and User Ram)
     notebook = ttk.Notebook(main_frame)
     notebook.pack(side="right", fill="both", pady=10)
-    ram_frame = ttk.Frame(notebook)
-    rom_frame = ttk.Frame(notebook)
-    notebook.add(ram_frame, text="RAM")  # Display "RAM" on the tab
-    notebook.add(rom_frame, text="ROM")  # Display "ROM" on the tab
+    ram_code_frame = ttk.Frame(notebook)
+    ram_user_frame = ttk.Frame(notebook)
+    binary_frame = ttk.Frame(notebook)
+    notebook.add(ram_code_frame, text="Code RAM")  # Display "Code RAM" on the tab
+    notebook.add(ram_user_frame, text="User RAM")  # Display "User RAM" on the tab
+    notebook.add(binary_frame, text="Binary Code")  # Display "Binary" on the tab
 
     # Creation of the RAM Tree (array)
-    global ram_tree
-    ram_tree = ttk.Treeview(ram_frame, columns=("Address", "Value", "Instruction"), show='headings')
-    ram_tree.heading("Address", text="Address")  # Title/heading text
-    ram_tree.heading("Value", text="Value")
-    ram_tree.heading("Instruction", text="Instruction")
-    ram_tree.column("Address", width=70)         # Column widths
-    ram_tree.column("Value", width=50)
-    ram_tree.column("Instruction", width=180)
+    global ram_code_tree
+    ram_code_tree = ttk.Treeview(ram_code_frame, columns=("Address", "Value", "Instruction"), show='headings')
+    ram_code_tree.heading("Address", text="Address")  # Title/heading text
+    ram_code_tree.heading("Value", text="Value")
+    ram_code_tree.heading("Instruction", text="Instruction")
+    ram_code_tree.column("Address", width=70)         # Column widths
+    ram_code_tree.column("Value", width=50)
+    ram_code_tree.column("Instruction", width=180)
 
-    ram_scrollbar = ttk.Scrollbar(ram_frame, orient=tk.VERTICAL, command=ram_tree.yview)  # Creation of a vertical scrollbar
-    ram_scrollbar.pack(side="right", fill="y", pady=0)
-    ram_tree.config(yscrollcommand=ram_scrollbar.set)
+    ram_code_scrollbar = ttk.Scrollbar(ram_code_frame, orient=tk.VERTICAL, command=ram_code_tree.yview)  # Creation of a vertical scrollbar
+    ram_code_scrollbar.pack(side="right", fill="y", pady=0)
+    ram_code_tree.config(yscrollcommand=ram_code_scrollbar.set)
 
     # Initialization of the RAM
     for i in range(2048):
-        ram_address = "0x"+format(i*2+134217728, '08x')  # Creates the iterable adress 2 by 2 with a 0x0800000 offset
-        ram_value = "0x"+format(0, '04x') 
-        ram_instruction = ""
+        ram_code_address = "0x"+format(i*2+134217728, '08x')  # Creates the iterable adress 2 by 2 with a 0x0800000 offset
+        ram_code_value = "0x"+format(0, '04x') 
+        ram_code_instruction = ""
 
         tags = ()  # Tags are used to add a background color inside the array to improve visibility
         if i % 2 == 0:
             tags = ("row1")
         else:
             tags = ("row2")
-        ram_tree.insert("", tk.END, values=(ram_address, ram_value, ram_instruction), tags=tags)
-    ram_tree.tag_configure("row1", background="gainsboro", foreground="black")   # One color on even numbered lines
-    ram_tree.tag_configure("row2", background="whitesmoke", foreground="black")  # Other one on odd numbered lines
+        ram_code_tree.insert("", tk.END, values=(ram_code_address, ram_code_value, ram_code_instruction), tags=tags)
+    ram_code_tree.tag_configure("row1", background="gainsboro", foreground="black")   # One color on even numbered lines
+    ram_code_tree.tag_configure("row2", background="whitesmoke", foreground="black")  # Other one on odd numbered lines
     
-    ram_tree.pack(fill="both", expand=True, pady=5)
+    ram_code_tree.pack(fill="both", expand=True, padx=3, pady=3)
 
     # Creation of the ROM Tree (array)
-    global rom_tree
-    rom_tree = ttk.Treeview(rom_frame, columns=("Address", "Value"), show='headings')
-    rom_tree.heading("Address", text="Address")  # Title/heading text
-    rom_tree.heading("Value", text="Value")
-    rom_tree.column("Address", width=150)         # Column widths
-    rom_tree.column("Value", width=150)
+    global ram_user_tree
+    ram_user_tree = ttk.Treeview(ram_user_frame, columns=("Address", "Value"), show='headings')
+    ram_user_tree.heading("Address", text="Address")  # Title/heading text
+    ram_user_tree.heading("Value", text="Value")
+    ram_user_tree.column("Address", width=150)         # Column widths
+    ram_user_tree.column("Value", width=150)
 
-    rom_scrollbar = ttk.Scrollbar(rom_frame, orient=tk.VERTICAL, command=rom_tree.yview)  # Creation of a vertical scrollbar
-    rom_scrollbar.pack(side="right", fill="y", pady=0)
-    rom_tree.config(yscrollcommand=rom_scrollbar.set)
+    ram_user_scrollbar = ttk.Scrollbar(ram_user_frame, orient=tk.VERTICAL, command=ram_user_tree.yview)  # Creation of a vertical scrollbar
+    ram_user_scrollbar.pack(side="right", fill="y", pady=5)
+    ram_user_tree.config(yscrollcommand=ram_user_scrollbar.set)
 
     # Initialization of the ROM
     for i in range(2048):
-        rom_address = "0x"+format(i*2+134217728, '08x')  # Creates the iterable adress 2 by 2 with a 0x0800000 offset
-        rom_value = "0x"+format(0, '08x')
+        ram_user_address = "0x"+format(i*4+536870912, '08x')  # Creates the iterable adress 2 by 2 with a 0x0800000 offset
+        ram_user_value = "0x"+format(0, '08x')
 
         tags = ()  # Tags are used to add a background color inside the array to improve visibility
         if i % 2 == 0:
             tags = ("row1")
         else:
             tags = ("row2")
-        rom_tree.insert("", tk.END, values=(rom_address, rom_value), tags=tags)
-    rom_tree.tag_configure("row1", background="gainsboro", foreground="black")   # One color on even numbered lines
-    rom_tree.tag_configure("row2", background="whitesmoke", foreground="black")  # Other one on odd numbered lines
+        ram_user_tree.insert("", tk.END, values=(ram_user_address, ram_user_value), tags=tags)
+    ram_user_tree.tag_configure("row1", background="gainsboro", foreground="black")   # One color on even numbered lines
+    ram_user_tree.tag_configure("row2", background="whitesmoke", foreground="black")  # Other one on odd numbered lines
     
-    rom_tree.pack(fill="both", expand=True, pady=5)
+    ram_user_tree.pack(fill="both", expand=True, padx=3, pady=3)
+
+    global binary_text
+    binary_text = tk.Text(binary_frame, width=40, height=10, state=tk.DISABLED)
+    binary_text.pack(side="left", fill="both", expand=True, padx=3, pady=3)
+    binary_scrollbar = ttk.Scrollbar(binary_text, orient=tk.VERTICAL, command=binary_text.yview)
+    binary_scrollbar.pack(side="right", fill="y")
+    binary_text.config(yscrollcommand=binary_scrollbar.set)
 
 
 def asm_zone_init(texts_frame):
@@ -342,7 +363,7 @@ def registers_init(main_frame):
     reg_frame.pack(side="right", fill="y", pady=10, padx=5)
 
     # Creation of the register widgets
-    for i in range(8):
+    for i in range(9):
         reg_value = tk.StringVar()
         registers.append(reg_value)
         reg_edit(i, 0, "black")
@@ -548,13 +569,23 @@ def btn_compile_init(toolbar):
 
         reset()
 
-        code = asm_get_code()
-        split_instructions,line_instruction,bitstream,register_update,line_update,error = instruction_translation(code)
+        code = asm_zone.get("1.0", tk.END)
+        split_instructions,line_instruction,bitstream,register_update,line_update,memory_update,error = instruction_translation(code)
         print(instruction_translation(code))
-        for l in range(len(line_update)):
-            mem_edit(line_update[l], bitstream, line_instruction[l], "black")
-            reg_edit(register_update[l][0], register_update[l][1], "black")
-            pip_edit(line_instruction[l])
+        for l in range(len(line_update)-2):
+            if bitstream[line_update[l]]!='':
+                ram_code_edit(line_update[line_update[l]], bitstream[line_update[l]], split_instructions[line_update[l]], "black")
+                pip_edit(split_instructions[line_update[l]])
+                binary_add_line(bitstream[line_update[l]])
+            if memory_update[line_update[l]]!=[]:
+                ram_user_edit(memory_update[line_update[l]][0], memory_update[line_update[l]][1], "black")
+            if register_update[line_update[l]]!=[]:
+                reg_edit(register_update[line_update[l]][0], register_update[line_update[l]][1], "black")
+        for e in range(len(error)//2):
+            debugger_add_line(error[e]+" at line "+f"{l+1}", "red")  # Usually the error is on the last line as the
+            asm_highlight_line(l+1)                             # simulation will stop when it encounters an error
+        if error==[]:
+            debugger_add_line("Compilation complete")
 
 
 
@@ -634,10 +665,22 @@ def step_iter():
 def reset():
     '''Resets the registers, the memory, and the pipeline.'''
 
+    # Clearing the binary window
+    binary_text.configure(state='normal')  # Set the widget to normal state to allow editing
+    binary_text.delete(1.0, 'end')  # Delete all the text from the beginning to the end
+    binary_text.configure(state='disabled')  # Set the widget back to disabled state
+
+    #Clearing the debugger window
+    debugger_text.configure(state='normal')  # Set the widget to normal state to allow editing
+    debugger_text.delete(1.0, 'end')  # Delete all the text from the beginning to the end
+    debugger_text.configure(state='disabled')  # Set the widget back to disabled state
+
     for i in range(8):
         reg_edit(i, 0, "black")
     for i in range(255):
-        mem_edit(i, "0", "", "black")
+        ram_code_edit(i, "0", "", "black")
+    for i in range(255):
+        ram_user_edit(i, "0", "black")
     for i in range(19):
         pip_modify_column(["", "", "",], i+1, ["black", "black", "black"])
 
