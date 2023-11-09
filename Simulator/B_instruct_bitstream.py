@@ -12,13 +12,13 @@ def B_instruct_bitstream(instruction:str,split_instructions:list,line:int):
     label_list=label_recognition(split_instructions)
     if instruction[0:3]=='BEQ':
         #BEQ label
-        bitstream=BEQ_label(instruction,label_list,line)
+        bitstream=BEQ_label_bitstream(instruction,label_list,line)
     elif instruction[0:3]=='BNE':
         #BNE label
-        bitstream=BNE_label(instruction,label_list,line)
+        bitstream=BNE_label_bitstream(instruction,label_list,line)
     elif instruction[0:2]=='B ':
         #B label
-        bitstream=B_label(instruction,label_list,line)
+        bitstream=B_label_bitstream(instruction,label_list,line)
 
     return bitstream
 
