@@ -495,7 +495,7 @@ def MOV_simu(instruction:str,line:int):
     error=[]
 
     #MOV Rd,Rm
-    if (len(register_recognition(instruction)[0])==2)and(instruction.find('#')==0):
+    if (len(register_recognition(instruction)[0])==2)and(instruction.count('#')==0):
         #Détection d'erreurs
         if len(register_recognition(instruction)[1])!=0:
             for i in range(len(register_recognition(instruction)[1])):
@@ -515,7 +515,7 @@ def MOV_simu(instruction:str,line:int):
 
             #Opération simulée sur Rd
             register_update.append(int(Rd,2))
-            register_update.append(Rm_value,2)
+            register_update.append(Rm_value)
 
 
     
