@@ -17,8 +17,10 @@ def instruction_recognition(instruction:str,line:int,split_instructions:list,sim
     n=len(instruction)
     bitstream=''
     register_update=[]
-    error=[]
+    memory_update=[]
     line_update=line+1
+    error=[]
+
 
     if simu=='OFF':
         if n>0:
@@ -49,7 +51,7 @@ def instruction_recognition(instruction:str,line:int,split_instructions:list,sim
     elif simu=='ON':
         if n>0:
             if instruction.count(':')==1:
-                return register_update,error,line_update
+                return register_update,line_update,memory_update,error
             elif instruction[0:3]=='ADD':
                 register_update,error=ADD_simu(instruction,line)
             elif instruction[0:3]=='AND':
@@ -67,12 +69,12 @@ def instruction_recognition(instruction:str,line:int,split_instructions:list,sim
             elif instruction[0:3]=='MOV':
                 register_update,error=MOV_simu(instruction,line)
             elif instruction[0:3]=='STR':
-                register_update,error=STR_simu(instruction,line)
+                register_update,memory_update,error=STR_simu(instruction,line)
             elif instruction[0:3]=='SUB':
                 register_update,error=SUB_simu(instruction,line)
 
             else:
                 error.append("Syntax error")
                 error.append(line)
-        return register_update,line_update,error
+        return register_update,line_update,memory_update,error
     
