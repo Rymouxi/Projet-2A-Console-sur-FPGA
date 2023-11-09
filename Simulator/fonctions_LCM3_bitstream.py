@@ -211,7 +211,7 @@ def MOV_bitstream(instruction:str,line:int):
 
 
     #MOV Rd,Rm
-    if (len(register_recognition(instruction)[0])==2)and(instruction.find('#')==0):
+    if (len(register_recognition(instruction)[0])==2)and(instruction.count('#')==0):
         
         #Rd et Rn sont les numéros (en binaire) des registres dans MOV
         Rd=register_recognition(instruction)[0][0]
