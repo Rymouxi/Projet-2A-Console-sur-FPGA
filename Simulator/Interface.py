@@ -31,27 +31,60 @@ from instruction_translation import *
 
 # ---------- Variables ---------- #
 
-file_path = None     # Stores whether the file is saved somewhere
 
-registers = []       # Registers' array
+file_path = None          # Stores whether the file is saved somewhere
 
-run_state = 0        # Turns to 1 when run_step_by_step is clicked, back to 0 when stop is clicked
+registers = []            # Registers' array
 
-txt_color = "black"  # Default text color for themes
+run_state = 0             # Keeps track if the code is assembled, ran or neither
+
+txt_color = "black"       # Default text color for themes
+
 bkg_color = "whitesmoke"  # Default background color for themes
 
 
+''' Other global variables:
 
-''' Some global variables are defined in functions:
+    Defined in main_window_init()
+    - window:           Simulator window
+    - main_frame:       Right frame with the arrays
+    - paned_window:     Left frame with the text zones
+    - debugger_frame:   Debugger frame
 
-    asm_zone:       Text center zone defined in asm_zone_init().
-    debugger_text:  Debugger frame defined in debugger_init().
-    reg_frame:      Register frame defined in registers_init().
-    memory_tree:    Memory arraydefined in memory_array_init().
-    pip_frame:      Pipeline frame defined in pipeline_init().
-    button_runsbs:  Step_by_step button defined in btn_runsbs_init().
-    button_step:    Step button defined in btn_step_init().
-    file_path:      Redefined as global in save(), import(), and save_as().
+    Defined in memory_arrays_init()
+    - notebook:         Tabs of arrays and bitstream
+    - ram_code_tree:    Code RAM array
+    - ram_user_tree:    User RAM array
+    - binary_text:      Bitstream text frame
+
+    Defined in asm_zone_init()
+    - asm_zone:         Left coding area
+
+    Defined in registers_init()
+    - reg_frame:        Register frame
+    - display_mode:     Allows to chose between hex and dec modes
+
+    Defined in pipeline_init()
+    - pip_frame:        Pipeline frame
+
+    Defined in debugger_init()
+    - debugger_text:    Debugger frame
+
+    Defined in theme_toggle_dark() and theme_toggle_light()
+    - txt_color:        Foreground color theme
+    - bkg_color         Backgrounf color theme
+
+    Redefined in save(), import(), and save_as()
+    - file_path:
+
+    Defined in btn_runsbs_init()
+    - button_runsbs:    Step_by_step button
+
+    Defined in btn_step_init()
+    - button_step:      Step-> button
+    
+    Defined in run_step_by_step()
+    - run_state:        Stores the state of the buttons to display
 '''
 
 
@@ -214,7 +247,7 @@ def main_window_init():
     paned_window.add(asm_zone_frame, weight=4)
     paned_window.add(debugger_frame, weight=1)
 
-    memory_arrays_init(main_frame)         # Memory array frame on the left of the assembly zone
+    memory_arrays_init(main_frame)        # Memory array frame on the left of the assembly zone
     asm_zone_init(asm_zone_frame)         # Assembly code area in the middle
     debugger_init(debugger_frame)         # Debugger in the middle
     registers_init(main_frame)            # Register list frame on the right of the assembly zone
@@ -303,6 +336,13 @@ def asm_zone_init(texts_frame):
         Input: main_frame: Frame in which the asm window will be created.'''
     
     def on_key(event):
+        button_assemble.configure(fg_color="forestgreen", state="!disabled")
+        button_runsbs.configure(text="Run Step by Step", fg_color="gray", state="disabled")
+        button_step.configure(state="disabled")
+
+        global run_state
+        run_state = 0
+
         if event.char.islower() and event.char.isalpha():
             # If the typed character is lowercase, replace it with uppercase
             asm_zone.insert(tk.INSERT, event.char.upper())
@@ -573,28 +613,54 @@ def btn_assemble_init(toolbar):
 
         reset()
 
+        button_assemble.configure(fg_color="gray", state="normal")
+        button_runsbs.configure(text="Run Step by Step", fg_color="forestgreen", state="!disabled")
+
+        global run_state
+        run_state = 1
+
         code = asm_zone.get("1.0", tk.END)
-        split_instructions,line_instruction,bitstream,register_update,line_update,memory_update,error = instruction_translation(code)
-        print(instruction_translation(code))
 
-        for l in range(len(line_update)-2):
-            if bitstream[line_update[l]]!='':
-                mem_edit(ram_code_tree, line_update[line_update[l]], bitstream[line_update[l]], split_instructions[line_update[l]])
-                pip_edit(split_instructions[line_update[l]])
-                textbox_add_line(binary_text, bitstream[line_update[l]])
-            if memory_update[line_update[l]]!=[]:
-                mem_edit(ram_user_tree, memory_update[line_update[l]][0], memory_update[line_update[l]][1], "User")
-            if register_update[line_update[l]]!=[]:
-                reg_edit(register_update[line_update[l]][0], register_update[line_update[l]][1])
+        variations = ["sipping a coconut", "catching some rays", "in a hammock", "on a beach", "snorkeling", "in a tropical paradise", "surfing the clouds",
+        "on a spa retreat", "napping in a hammock", "practicing mindfulness", "doing yoga", "enjoying a siesta", "on a cosmic cruise", "in a Zen garden",
+        "sunbathing", "in a day spa", "on a coffee break", "chilling in a hammock", "vacationing", "on a beach", "gone", "too short", "transparent", "too small"]
+        random_variation = random.choice(variations)
 
-        for e in range(len(error)//2):
-            textbox_add_line(debugger_text, error[e]+" at line "+f"{l+1}", "red")  # Usually the error is on the last line as the
-            asm_highlight_line(l+1)                             # simulation will stop when it encounters an error
+        if code == "\n":
+            textbox_add_line(debugger_text, "Assembling air? Your code's "+random_variation+".", "blue")
+            button_assemble.configure(fg_color="forestgreen", state="!disabled")
+            button_runsbs.configure(text="Run Step by Step", fg_color="gray", state="disabled")
+            button_step.configure(state="disabled")
+            run_state = 0
+            
+        else:
+            split_instructions,line_instruction,bitstream,register_update,line_update,memory_update,error = instruction_translation(code)
+            print(instruction_translation(code))
 
-        if error==[]:
-            textbox_add_line(debugger_text, "Assembly complete")
+            for l in range(len(line_update)-2):
+                if bitstream[line_update[l]]!='':
+                    mem_edit(ram_code_tree, line_update[line_update[l]], bitstream[line_update[l]], split_instructions[line_update[l]])
+                    pip_edit(split_instructions[line_update[l]])
+                    textbox_add_line(binary_text, bitstream[line_update[l]])
+                if memory_update[line_update[l]]!=[]:
+                    mem_edit(ram_user_tree, memory_update[line_update[l]][0], memory_update[line_update[l]][1], "User")
+                if register_update[line_update[l]]!=[]:
+                    reg_edit(register_update[line_update[l]][0], register_update[line_update[l]][1])
 
-    button_assemble = ctk.CTkButton(toolbar, text="Assemble", command=assemble, width=100, height=18, font = ("Arial", 10), fg_color="gray")
+            for e in range(len(error)//2):
+                textbox_add_line(debugger_text, error[e]+" at line "+f"{l+1}", "red")  # Usually the error is on the last line as the
+                asm_highlight_line(l+1)                             # simulation will stop when it encounters an error
+
+            if error==[]:
+                textbox_add_line(debugger_text, "Assembly complete", "forestgreen")
+            else:
+                button_assemble.configure(fg_color="forestgreen", state="!disabled")
+                button_runsbs.configure(text="Run Step by Step", fg_color="gray", state="disabled")
+                button_step.configure(state="disabled")
+                run_state = 0
+
+    global button_assemble
+    button_assemble = ctk.CTkButton(toolbar, text="Assemble", command=assemble, width=100, height=18, font = ("Arial", 10), fg_color="forestgreen", state="!disabled")
     button_assemble.pack(side="right", padx=0)
 
 
@@ -603,7 +669,7 @@ def btn_runsbs_init(toolbar):
         Input: toolbar: Frame in which to place the button.'''
 
     global button_runsbs
-    button_runsbs = ctk.CTkButton(toolbar, text="Run Step by Step", command=run_step_by_step, width=100, height=18, font = ("Arial", 10), fg_color="forestgreen", state="!disabled")
+    button_runsbs = ctk.CTkButton(toolbar, text="Run Step by Step", command=run_step_by_step, width=100, height=18, font = ("Arial", 10), fg_color="gray", state="disabled")
     button_runsbs.pack(side="right", padx=20)
 
 
@@ -646,17 +712,16 @@ def btn_dowload_init(toolbar):
 def run_step_by_step():
     '''Simulates on the computer the execution of the code, step by step.'''
 
-    reset()
-
     global run_state
-    if run_state == 0:
+    if run_state == 1:
+        reset()
         button_runsbs.configure(text="S T O P", fg_color="firebrick")
-        run_state = 1
         button_step.configure(state="normal")
-    else:
+        run_state = 2
+    elif run_state == 2:
         button_runsbs.configure(text="Run Step by Step", fg_color="forestgreen")
-        run_state = 0
         button_step.configure(state="disabled")
+        run_state = 1
 
 
 # (To be implemented)
