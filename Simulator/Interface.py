@@ -23,21 +23,23 @@ from instruction_translation import *
 #from connection_board import *
 
 # Try to kill frames and re-init them on runsbs to lower the load
-# initialiser la taille de la mémoire en fonction du code
-# Changer fond debugger lorsqu'on passe en step-by-step
 # Masquer les boutons downloads et tout quand il faut
-# Bouton deci-hexa pour registres
+# Faire un bouton run
+# Faire un mode sombre qui marche
 
 
 
 
 # ---------- Variables ---------- #
 
-file_path = None  # Stores whether the file is saved somewhere
+file_path = None     # Stores whether the file is saved somewhere
 
-registers = []    # Registers' array
+registers = []       # Registers' array
 
-run_state = 0     # Turns to 1 when run_step_by_step is clicked, back to 0 when stop is clicked
+run_state = 0        # Turns to 1 when run_step_by_step is clicked, back to 0 when stop is clicked
+
+txt_color = "black"  # Default text color for themes
+bkg_color = "whitesmoke"  # Default background color for themes
 
 
 
@@ -61,29 +63,29 @@ run_state = 0     # Turns to 1 when run_step_by_step is clicked, back to 0 when 
 # ---------- Interface Edition Functions (for Lael and Cyprien) ---------- #
 
 
-def reg_edit(Rx: int, value: int, color="black"):
+def reg_edit(Rx: int, value: int):
     '''Edits the registers' values and colors.\n
         Inputs:\n
         Rx: Index of the register (between 0 and 15).\n
         value: New value to put into the register.\n
         color: Name of the color in which the register will be displayed.'''
 
+    current_mode = display_mode.get()
+
+    # Update the displayed values in the new mode
     if 0 <= Rx < 8:
-        hex_value = "0x"+format(value, '08x')  # Changes from int to string hex display (0x08......)
-        reg_label = ttk.Label(reg_frame, text=f"R{Rx}:", foreground=color)  # Register name and its color
+        new_value = "0x"+format(value, '08x') if current_mode == "Switch to dec" else str(value)
+        reg_label = ttk.Label(reg_frame, text=f"R{Rx}:", foreground=txt_color, background=bkg_color)  # Register name and its color
 
     elif Rx == 8:
-        hex_value = "0b"+format(value, '04b')  # Changes from int to string hex display (0x08......)
-        reg_label = ttk.Label(reg_frame, text=f"NZVC:", foreground=color)   # Register name and its color
+        new_value = "0b"+format(value, '04b') if current_mode == "Switch to dec" else str(value)
+        reg_label = ttk.Label(reg_frame, text=f"NZVC:", foreground=txt_color, background=bkg_color)  # Register name and its color
 
-    reg_value = tk.StringVar()  # Changes from string hex to tk.StringVar
-    reg_value.set(hex_value)
+    registers[Rx].set(new_value)
 
-    reg_field = ttk.Label(reg_frame, textvariable=reg_value, foreground=color)  # Register value and its color
-    reg_label.grid(row=Rx, column=0, sticky="w", padx=5, pady=2)                # Register's name Config and size
-    reg_field.grid(row=Rx, column=1, sticky="w", padx=5, pady=2)                # Register's value Config and size
-
-    registers[Rx] = reg_value  # Changes the value
+    reg_field = ttk.Label(reg_frame, textvariable=registers[Rx], foreground=txt_color, background=bkg_color)  # Register value and its color
+    reg_label.grid(row=Rx, column=0, sticky="w", padx=5, pady=2)  # Register's name Config and size
+    reg_field.grid(row=Rx, column=1, sticky="w", padx=5, pady=2)  # Register's value Config and size
 
 
 def mem_edit(memory_tree, line: int, binary_value="0", instruction="", type="Code", color="black"):
@@ -224,7 +226,7 @@ def main_window_init():
     btn_reset_init(toolbar_frame)
     btn_step_init(toolbar_frame)
     btn_runsbs_init(toolbar_frame)
-    btn_compile_init(toolbar_frame)
+    btn_assemble_init(toolbar_frame)
 
     ctk.set_appearance_mode("Light")
 
@@ -315,16 +317,46 @@ def asm_zone_init(texts_frame):
 def registers_init(main_frame):
     '''Initializes the registers' value and window.'''
 
+    def toggle_display():
+        '''Toggles between decimal and hex display for registers.'''
+
+        current_mode = display_mode.get()
+        new_mode = "Switch to hex" if current_mode == "Switch to dec" else "Switch to dec"
+        display_mode.set(new_mode)
+        
+        reg_update()
+
+    style = ttk.Style()
+    style.configure("Theme.TLabelframe", background=bkg_color)
+
     global reg_frame
-    reg_frame = ttk.LabelFrame(main_frame, text="Registers")
+    reg_frame = ttk.LabelFrame(main_frame, text="Registers", style="Theme.TLabelframe")
     reg_frame.pack(side="right", fill="y", pady=10, padx=5)
+
+    # Button to toggle between decimal and hex display
+    global display_mode
+    display_mode = tk.StringVar()
+    display_mode.set("Switch to dec")  # Initial display mode is hex
+    display_button = ttk.Button(reg_frame, textvariable=display_mode, command=toggle_display)
+    display_button.grid(row=10, column=0, columnspan=2, pady=5)
 
     # Creation of the register widgets
     for i in range(9):
         reg_value = tk.StringVar()
         registers.append(reg_value)
-        reg_edit(i, 0, "black")
+        reg_edit(i, 0)
 
+
+def reg_update():
+    '''Updates the registers.'''
+
+    for i in range(8):
+        current_value_str = registers[i].get()
+        current_value = int(current_value_str[2:], 16) if current_value_str and len(current_value_str) > 2 else int(current_value_str)  # Interpret the current value as hex
+        reg_edit(i, current_value)
+    current_value_str = registers[8].get()
+    current_value = int(current_value_str[2:], 2) if current_value_str and len(current_value_str) > 2 else int(current_value_str)  # Interpret the current value as binary
+    reg_edit(8, current_value)
 
 def pipeline_init(window):
     '''Creates the pipeline frame.\n
@@ -474,19 +506,36 @@ def btn_settings_menu_init(toolbar):
 
     settings_menu.menu = tk.Menu(settings_menu, tearoff=0)  # File menu "menu"
     settings_menu["menu"] = settings_menu.menu
-
+    
     def theme_toggle_dark():
         '''Toggles dark theme.'''
-
-        asm_zone.config(background="dimgray", fg="white")
+        global txt_color, bkg_color
+        txt_color = "white"  # Default text color for themes
+        bkg_color = "#424242"  # Default background color for themestxt_color
         ctk.set_appearance_mode("dark")
+        asm_zone.config(background="dimgray", fg="white")
+        reg_update()
+        style = ttk.Style()
+        style.configure("Theme.TLabelframe", background=bkg_color)
+
+        custom_label = tk.Label(reg_frame, text="Registers", background=bkg_color, foreground=txt_color)  # Replace colors
+        reg_frame['labelwidget'] = custom_label  # Set the custom label widget
 
     def theme_toggle_light():
         '''Toggles light theme.'''
 
-        asm_zone.config(background="white", fg="black")
+        global txt_color, bkg_color
+        txt_color = "black"  # Default text color for themes
+        bkg_color = "whitesmoke"  # Default background color for themestxt_color
         ctk.set_appearance_mode("light")
+        asm_zone.config(background="white", fg="black")
+        reg_update()
+        style = ttk.Style()
+        style.configure("Theme.TLabelframe", background=bkg_color)
 
+        custom_label = tk.Label(reg_frame, text="Registers", background=bkg_color, foreground=txt_color)  # Replace colors
+        reg_frame['labelwidget'] = custom_label  # Set the custom label widget
+        
     settings_menu.menu.add_command(label="Dark mode", command=theme_toggle_dark)
     settings_menu.menu.add_command(label="Light mode", command=theme_toggle_light)
     settings_menu.pack()
@@ -512,11 +561,11 @@ def btn_help_menu_init(toolbar):
     help_menu.menu.add_command(label="LCM3 Documentation", command=help_lcm3_docu)
 
 
-def btn_compile_init(toolbar):
-    '''Compiles the code'''
+def btn_assemble_init(toolbar):
+    '''Create the assemble button'''
 
-    def compile():
-        '''Compiles the code'''
+    def assemble():
+        '''Assembles the code'''
 
         reset()
 
@@ -532,17 +581,17 @@ def btn_compile_init(toolbar):
             if memory_update[line_update[l]]!=[]:
                 mem_edit(ram_user_tree, memory_update[line_update[l]][0], memory_update[line_update[l]][1], "User")
             if register_update[line_update[l]]!=[]:
-                reg_edit(register_update[line_update[l]][0], register_update[line_update[l]][1], "black")
+                reg_edit(register_update[line_update[l]][0], register_update[line_update[l]][1])
 
         for e in range(len(error)//2):
             textbox_add_line(debugger_text, error[e]+" at line "+f"{l+1}", "red")  # Usually the error is on the last line as the
             asm_highlight_line(l+1)                             # simulation will stop when it encounters an error
 
         if error==[]:
-            textbox_add_line(debugger_text, "Compilation complete")
+            textbox_add_line(debugger_text, "Assembly complete")
 
-    button_compile = ctk.CTkButton(toolbar, text="Compile & Debug", command=compile, width=100, height=18, font = ("Arial", 10), fg_color="gray")
-    button_compile.pack(side="right", padx=0)
+    button_assemble = ctk.CTkButton(toolbar, text="Assemble", command=assemble, width=100, height=18, font = ("Arial", 10), fg_color="gray")
+    button_assemble.pack(side="right", padx=0)
 
 
 def btn_runsbs_init(toolbar):
@@ -626,7 +675,7 @@ def reset():
     debugger_text.delete(1.0, 'end')           # Deletes all the text
     debugger_text.configure(state='disabled')  # Set back to disabled state
 
-    for i in range(8):  # Registers reset
+    for i in range(9):  # Registers reset
         reg_edit(i, 0)
 
     for i in range(len(ram_code_tree.get_children())):  # Code RAM reset
@@ -726,10 +775,4 @@ def help_simulator_docu():
 
 
 main_window_init()
-
-
-# Create a style object
-#style = ttk.Style()
-#style.configure("Color.TLabel", foreground="white", background="black")
-
 
