@@ -22,7 +22,6 @@ import webbrowser
 from instruction_translation import *
 #from connection_board import *
 
-# Try to kill frames and re-init them on runsbs to lower the load
 # Masquer les boutons downloads et tout quand il faut
 # Faire un bouton run
 # Faire un mode sombre qui marche
@@ -81,7 +80,7 @@ def reg_edit(Rx: int, value: int):
         new_value = "0b"+format(value, '04b') if current_mode == "Switch to dec" else str(value)
         reg_label = ttk.Label(reg_frame, text=f"NZVC:", foreground=txt_color, background=bkg_color)  # Register name and its color
 
-    registers[Rx].set(new_value)
+    registers[Rx].set(new_value)    
 
     reg_field = ttk.Label(reg_frame, textvariable=registers[Rx], foreground=txt_color, background=bkg_color)  # Register value and its color
     reg_label.grid(row=Rx, column=0, sticky="w", padx=5, pady=2)  # Register's name Config and size
@@ -189,9 +188,11 @@ def main_window_init():
         Returns: The window on which everything is happening.'''
 
     # Creation of the main window
+    global window
     window = ctk.CTk()
     window.title("ENSEA's Python LCM3 ASM Simulator") 
     window.geometry("980x720")      # Initial size of the window
+    global main_frame
     main_frame = ctk.CTkFrame(window)  # Main frame
     main_frame.pack(expand=True, fill="both")
 
@@ -201,11 +202,13 @@ def main_window_init():
 
     texts_frame = ctk.CTkFrame(main_frame)  # Main frame
     texts_frame.pack(side="left", fill="both", expand=True, pady=8)
+    global paned_window
     paned_window = ttk.Panedwindow(texts_frame, orient=tk.VERTICAL)
     paned_window.pack(expand=True, fill="both")
 
     asm_zone_frame = ttk.LabelFrame(paned_window, text="ASM Zone")
     asm_zone_frame.grid(row=0, column=0, sticky="nsew")
+    global debugger_frame
     debugger_frame = ttk.LabelFrame(paned_window, text="Debugger")
     debugger_frame.grid(row=1, column=0, sticky="nsew")
     paned_window.add(asm_zone_frame, weight=4)
@@ -248,6 +251,7 @@ def memory_arrays_init(main_frame):
     '''Creates the left frames with memory arrays and the bitstream.'''
 
     # Creation of the two tabs (Code and User Ram)
+    global notebook
     notebook = ttk.Notebook(main_frame)
     notebook.pack(side="right", fill="both", pady=10)
     ram_code_frame = ttk.Frame(notebook)
@@ -307,7 +311,7 @@ def asm_zone_init(texts_frame):
             return None  # Let the default action proceed for other keys
 
     global asm_zone
-    asm_zone = tk.Text(texts_frame, width=40, height=30)
+    asm_zone = tk.Text(texts_frame, width=40, height=30, bg="white", fg="black")
     asm_zone.pack(side="top", fill="both", expand=True)
     scrollbar_init(asm_zone, asm_zone)
 
@@ -528,7 +532,7 @@ def btn_settings_menu_init(toolbar):
         txt_color = "black"  # Default text color for themes
         bkg_color = "whitesmoke"  # Default background color for themestxt_color
         ctk.set_appearance_mode("light")
-        asm_zone.config(background="white", fg="black")
+        asm_zone.config(bg="white", fg="black")
         reg_update()
         style = ttk.Style()
         style.configure("Theme.TLabelframe", background=bkg_color)
@@ -665,27 +669,15 @@ def step_iter():
 def reset():
     '''Resets the registers, the memory, and the pipeline.'''
 
-    # Bitstream window reset
-    binary_text.configure(state='normal')      # Allows editing
-    binary_text.delete(1.0, 'end')             # Deletes all the text
-    binary_text.configure(state='disabled')    # Sets back to disabled state
+    notebook.destroy()
+    reg_frame.destroy()
+    pip_frame.destroy()
+    debugger_text.destroy()
 
-    # Debugger reset
-    debugger_text.configure(state='normal')    # Allows editing
-    debugger_text.delete(1.0, 'end')           # Deletes all the text
-    debugger_text.configure(state='disabled')  # Set back to disabled state
-
-    for i in range(9):  # Registers reset
-        reg_edit(i, 0)
-
-    for i in range(len(ram_code_tree.get_children())):  # Code RAM reset
-        mem_edit(ram_code_tree, i)
-
-    for i in range(len(ram_user_tree.get_children())):  # User RAM reset
-        mem_edit(ram_user_tree, i, type="User")
-
-    for i in range(19):  # Pipeline reset
-        pip_modify_column(c=i+1)
+    memory_arrays_init(main_frame)
+    registers_init(main_frame)
+    pipeline_init(window)
+    debugger_init(debugger_frame)
 
 
 # (To be implemented)
