@@ -70,27 +70,23 @@ def reg_edit(Rx: int, value: int, color="black"):
 
     if 0 <= Rx < 8:
         hex_value = "0x"+format(value, '08x')  # Changes from int to string hex display (0x08......)
-        reg_value = tk.StringVar()             # Changes from string hex to tk.StringVar
-        reg_value.set(hex_value)
-        reg_label = ttk.Label(reg_frame, text=f"R{Rx}:", foreground=color)          # Register name and its color
-        reg_field = ttk.Label(reg_frame, textvariable=reg_value, foreground=color)  # Register value and its color
-        reg_label.grid(row=Rx, column=0, sticky="w", padx=5, pady=2)                # Register's name Config and size
-        reg_field.grid(row=Rx, column=1, sticky="w", padx=5, pady=2)                # Register's value Config and size
-        registers[Rx] = reg_value  # Changes the value
+        reg_label = ttk.Label(reg_frame, text=f"R{Rx}:", foreground=color)  # Register name and its color
 
     elif Rx == 8:
-
         hex_value = "0b"+format(value, '04b')  # Changes from int to string hex display (0x08......)
-        reg_value = tk.StringVar()             # Changes from string hex to tk.StringVar
-        reg_value.set(hex_value)
-        reg_label = ttk.Label(reg_frame, text=f"NZVC:", foreground=color)          # Register name and its color
-        reg_field = ttk.Label(reg_frame, textvariable=reg_value, foreground=color)  # Register value and its color
-        reg_label.grid(row=Rx, column=0, sticky="w", padx=5, pady=2)                # Register's name Config and size
-        reg_field.grid(row=Rx, column=1, sticky="w", padx=5, pady=2)                # Register's value Config and size
-        registers[Rx] = reg_value  # Changes the value
+        reg_label = ttk.Label(reg_frame, text=f"NZVC:", foreground=color)   # Register name and its color
+
+    reg_value = tk.StringVar()  # Changes from string hex to tk.StringVar
+    reg_value.set(hex_value)
+
+    reg_field = ttk.Label(reg_frame, textvariable=reg_value, foreground=color)  # Register value and its color
+    reg_label.grid(row=Rx, column=0, sticky="w", padx=5, pady=2)                # Register's name Config and size
+    reg_field.grid(row=Rx, column=1, sticky="w", padx=5, pady=2)                # Register's value Config and size
+
+    registers[Rx] = reg_value  # Changes the value
 
 
-def ram_code_edit(line: int, binary_value: str, instruction: str, color="black"):
+def mem_edit(memory_tree, line: int, binary_value="0", instruction="", type="Code", color="black"):
     '''Edits the code ram values, corresponding instructions, and colors.\n
         Inputs:\n
         line: Number of the line to modify.\n
@@ -98,57 +94,39 @@ def ram_code_edit(line: int, binary_value: str, instruction: str, color="black")
         instr: Text to insert in the third column.\n
         color: Name of the color in which the line will be displayed.'''
 
-    value = int(binary_value, 2)
-    hex_value = "0x"+format(value, '04x')           # Changes from int to string hex display (0x08......)
-    item_id = ram_code_tree.get_children()[line]  # Gets the item ID for the line
-    ram_code_tree.item(item_id, values=(ram_code_tree.item(item_id, "values")[0], hex_value, ram_code_tree.item(item_id, "values")[2]))    # Updates the value
-    ram_code_tree.item(item_id, values=(ram_code_tree.item(item_id, 'values')[0], ram_code_tree.item(item_id, 'values')[1], instruction))  # Updates the instruction
+    hex_value = "0x"+format(int(binary_value, 2), '04x') if type=="Code" else "0x"+format(int(binary_value, 2), '08x')  # Changes from binary to hex
+    tags = "even" if line % 2 == 0 else "odd"
 
-    if line % 2 != 1:  # Following part to ensure the background doesn't change color
-        tags = "even"
+    if line < len(memory_tree.get_children()):
+        # Line exists, update the values
+        item_id = memory_tree.get_children()[line]  # Gets the item ID for the line
+        memory_tree.item(item_id, values=(memory_tree.item(item_id, "values")[0], hex_value, instruction))  # Updates the value
+        memory_tree.item(item_id, tags=tags)
+
     else:
-        tags = "odd"
-    ram_code_tree.item(item_id, tags=tags)
-    ram_code_tree.tag_configure("even", background="gainsboro", foreground=color)  # One color on even numbered lines
-    ram_code_tree.tag_configure("odd", background="whitesmoke", foreground=color)  # Other one on odd numbered lines
+        # Line doesn't exist, insert a new line
+        address = "0x"+format(line*2+134217728, '08x') if type=="Code" else "0x"+format(line*4+536870912, '08x')
+        memory_tree.insert("", tk.END, values=(address, hex_value, instruction), tags=(tags))
+
+    memory_tree.tag_configure("even", background="gainsboro", foreground=color)  # One color on even numbered lines
+    memory_tree.tag_configure("odd", background="whitesmoke", foreground=color)  # Other one on odd numbered lines
 
 
-def ram_user_edit(line: int, binary_value: str, color="black"):
-    '''Edits the user ram values and colors.\n
+def textbox_add_line(text_widget, line: str, color="black"):
+    '''Adds a line to a text_widget.\n
         Inputs:\n
-        line: Number of the line to modify.\n
-        value: Hex value to insert in the second column.\n
-        color: Name of the color in which the line will be displayed.'''
+        text_widget: Text frame, such as the debugger or the bitstream.\n
+        line: String you wanna display.\n
+        color: color of the text.'''
 
-    value = int(binary_value, 2)
-    hex_value = "0x"+format(value, '08x')           # Changes from int to string hex display (0x08......)
-    item_id = ram_user_tree.get_children()[line]  # Gets the item ID for the line
-    ram_user_tree.item(item_id, values=(ram_user_tree.item(item_id, "values")[0], hex_value))    # Updates the value
-
-    if line % 2 != 1:  # Following part to ensure the background doesn't change color
-        tags = "even"
-    else:
-        tags = "odd"
-    ram_user_tree.item(item_id, tags=tags)
-    ram_user_tree.tag_configure("even", background="gainsboro", foreground=color)  # One color on even numbered lines
-    ram_user_tree.tag_configure("odd", background="whitesmoke", foreground=color)  # Other one on odd numbered lines
-
-
-def binary_add_line(binary_line):
-    binary_text.configure(state='normal')  # Set the widget to normal state to allow editing
-    binary_text.insert('end', binary_line + '\n')  # Append the line and a newline character
-    binary_text.configure(state='disabled')  # Set the widget back to disabled state
-
-
-def debugger_add_line(line, color="black"):
-    debugger_text.configure(state='normal')  # Set the widget to normal state to allow editing
-    debugger_text.tag_configure(color, foreground=color)  # Configure a tag with the specified color
-    debugger_text.insert('end', line + '\n', (color,))  # Add the line to the end and include a newline character
-    debugger_text.configure(state='disabled')  # Set the widget back to disabled state
+    text_widget.configure(state='normal')  # Set the widget to normal state to allow editing
+    text_widget.tag_configure(color, foreground=color)  # Configure a tag with the specified color
+    text_widget.insert('end', line + '\n', (color,))  # Add the line to the end and include a newline character
+    text_widget.configure(state='disabled')  # Set the widget back to disabled state
 
 
 def pip_edit(pip_text):
-    '''Iterates the pipeline and adds a new instruction column'''
+    '''Iterates the pipeline and adds a new instruction column.'''
 
     def pip_get_column(c: int):
         '''Retrieves the content of a specific column in the pipeline array.
@@ -253,6 +231,17 @@ def main_window_init():
     window.mainloop()
 
 
+def scrollbar_init(frame, scrollable):
+        '''Creates a scrollbar.\n
+            Inputs:\n
+            frame: frame in which the scrollbar will be placed.\n
+            scrollable: widget/frame that will be scrolled. may be different from frame.'''
+
+        scrollbar = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=scrollable.yview)  # Creation of a vertical scrollbar
+        scrollbar.pack(side="right", fill="y")
+        scrollable.config(yscrollcommand=scrollbar.set)
+
+
 def memory_arrays_init(main_frame):
     '''Creates the left frames with memory arrays and the bitstream.'''
 
@@ -266,7 +255,7 @@ def memory_arrays_init(main_frame):
     notebook.add(ram_user_frame, text="User RAM")  # Display "User RAM" on the tab
     notebook.add(binary_frame, text="Binary Code")  # Display "Binary" on the tab
 
-    # Creation of the RAM Tree (array)
+    # Creation of the Code RAM Tree (array)
     global ram_code_tree
     ram_code_tree = ttk.Treeview(ram_code_frame, columns=("Address", "Value", "Instruction"), show='headings')
     ram_code_tree.heading("Address", text="Address")  # Title/heading text
@@ -275,62 +264,32 @@ def memory_arrays_init(main_frame):
     ram_code_tree.column("Address", width=70)         # Column widths
     ram_code_tree.column("Value", width=50)
     ram_code_tree.column("Instruction", width=180)
+    scrollbar_init(ram_code_frame, ram_code_tree)
 
-    ram_code_scrollbar = ttk.Scrollbar(ram_code_frame, orient=tk.VERTICAL, command=ram_code_tree.yview)  # Creation of a vertical scrollbar
-    ram_code_scrollbar.pack(side="right", fill="y", pady=0)
-    ram_code_tree.config(yscrollcommand=ram_code_scrollbar.set)
-
-    # Initialization of the RAM
-    for i in range(2048):
-        ram_code_address = "0x"+format(i*2+134217728, '08x')  # Creates the iterable adress 2 by 2 with a 0x0800000 offset
-        ram_code_value = "0x"+format(0, '04x') 
-        ram_code_instruction = ""
-
-        tags = ()  # Tags are used to add a background color inside the array to improve visibility
-        if i % 2 == 0:
-            tags = ("row1")
-        else:
-            tags = ("row2")
-        ram_code_tree.insert("", tk.END, values=(ram_code_address, ram_code_value, ram_code_instruction), tags=tags)
-    ram_code_tree.tag_configure("row1", background="gainsboro", foreground="black")   # One color on even numbered lines
-    ram_code_tree.tag_configure("row2", background="whitesmoke", foreground="black")  # Other one on odd numbered lines
-    
-    ram_code_tree.pack(fill="both", expand=True, padx=3, pady=3)
-
-    # Creation of the ROM Tree (array)
+    # Creation of the User RAM Tree (array)
     global ram_user_tree
     ram_user_tree = ttk.Treeview(ram_user_frame, columns=("Address", "Value"), show='headings')
     ram_user_tree.heading("Address", text="Address")  # Title/heading text
     ram_user_tree.heading("Value", text="Value")
     ram_user_tree.column("Address", width=150)         # Column widths
     ram_user_tree.column("Value", width=150)
+    scrollbar_init(ram_user_frame, ram_user_tree)
 
-    ram_user_scrollbar = ttk.Scrollbar(ram_user_frame, orient=tk.VERTICAL, command=ram_user_tree.yview)  # Creation of a vertical scrollbar
-    ram_user_scrollbar.pack(side="right", fill="y", pady=5)
-    ram_user_tree.config(yscrollcommand=ram_user_scrollbar.set)
+    # Initialization of the Code RAM
+    for i in range(256):
+        mem_edit(ram_code_tree, i)
+    ram_code_tree.pack(fill="both", expand=True, padx=3, pady=3)
 
-    # Initialization of the ROM
-    for i in range(2048):
-        ram_user_address = "0x"+format(i*4+536870912, '08x')  # Creates the iterable adress 2 by 2 with a 0x0800000 offset
-        ram_user_value = "0x"+format(0, '08x')
-
-        tags = ()  # Tags are used to add a background color inside the array to improve visibility
-        if i % 2 == 0:
-            tags = ("row1")
-        else:
-            tags = ("row2")
-        ram_user_tree.insert("", tk.END, values=(ram_user_address, ram_user_value), tags=tags)
-    ram_user_tree.tag_configure("row1", background="gainsboro", foreground="black")   # One color on even numbered lines
-    ram_user_tree.tag_configure("row2", background="whitesmoke", foreground="black")  # Other one on odd numbered lines
-    
+    # Initialization of the User RAM
+    for i in range(256):
+        mem_edit(ram_user_tree, i, type="User")
     ram_user_tree.pack(fill="both", expand=True, padx=3, pady=3)
 
+    # Creation of the Bitstream window
     global binary_text
     binary_text = tk.Text(binary_frame, width=40, height=10, state=tk.DISABLED)
     binary_text.pack(side="left", fill="both", expand=True, padx=3, pady=3)
-    binary_scrollbar = ttk.Scrollbar(binary_text, orient=tk.VERTICAL, command=binary_text.yview)
-    binary_scrollbar.pack(side="right", fill="y")
-    binary_text.config(yscrollcommand=binary_scrollbar.set)
+    scrollbar_init(binary_text, binary_text)
 
 
 def asm_zone_init(texts_frame):
@@ -348,9 +307,7 @@ def asm_zone_init(texts_frame):
     global asm_zone
     asm_zone = tk.Text(texts_frame, width=40, height=30)
     asm_zone.pack(side="top", fill="both", expand=True)
-    asm_scrollbar = ttk.Scrollbar(asm_zone, orient=tk.VERTICAL, command=asm_zone.yview)  # Creation of a vertical scrollbar
-    asm_scrollbar.pack(side="right", fill="y")
-    asm_zone.config(yscrollcommand=asm_scrollbar.set)  # Configuration of the text widget to work with the scrollbar
+    scrollbar_init(asm_zone, asm_zone)
 
     asm_zone.bind("<Key>", on_key)
 
@@ -386,15 +343,11 @@ def pipeline_init(window):
         header_label = ttk.Label(pip_fde_frame, text=header, width=8)    # Column text
         header_label.grid(row=i, column=0, padx=12, pady=8, sticky="w")  # Column shape and place config
 
-    # Initialisation of the other cells (19 of them)
-    pip_column_text = [["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""],
-        ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""], ["", "", ""]]
-
-    for i, col_labels in enumerate(pip_column_text):
-        pip_modify_column(col_labels, i+1, ["black", "black", "black"])
+    for i in range(19):
+        pip_modify_column(c=i+1)
 
 
-def pip_modify_column(pip_column_text, c: int, color_array):
+def pip_modify_column(pip_column_text=["", "", "",], c=0, color_array=["black", "black", "black"]):
     '''Creates or modifies an existing column in the pipeline array. \n
         Inputs:
         pip_column_text: Text data that will fill the column.\n
@@ -417,9 +370,7 @@ def debugger_init(texts_frame):
     global debugger_text
     debugger_text = tk.Text(texts_frame, width=40, height=10, state=tk.DISABLED, background="gainsboro")
     debugger_text.pack(side="left", fill="both", expand=True, padx=6, pady=6)
-    debugger_scrollbar = ttk.Scrollbar(debugger_text, orient=tk.VERTICAL, command=debugger_text.yview)
-    debugger_scrollbar.pack(side="right", fill="y")
-    debugger_text.config(yscrollcommand=debugger_scrollbar.set)
+    scrollbar_init(debugger_text, debugger_text)
 
 
 
@@ -572,24 +523,24 @@ def btn_compile_init(toolbar):
         code = asm_zone.get("1.0", tk.END)
         split_instructions,line_instruction,bitstream,register_update,line_update,memory_update,error = instruction_translation(code)
         print(instruction_translation(code))
+
         for l in range(len(line_update)-2):
             if bitstream[line_update[l]]!='':
-                ram_code_edit(line_update[line_update[l]], bitstream[line_update[l]], split_instructions[line_update[l]], "black")
+                mem_edit(ram_code_tree, line_update[line_update[l]], bitstream[line_update[l]], split_instructions[line_update[l]])
                 pip_edit(split_instructions[line_update[l]])
-                binary_add_line(bitstream[line_update[l]])
+                textbox_add_line(binary_text, bitstream[line_update[l]])
             if memory_update[line_update[l]]!=[]:
-                ram_user_edit(memory_update[line_update[l]][0], memory_update[line_update[l]][1], "black")
+                mem_edit(ram_user_tree, memory_update[line_update[l]][0], memory_update[line_update[l]][1], "User")
             if register_update[line_update[l]]!=[]:
                 reg_edit(register_update[line_update[l]][0], register_update[line_update[l]][1], "black")
+
         for e in range(len(error)//2):
-            debugger_add_line(error[e]+" at line "+f"{l+1}", "red")  # Usually the error is on the last line as the
+            textbox_add_line(debugger_text, error[e]+" at line "+f"{l+1}", "red")  # Usually the error is on the last line as the
             asm_highlight_line(l+1)                             # simulation will stop when it encounters an error
+
         if error==[]:
-            debugger_add_line("Compilation complete")
+            textbox_add_line(debugger_text, "Compilation complete")
 
-
-
-    global button_compile
     button_compile = ctk.CTkButton(toolbar, text="Compile & Debug", command=compile, width=100, height=18, font = ("Arial", 10), fg_color="gray")
     button_compile.pack(side="right", padx=0)
 
@@ -665,24 +616,27 @@ def step_iter():
 def reset():
     '''Resets the registers, the memory, and the pipeline.'''
 
-    # Clearing the binary window
-    binary_text.configure(state='normal')  # Set the widget to normal state to allow editing
-    binary_text.delete(1.0, 'end')  # Delete all the text from the beginning to the end
-    binary_text.configure(state='disabled')  # Set the widget back to disabled state
+    # Bitstream window reset
+    binary_text.configure(state='normal')      # Allows editing
+    binary_text.delete(1.0, 'end')             # Deletes all the text
+    binary_text.configure(state='disabled')    # Sets back to disabled state
 
-    #Clearing the debugger window
-    debugger_text.configure(state='normal')  # Set the widget to normal state to allow editing
-    debugger_text.delete(1.0, 'end')  # Delete all the text from the beginning to the end
-    debugger_text.configure(state='disabled')  # Set the widget back to disabled state
+    # Debugger reset
+    debugger_text.configure(state='normal')    # Allows editing
+    debugger_text.delete(1.0, 'end')           # Deletes all the text
+    debugger_text.configure(state='disabled')  # Set back to disabled state
 
-    for i in range(8):
-        reg_edit(i, 0, "black")
-    for i in range(255):
-        ram_code_edit(i, "0", "", "black")
-    for i in range(255):
-        ram_user_edit(i, "0", "black")
-    for i in range(19):
-        pip_modify_column(["", "", "",], i+1, ["black", "black", "black"])
+    for i in range(8):  # Registers reset
+        reg_edit(i, 0)
+
+    for i in range(len(ram_code_tree.get_children())):  # Code RAM reset
+        mem_edit(ram_code_tree, i)
+
+    for i in range(len(ram_user_tree.get_children())):  # User RAM reset
+        mem_edit(ram_user_tree, i, type="User")
+
+    for i in range(19):  # Pipeline reset
+        pip_modify_column(c=i+1)
 
 
 # (To be implemented)
@@ -752,22 +706,15 @@ def help_simulator_docu():
     popup = tk.Tk()
     popup.title("ENSEA's Python LCM3 Simulator - Documentation")
     popup.geometry("1200x800")
-
-    # Frame to hold the text widget and scrollbar
-    popup_frame = ttk.Frame(popup)
+    
+    popup_frame = ttk.Frame(popup)  # Frame to hold the text widget and scrollbar
     popup_frame.pack(fill=tk.BOTH, expand=True)
 
-    # Text widget for the documentation
-    documentation_text_widget = tk.Text(popup_frame, wrap=tk.WORD, height=20, width=60)
+    documentation_text_widget = tk.Text(popup_frame, wrap=tk.WORD, height=20, width=60)  # Text widget for the documentation
     documentation_text_widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+    scrollbar_init(popup_frame, documentation_text_widget)
 
-    # Scrollbar for the Text widget
-    scrollbar = ttk.Scrollbar(popup_frame, command=documentation_text_widget.yview)
-    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-    documentation_text_widget.config(yscrollcommand=scrollbar.set)
-
-    # Insert the text
-    documentation_text_widget.insert(tk.END, documentation_text)
+    documentation_text_widget.insert(tk.END, documentation_text)  # Insert the text
     documentation_text_widget.configure(state='disabled', font=("Helvetica",12))  # Make it un-editable
 
 
