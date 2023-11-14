@@ -9,7 +9,7 @@ z2
 cModel Technology
 Z0 dC:/Users/jincl/Desktop/ProjetFPGA/Projet-2A-Console-sur-FPGA/Code_VHDL
 Edecode
-Z1 w1699969678
+Z1 w1699977187
 Z2 DPx3 std 6 textio 0 22 zE1`LPoLg^DX3Oz^4Fj1K3
 Z3 DPx4 ieee 14 std_logic_1164 0 22 eNV`TJ_GofJTzYa?f<@Oe1
 R0
@@ -21,9 +21,9 @@ V]m;YbMIY@KJH1jTdHXR`z3
 !s100 WSgz8_K1P_e2RW2IU?H6i1
 Z6 OV;C;10.5b;63
 32
-Z7 !s110 1699969892
+Z7 !s110 1699977373
 !i10b 1
-Z8 !s108 1699969892.000000
+Z8 !s108 1699977373.000000
 Z9 !s90 -reportprogress|300|DECODE.vhd|
 Z10 !s107 DECODE.vhd|
 !i113 1
@@ -34,8 +34,8 @@ R3
 DEx4 work 6 decode 0 22 ]m;YbMIY@KJH1jTdHXR`z3
 l70
 L53
-VSQ@<FR;jV`[W84_bMiUTT3
-!s100 >YPYVzPFIn6`68IW[]Ank1
+Vj8R21;TNEm_UjEE7JDQ4a1
+!s100 U`hd]Aa0A5=ZiRY2ZcP3F2
 R6
 32
 R7
@@ -206,55 +206,92 @@ VG=QzXh18BGM25KF5z;N=D3
 !s100 JAn@mSZHGPk>AB3^TDDBg1
 R6
 32
-R7
+Z43 !s110 1699972324
 !i10b 1
-R8
-Z43 !s90 -reportprogress|300|DECODE_tb5.vhd|
-Z44 !s107 DECODE_tb5.vhd|
+Z44 !s108 1699972324.000000
+Z45 !s90 -reportprogress|300|DECODE_tb5.vhd|
+Z46 !s107 DECODE_tb5.vhd|
 !i113 1
 R11
 Abehavioral
 R2
 R3
-Z45 DEx4 work 10 decode_tb5 0 22 G=QzXh18BGM25KF5z;N=D3
+DEx4 work 10 decode_tb5 0 22 G=QzXh18BGM25KF5z;N=D3
 l56
 L19
 VTn?2R0_R<QzT8d;n0MAMd2
 !s100 L7ebeo=`P:mkN8ZT_PMdi2
 R6
 32
-R7
-!i10b 1
-R8
 R43
+!i10b 1
 R44
+R45
+R46
 !i113 1
 R11
-Efetch
-Z46 w1699821959
-Z47 DPx4 ieee 18 std_logic_unsigned 0 22 ;eZjO2D4ZDz<]0>8AL<ne1
-Z48 DPx4 ieee 15 std_logic_arith 0 22 [G314=:2zXJ`VORJe1J@Z1
+Edecode_tb6
+Z47 w1699977353
 R2
 R3
 R0
-Z49 8FETCH.vhd
-Z50 FFETCH.vhd
+Z48 8DECODE_tb6.vhd
+Z49 FDECODE_tb6.vhd
+l0
+L15
+VJ3ZIJn27Z2JA]>[DKOkH<3
+!s100 zW^WC`lfYAGGIK_Z8CSWL3
+R6
+32
+R7
+!i10b 1
+R8
+Z50 !s90 -reportprogress|300|DECODE_tb6.vhd|
+Z51 !s107 DECODE_tb6.vhd|
+!i113 1
+R11
+Abehavioral
+R2
+R3
+Z52 DEx4 work 10 decode_tb6 0 22 J3ZIJn27Z2JA]>[DKOkH<3
+l56
+L19
+VBR@^9OFCeFZVeh3f9WRkS0
+!s100 9cE?KfI8[lf[k`2DWfViV2
+R6
+32
+R7
+!i10b 1
+R8
+R50
+R51
+!i113 1
+R11
+Efetch
+Z53 w1699821959
+Z54 DPx4 ieee 18 std_logic_unsigned 0 22 ;eZjO2D4ZDz<]0>8AL<ne1
+Z55 DPx4 ieee 15 std_logic_arith 0 22 [G314=:2zXJ`VORJe1J@Z1
+R2
+R3
+R0
+Z56 8FETCH.vhd
+Z57 FFETCH.vhd
 l0
 L36
 VcgWoo@H<fi42OjGDBP36=1
 !s100 :GYX9XY:z^Ua_V54Lz9T`3
 R6
 32
-Z51 !s110 1699967070
+Z58 !s110 1699967070
 !i10b 1
-Z52 !s108 1699967070.000000
-Z53 !s90 -reportprogress|300|FETCH.vhd|
-Z54 !s107 FETCH.vhd|
+Z59 !s108 1699967070.000000
+Z60 !s90 -reportprogress|300|FETCH.vhd|
+Z61 !s107 FETCH.vhd|
 !i113 1
 R11
 Abehavioral
-R47
-R48
+R54
+R55
 R2
 R3
 DEx4 work 5 fetch 0 22 cgWoo@H<fi42OjGDBP36=1
@@ -264,31 +301,31 @@ VHh^Yzf:]_CAQh9`ABCcY=3
 !s100 oKea<ohA?N5f9Uheh9h650
 R6
 32
-R51
+R58
 !i10b 1
-R52
-R53
-R54
+R59
+R60
+R61
 !i113 1
 R11
 Efetch_tb1
-Z55 w1697551365
+Z62 w1697551365
 R2
 R3
 R0
-Z56 8FETCH_tb1.vhd
-Z57 FFETCH_tb1.vhd
+Z63 8FETCH_tb1.vhd
+Z64 FFETCH_tb1.vhd
 l0
 L34
 V]G<@I=TC:]Z?Mbf3n`B_H1
 !s100 8Q:O305MaS6OjICJnlz4=2
 R6
 32
-Z58 !s110 1699967071
+Z65 !s110 1699967071
 !i10b 1
-Z59 !s108 1699967071.000000
-Z60 !s90 -reportprogress|300|FETCH_tb1.vhd|
-Z61 !s107 FETCH_tb1.vhd|
+Z66 !s108 1699967071.000000
+Z67 !s90 -reportprogress|300|FETCH_tb1.vhd|
+Z68 !s107 FETCH_tb1.vhd|
 !i113 1
 R11
 Abehavioral
@@ -301,10 +338,10 @@ V8JjKQNT2R:aiB;=YAlBiY2
 !s100 P;;aP?RT^2Z5mliij63GV0
 R6
 32
-R58
+R65
 !i10b 1
-R59
-R60
-R61
+R66
+R67
+R68
 !i113 1
 R11

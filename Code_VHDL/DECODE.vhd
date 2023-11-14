@@ -221,6 +221,19 @@ begin
                         signD_cond <="1111";
             end if;  
 
+            if (iD_instruction(15 downto 6)="0110100000") --LDR Rt,[Rn]
+                then    signD_enW<='0';
+                        signD_enMEM<='1';
+                        signD_RW<='0';
+                        signD_sel<='0';
+                        signD_instBXX <= '0';
+                        signD_instB <= '0';
+                        signD_n<=iD_instruction(5 downto 3);
+                        signD_t<=iD_instruction(2 downto 0);
+                        signD_codeOp<="000";
+                        signD_cond <="1111";
+            end if;  
+
             if (iD_instruction(15 downto 11)="00000") --LSL Rd, Rm, #imm5
                 then    signD_enW<='1';
                         signD_enMEM<='0';
@@ -275,8 +288,8 @@ begin
                         signD_cond <="1111";
             end if;
 
-            if (iD_instruction(15 downto 9)="0110000000") --STR Rt, [Rn]
-                then    signD_enW<='0'; -- accès à la mémoire ?
+            if (iD_instruction(15 downto 6)="0110000000") --STR Rt, [Rn]
+                then    signD_enW<='0'; -- acces a la memoire ou pas
                         signD_enMEM<='1';
                         signD_RW<='1';
                         signD_sel<='0';
