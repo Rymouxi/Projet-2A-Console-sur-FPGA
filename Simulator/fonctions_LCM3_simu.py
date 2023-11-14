@@ -57,9 +57,10 @@ def LSL_simu(instruction:str,line:int):
     """
     register_update=[]
     error=[]
+    count=instruction.count("#")+instruction.count("0B")+instruction.count("0X")
 
     #LSL Rd,Rm,#imm5
-    if (len(register_recognition(instruction)[0])==2) and (instruction.count('#')>0):
+    if (len(register_recognition(instruction)[0])==2) and (count==1):
         if len(register_recognition(instruction)[1])!=0:
             for i in range(len(register_recognition(instruction)[1])):
                 error.append(register_recognition(instruction)[1][i])
@@ -230,9 +231,10 @@ def CMP_simu(instruction:str,line:int):
     """
     register_update=[]
     error=[]
+    count=instruction.count("#")+instruction.count("0B")+instruction.count("0X")
 
     #CMP Rn,#imm8
-    if (len(register_recognition(instruction)[0])==1)and(instruction.count('#')>0):
+    if (len(register_recognition(instruction)[0])==1)and(count==1):
         #Détection d'erreurs
         if len(register_recognition(instruction)[1])!=0:
             for i in range(len(register_recognition(instruction)[1])):
@@ -247,7 +249,7 @@ def CMP_simu(instruction:str,line:int):
 
             #Rn et imm8 sont les numéros (en binaire) des registres dans CMP
             Rn=register_recognition(instruction)[0][0]
-            imm8=register_recognition(instruction,8)[0]
+            imm8=imm_recognition(instruction,8)[0]
 
             #Valeur de Rn en décimale
             Rn_value=virtual_register[int(Rn,2)]
@@ -276,9 +278,10 @@ def ADD_simu(instruction:str,line:int):
     """
     register_update=[]
     error=[]
+    count=instruction.count("#")+instruction.count("0B")+instruction.count("0X")
 
     #ADD Rd,Rn,Rm
-    if (len(register_recognition(instruction)[0])==3)and (instruction.count('#')==0):
+    if (len(register_recognition(instruction)[0])==3)and (count==0):
         #Détection d'erreurs
         if len(register_recognition(instruction)[1])!=0:
             for i in range(len(register_recognition(instruction)[1])):
@@ -306,7 +309,7 @@ def ADD_simu(instruction:str,line:int):
 
     
     #ADD Rd,Rn,#immm3
-    elif (len(register_recognition(instruction)[0])==2)and(instruction.count('#')>0):
+    elif (len(register_recognition(instruction)[0])==2)and(count==1):
         #Détection d'erreurs
         if len(register_recognition(instruction)[1])!=0:
             for i in range(len(register_recognition(instruction)[1])):
@@ -338,7 +341,7 @@ def ADD_simu(instruction:str,line:int):
 
     
     #ADD Rd,#imm8
-    elif (len(register_recognition(instruction)[0])==1) and (instruction.count('#')>0):
+    elif (len(register_recognition(instruction)[0])==1) and (count==1):
         #Détection d'erreurs
         if len(register_recognition(instruction)[1])!=0:
             for i in range(len(register_recognition(instruction)[1])):
@@ -382,9 +385,10 @@ def SUB_simu(instruction:str,line:int):
 
     register_update=[]
     error=[]
+    count=instruction.count("#")+instruction.count("0B")+instruction.count("0X")
 
     #SUB Rd,Rn,Rm
-    if (len(register_recognition(instruction)[0])==3)and (instruction.count('#')==0):
+    if (len(register_recognition(instruction)[0])==3)and (count==0):
         #Détection d'erreurs
         if len(register_recognition(instruction)[1])!=0:
             for i in range(len(register_recognition(instruction)[1])):
@@ -416,7 +420,7 @@ def SUB_simu(instruction:str,line:int):
 
     
     #SUB Rd,Rn,#immm3
-    elif (len(register_recognition(instruction)[0])==2)and(instruction.count('#')>0):
+    elif (len(register_recognition(instruction)[0])==2)and(count==1):
         #Détection d'erreurs
         if len(register_recognition(instruction)[1])!=0:
             for i in range(len(register_recognition(instruction)[1])):
@@ -452,7 +456,7 @@ def SUB_simu(instruction:str,line:int):
 
     
     #SUB Rd,#imm8
-    elif (len(register_recognition(instruction)[0])==1) and (instruction.count('#')>0):
+    elif (len(register_recognition(instruction)[0])==1) and (count==1):
         #Détection d'erreurs
         if len(register_recognition(instruction)[1])!=0:
             for i in range(len(register_recognition(instruction)[1])):
@@ -500,8 +504,10 @@ def MOV_simu(instruction:str,line:int):
     register_update=[]
     error=[]
 
+    count=instruction.count("#")+instruction.count("0B")+instruction.count("0X")
+
     #MOV Rd,Rm
-    if (len(register_recognition(instruction)[0])==2)and(instruction.count('#')==0):
+    if (len(register_recognition(instruction)[0])==2)and(count==0):
         #Détection d'erreurs
         if len(register_recognition(instruction)[1])!=0:
             for i in range(len(register_recognition(instruction)[1])):
@@ -523,10 +529,9 @@ def MOV_simu(instruction:str,line:int):
             register_update.append(int(Rd,2))
             register_update.append(Rm_value)
 
-
     
     #MOV Rd,#imm8
-    elif (len(register_recognition(instruction)[0])==1)and(instruction.count('#')>0):
+    elif (len(register_recognition(instruction)[0])==1)and(count==1):
         #Détection d'erreurs
         if len(register_recognition(instruction)[1])!=0:
             for i in range(len(register_recognition(instruction)[1])):

@@ -202,13 +202,6 @@ def pip_edit(pip_text):
     column_label.grid(padx=10, pady=8, sticky="w")
 
 
-def asm_highlight_line(line_number):
-    start_index = asm_zone.index(f"{line_number}.0 linestart")
-    end_index = asm_zone.index(f"{line_number}.0 lineend")
-    asm_zone.tag_add("highlight", start_index, end_index)
-    asm_zone.tag_configure("highlight", background="red")
-
-
 
 
 
@@ -613,14 +606,21 @@ def btn_assemble_init(toolbar):
 
         reset()
 
-        button_assemble.configure(fg_color="gray", state="normal")
-        button_runsbs.configure(text="Run Step by Step", fg_color="forestgreen", state="!disabled")
-
         global run_state
         run_state = 1
 
+        button_assemble.configure(fg_color="gray", state="normal")
+        button_runsbs.configure(text="Run Step by Step", fg_color="forestgreen", state="!disabled")
+
+        # Remove the "highlight" tag and set the background to white
+        asm_zone.tag_remove("highlight", "1.0", "end")
+        asm_zone.tag_add("reset_bg", "1.0", "end")
+        asm_zone.tag_configure("reset_bg", background="white")
+
+        # Get the code from the ASM text window
         code = asm_zone.get("1.0", tk.END)
 
+        # Funny text variations for when user tries to assemble empty code
         variations = ["sipping a coconut", "catching some rays", "in a hammock", "on a beach", "snorkeling", "in a tropical paradise", "surfing the clouds",
         "on a spa retreat", "napping in a hammock", "practicing mindfulness", "doing yoga", "enjoying a siesta", "on a cosmic cruise", "in a Zen garden",
         "sunbathing", "in a day spa", "on a coffee break", "chilling in a hammock", "vacationing", "on a beach", "gone", "too short", "transparent", "too small"]
@@ -648,8 +648,18 @@ def btn_assemble_init(toolbar):
                     reg_edit(register_update[line_update[l]][0], register_update[line_update[l]][1])
 
             for e in range(len(error)//2):
+                # Print the error in the debugger window
                 textbox_add_line(debugger_text, error[e]+" at line "+f"{l+1}", "red")  # Usually the error is on the last line as the
-                asm_highlight_line(l+1)                             # simulation will stop when it encounters an error
+
+                # Remove all existing tags
+                asm_zone.tag_remove("highlight", "1.0", "end")
+                asm_zone.tag_remove("reset_bg", "1.0", "end")
+
+                # Highlight the specific line with a red background
+                start_index = f"{l+1}.0 linestart"
+                end_index = f"{l+1}.0 lineend"
+                asm_zone.tag_add("highlight", start_index, end_index)
+                asm_zone.tag_configure("highlight", background="red")
 
             if error==[]:
                 textbox_add_line(debugger_text, "Assembly complete", "forestgreen")

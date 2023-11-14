@@ -112,7 +112,7 @@ def CMP_bitstream(instruction:str,line:int):
 
     #Rn et imm8 sont les numéros (en binaire) des registres dans CMP
     Rn=register_recognition(instruction)[0][0]
-    imm8=register_recognition(instruction,8)[0]
+    imm8=imm_recognition(instruction,8)[0]
            
     #Bitstream
     bitstream='00101'+Rn+imm8

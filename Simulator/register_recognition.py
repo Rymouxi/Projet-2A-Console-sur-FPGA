@@ -56,25 +56,44 @@ def imm_recognition(instruction:str,size:int):
     Ainsi que les erreurs éventuelles"""
     
     n=len(instruction)
-    count=instruction.count('#')
     error=[]
+    hexa=['0','1','2','3','4','5','6','7','8','9','A','B','C','D','F']
+    imm_bin=''
 
-    if count==0:
-        error.append("There's no # before the number in this instruction.")
     #Acquisition du nombre de imm
-    elif count>1:
-        error.append("There's too much # in the instruction.")
-    else:
+    if instruction.count('#')==1:
         m=1
         imm=''
         if instruction[instruction.find('#')+1].isdigit()==True:
-            while (instruction.find('#')+m<n)and(instruction[instruction.find('#')+m].isdigit()):
+            while (instruction.find('#')+m<n)and((instruction[instruction.find('#')+m] in hexa)==True):
                 imm+=instruction[instruction.find('#')+m:instruction.find('#')+m+1]
                 m+=1
         else:
             error.append("There's no number after #.")
-    #Mise en binaire du nombre
-    imm_bin=DecToBin(int(imm)) #imm_bin est un str
+        #Mise en binaire du nombre
+        imm_bin=DecToBin(int(imm)) 
+    elif instruction.count('0X')==1:
+        m=1
+        imm=''
+        if (instruction[instruction.find('0X')+2] in hexa)==True:
+            while (instruction.find('0X')+1+m<n)and((instruction[instruction.find('0X')+1+m] in hexa)==True):
+                imm+=instruction[instruction.find('0X')+1+m:instruction.find('0X')+m+2]
+                m+=1
+        else:
+            error.append("There's no number after 0X.")
+        imm_bin=DecToBin(int(imm,16))
+    elif instruction.count('0B')==1:
+        m=1
+        imm=''
+        if (instruction[instruction.find('0B')+2] in hexa)==True:
+            while (instruction.find('0B')+1+m<n)and((instruction[instruction.find('0B')+1+m] in hexa)==True):
+                imm+=instruction[instruction.find('0B')+1+m:instruction.find('0B')+m+2]
+                m+=1
+        else:
+            error.append("There's no number after 0B.")
+        imm_bin=imm
+    else:
+        error.append("The number type doesn't match with any known type")
 
     #Complétion des numéros binaires de imm par des 0, si nécessaires
     imm_final=''
