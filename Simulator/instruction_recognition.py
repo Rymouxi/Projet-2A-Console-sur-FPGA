@@ -26,25 +26,25 @@ def instruction_recognition(instruction:str,line:int,split_instructions:list,sim
         if n>0:
             if instruction.count(':')==1:
                 return bitstream
-            elif instruction[0:3]=='ADD ':
+            elif instruction[0:3]=='ADD':
                 bitstream=ADD_bitstream(instruction,line)
-            elif instruction[0:3]=='AND ':
+            elif instruction[0:3]=='AND':
                 bitstream=AND_bitstream(instruction,line)
             elif instruction[0]=='B':
                 bitstream=B_instruct_bitstream(instruction,split_instructions,line)
-            elif instruction[0:3]=='CMP ':
+            elif instruction[0:3]=='CMP':
                 bitstream=CMP_bitstream(instruction,line)
-            elif instruction[0:3]=='EOR ':
+            elif instruction[0:3]=='EOR':
                 bitstream=EOR_bitstream(instruction,line)
-            elif instruction[0:3]=='LDR ':
+            elif instruction[0:3]=='LDR':
                 bitstream=LDR_bitstream(instruction,line)
-            elif instruction[0:3]=='LSL ':
+            elif instruction[0:3]=='LSL':
                 bitstream=LSL_bitstream(instruction,line)
-            elif instruction[0:3]=='MOV ':
+            elif instruction[0:3]=='MOV':
                 bitstream=MOV_bitstream(instruction,line)
-            elif instruction[0:3]=='STR ':
+            elif instruction[0:3]=='STR':
                 bitstream=STR_bitstream(instruction,line)
-            elif instruction[0:3]=='SUB ':
+            elif instruction[0:3]=='SUB':
                 bitstream=SUB_bitstream(instruction,line)
         return bitstream
 
@@ -52,25 +52,25 @@ def instruction_recognition(instruction:str,line:int,split_instructions:list,sim
         if n>0:
             if instruction.count(':')==1:
                 return register_update,line_update,memory_update,error
-            elif instruction[0:3]=='ADD':
+            elif instruction[0:4]=='ADD ':
                 register_update,error=ADD_simu(instruction,line)
-            elif instruction[0:3]=='AND':
+            elif instruction[0:4]=='AND ':
                 register_update,error=AND_simu(instruction,line)
             elif instruction[0]=='B':
                 line_update,error=B_instruct_simu(instruction,split_instructions,line)
-            elif instruction[0:3]=='CMP':
+            elif instruction[0:4]=='CMP ':
                 register_update,error=CMP_simu(instruction,line)
-            elif instruction[0:3]=='EOR':
+            elif instruction[0:4]=='EOR ':
                 register_update,error=EOR_simu(instruction,line)
-            elif instruction[0:3]=='LDR':
+            elif instruction[0:4]=='LDR ':
                 register_update,error=LDR_simu(instruction,line)
-            elif instruction[0:3]=='LSL':
+            elif instruction[0:4]=='LSL ':
                 register_update,error=LSL_simu(instruction,line)
-            elif instruction[0:3]=='MOV':
+            elif instruction[0:4]=='MOV ':
                 register_update,error=MOV_simu(instruction,line)
-            elif instruction[0:3]=='STR':
+            elif instruction[0:4]=='STR ':
                 register_update,memory_update,error=STR_simu(instruction,line)
-            elif instruction[0:3]=='SUB':
+            elif instruction[0:4]=='SUB ':
                 register_update,error=SUB_simu(instruction,line)
 
             else:
