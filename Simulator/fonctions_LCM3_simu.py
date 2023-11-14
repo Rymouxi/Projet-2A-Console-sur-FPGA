@@ -230,6 +230,7 @@ def CMP_simu(instruction:str,line:int):
     Le registre NZVC est le 9ème 
     """
     register_update=[]
+    NZVC='0000'
     error=[]
     count=instruction.count("#")+instruction.count("0B")+instruction.count("0X")
 
@@ -254,17 +255,24 @@ def CMP_simu(instruction:str,line:int):
             #Valeur de Rn en décimale
             Rn_value=virtual_register[int(Rn,2)]
 
-            #Opération d'instruction CMP en décimale
-            cmp_value=abs(Rn_value-int(imm8,2))
+            #Calcul du NZVC
+            if Rn_value-int(imm8,2)<0:
+                #N=1
+                NZVC[0]='1'
+            if Rn_value-int(imm8,2)==0:
+                #Z=1
+                NZVC[1]='1'
+            if len(bin(Rn_value-int(imm8,2)))>max((len(Rn_value)+2),(len(imm8)+2)):
+                #V=1
+                NZVC[2]='1'
+            #Le C de NZVC n'est pas encore fait
 
             #Simulation interne des registres
-            virtual_register_write(8,cmp_value)
+            virtual_register_write(8,NZVC)
 
             #Renvoi des informations nécessaires à la simulation
             register_update.append(8)#Le registre 8 correspond au NZVC
-            register_update.append(cmp_value)
-
-
+            register_update.append(NZVC)
         
     else:
         error.append("Number of arguments in CMP line "+str(line)+" doesn't match. CMP instructions must be of form 'CMP Rn,#imm8'.")
