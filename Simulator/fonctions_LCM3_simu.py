@@ -440,7 +440,7 @@ def SUB_simu(instruction:str,line:int):
             Rn_value=virtual_register[int(Rn,2)]
 
             #Opération d'instruction SUB en décimale
-            sub_value=Rn_value-DecToBin(imm3)
+            sub_value=Rn_value-int(imm3,2)
 
             if sub_value<0:
                 error.append("imm number is too big to substract to register R"+int(Rd,2))
@@ -475,7 +475,7 @@ def SUB_simu(instruction:str,line:int):
             Rd_value=virtual_register[int(Rd,2)]
 
             #Opération d'instruction SUB en décimale
-            sub_value=Rd_value-DecToBin(imm8)
+            sub_value=Rd_value-int(imm8,2)
             
             if sub_value<0:
                 error.append("imm number is too big to substract to register R"+int(Rd,2))
