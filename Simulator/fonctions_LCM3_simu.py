@@ -249,7 +249,7 @@ def CMP_simu(instruction:str,line:int):
 
             #Rn et imm8 sont les numéros (en binaire) des registres dans CMP
             Rn=register_recognition(instruction)[0][0]
-            imm8=register_recognition(instruction,8)[0]
+            imm8=imm_recognition(instruction,8)[0]
 
             #Valeur de Rn en décimale
             Rn_value=virtual_register[int(Rn,2)]
