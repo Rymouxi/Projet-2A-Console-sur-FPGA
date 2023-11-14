@@ -3,6 +3,7 @@ from tkinter import ttk
 import customtkinter as ctk
 import serial
 from serial.tools.list_ports import comports
+import tkinter.messagebox
 
 ser = None
 
@@ -75,13 +76,13 @@ def connect_board():
     ttk.Button(popup, text="OK", command=on_ok).grid(row=6)
 
     popup.mainloop()
-
+    
 def disconnect_board():
-    close_serial = input("Voulez-vous fermer la connexion série? (Oui/Non)").lower()
-
-    if close_serial == "oui":
+    close_serial = tkinter.messagebox.askyesno("Fermer la connexion série", "Voulez-vous fermer la connexion série?")
+    
+    if close_serial:
         global ser
         ser.close()
         print("Connexion série fermée.")
     else:
-        print("Connexion série non fermée.")
+        print("Connexion série non fermée.") 
