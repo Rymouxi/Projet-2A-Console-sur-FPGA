@@ -11,15 +11,20 @@ def saut_ligne(code_text:str):
         if indent_count!=0:
             for indent in range(indent_count):
                 code_loop=code_loop[0:code_loop.find("\t")]+code_loop[code_loop.find("\t")+1:n]
+        if code_loop[0:code_loop.find("\n")].count(";")!=0:
+            code_loop=code_loop[0:code_loop.find(';')]+code_loop[code_loop.find("\n")-1:n]
         code_asm.append(code_loop[0:code_loop.find('\n')])
         code_loop=code_loop[code_loop.find('\n')+1:n]
         n=len(code_loop)
-        
+
     indent_count=code_loop[0:code_loop.find("\n")].count("\t")
     if indent_count!=0:
         for indent in range(indent_count):
             code_loop=code_loop[0:code_loop.find("\t")]+code_loop[code_loop.find("\t")+1:n]
     code_asm.append(code_loop[0:len(code_loop)])
+
+    #Reconnaissance des commentaires ;
+
     return code_asm
 
 def DecToBin(Number:int):
