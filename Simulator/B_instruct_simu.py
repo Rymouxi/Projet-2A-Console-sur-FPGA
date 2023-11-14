@@ -16,16 +16,18 @@ def B_instruct_simu(instruction:str,split_instructions:list,line:int):
     label_list=label_recognition(split_instructions)
     line_update=0
     error=[]
-    if instruction[0:3]=='BEQ':
+    if instruction[0:3]=='BEQ ':
         #BEQ label
         line_update,error=BEQ_label_simu(instruction,label_list,line)
-    elif instruction[0:3]=='BNE':
+    elif instruction[0:3]=='BNE ':
         #BNE label
         line_update,error=BNE_label_simu(instruction,label_list,line)
     elif instruction[0:2]=='B ':
         #B label
         line_update,error=B_label_simu(instruction,label_list,line)
-
+    else:
+        error.append("Syntax Error")
+        error.append(line)
     return line_update,error
 
 
