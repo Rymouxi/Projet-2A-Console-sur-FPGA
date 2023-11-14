@@ -20,7 +20,7 @@ import random
 import webbrowser
 
 from instruction_translation import *
-#from connection_board import *
+from connection_board import *
 
 # Masquer les boutons downloads et tout quand il faut
 # Faire un bouton run
@@ -660,7 +660,7 @@ def btn_assemble_init(toolbar):
                 run_state = 0
 
     global button_assemble
-    button_assemble = ctk.CTkButton(toolbar, text="Assemble", command=assemble, width=100, height=18, font = ("Arial", 10), fg_color="forestgreen", state="!disabled")
+    button_assemble = ctk.CTkButton(toolbar, text="Assemble", command=assemble, width=90, height=18, font = ("Arial", 10), fg_color="forestgreen", state="!disabled")
     button_assemble.pack(side="right", padx=0)
 
 
@@ -669,7 +669,7 @@ def btn_runsbs_init(toolbar):
         Input: toolbar: Frame in which to place the button.'''
 
     global button_runsbs
-    button_runsbs = ctk.CTkButton(toolbar, text="Run Step by Step", command=run_step_by_step, width=100, height=18, font = ("Arial", 10), fg_color="gray", state="disabled")
+    button_runsbs = ctk.CTkButton(toolbar, text="Run Step by Step", command=run_step_by_step, width=90, height=18, font = ("Arial", 10), fg_color="gray", state="disabled")
     button_runsbs.pack(side="right", padx=20)
 
 
@@ -678,7 +678,7 @@ def btn_step_init(toolbar):
         Input: toolbar: Frame in which to place the button.'''
 
     global button_step
-    button_step = ctk.CTkButton(toolbar, text="Step ->", command=step_iter, width=100, height=18, font = ("Arial", 10), fg_color="gray")
+    button_step = ctk.CTkButton(toolbar, text="Step ->", command=step_iter, width=90, height=18, font = ("Arial", 10), fg_color="gray")
     button_step.pack(side="right", padx=0)
     button_step.configure(state="disabled")
 
@@ -687,7 +687,7 @@ def btn_reset_init(toolbar):
     '''Creates the reset button which resets the registers, the memory, and the pipeline.\n
         Input: toolbar: Frame in which to place the button.'''
 
-    button_reset = ctk.CTkButton(toolbar, text="Reset", command=reset, width=100, height=18, font = ("Arial", 10), fg_color="gray")
+    button_reset = ctk.CTkButton(toolbar, text="Reset", command=reset, width=90, height=18, font = ("Arial", 10), fg_color="gray")
     button_reset.pack(side="right", padx=20)
 
 
@@ -695,15 +695,23 @@ def btn_connect_init(toolbar):
     '''Creates the connect button which automatically connects the simulator to a connected board, if there's one.\n
         Input: toolbar: Frame in which to place the button.'''
 
-    #button_connect = ctk.CTkButton(toolbar, text="Connect Board", command=connect_board, width=100, height=18, font = ("Arial", 10), fg_color="gray")
-    #button_connect.pack(side="right", padx=0)
+    def connect_update():
+        if ser:
+            connect_board()
+            button_runsbs.configure(text="Disconnect Board", fg_color="firebrick", mode="!disabled")
+        else:
+            disconnect_board()
+            button_runsbs.configure(text="Connect Board", fg_color="gray")
+
+    button_connect = ctk.CTkButton(toolbar, text="Connect Board", command=connect_update, width=90, height=18, font = ("Arial", 10), fg_color="gray")
+    button_connect.pack(side="right", padx=0)
 
 
 def btn_dowload_init(toolbar):
     '''Creates the download button which downloads the code in the text window into the board, and executes it.\n
         Input: toolbar: Frame in which to place the button.'''
 
-    button_download = ctk.CTkButton(toolbar, text="Download Code", command=download_code, width=100, height=18, font = ("Arial", 10), fg_color="gray")
+    button_download = ctk.CTkButton(toolbar, text="Download Code", command=download_code, width=90, height=18, font = ("Arial", 10), fg_color="gray")
     button_download.pack(side="right", padx=20)
     button_download.configure(state="disabled")
     # To remove as soon as the simulator is connected to a board !
