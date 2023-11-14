@@ -57,7 +57,7 @@ def LSL_simu(instruction:str,line:int):
     """
     register_update=[]
     error=[]
-    count=instruction.count("#")+instruction.count("0b")+instruction.count("0x")
+    count=instruction.count("#")+instruction.count("0B")+instruction.count("0X")
 
     #LSL Rd,Rm,#imm5
     if (len(register_recognition(instruction)[0])==2) and (count==1):
@@ -231,7 +231,7 @@ def CMP_simu(instruction:str,line:int):
     """
     register_update=[]
     error=[]
-    count=instruction.count("#")+instruction.count("0b")+instruction.count("0x")
+    count=instruction.count("#")+instruction.count("0B")+instruction.count("0X")
 
     #CMP Rn,#imm8
     if (len(register_recognition(instruction)[0])==1)and(count==1):
@@ -278,7 +278,7 @@ def ADD_simu(instruction:str,line:int):
     """
     register_update=[]
     error=[]
-    count=instruction.count("#")+instruction.count("0b")+instruction.count("0x")
+    count=instruction.count("#")+instruction.count("0B")+instruction.count("0X")
 
     #ADD Rd,Rn,Rm
     if (len(register_recognition(instruction)[0])==3)and (count==0):
@@ -385,7 +385,7 @@ def SUB_simu(instruction:str,line:int):
 
     register_update=[]
     error=[]
-    count=instruction.count("#")+instruction.count("0b")+instruction.count("0x")
+    count=instruction.count("#")+instruction.count("0B")+instruction.count("0X")
 
     #SUB Rd,Rn,Rm
     if (len(register_recognition(instruction)[0])==3)and (count==0):
@@ -504,7 +504,7 @@ def MOV_simu(instruction:str,line:int):
     register_update=[]
     error=[]
 
-    count=instruction.count("#")+instruction.count("0b")+instruction.count("0x")
+    count=instruction.count("#")+instruction.count("0B")+instruction.count("0X")
 
     #MOV Rd,Rm
     if (len(register_recognition(instruction)[0])==2)and(count==0):
