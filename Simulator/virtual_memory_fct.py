@@ -25,3 +25,11 @@ def virtual_memory_read(address):
     global virtual_memory
     value=virtual_memory[2*i+1]
     return value
+
+def virtual_memory_error(address):
+    error=''
+    for i in range(len(virtual_memory)):
+        if virtual_memory[i]==address:
+            return error
+    error="This address does not exist"
+    return(error)
