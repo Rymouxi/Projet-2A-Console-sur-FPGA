@@ -275,6 +275,19 @@ begin
                         signD_cond <="1111";
             end if;
 
+            if (iD_instruction(15 downto 9)="0110000000") --STR Rt, [Rn]
+                then    signD_enW<='0'; -- accès à la mémoire ?
+                        signD_enMEM<='1';
+                        signD_RW<='1';
+                        signD_sel<='0';
+                        signD_instBXX <= '0';
+                        signD_instB <= '0';
+                        signD_n<=iD_instruction(5 downto 3);
+                        signD_t<=iD_instruction(2 downto 0);
+                        signD_codeOp<="000";
+                        signD_cond <="1111";
+            end if;
+
             if (iD_instruction(15 downto 9)="0001111") --SUB Rd, Rn, #imm3
                 then    signD_enW<='1';
                         signD_enMEM<='0';
