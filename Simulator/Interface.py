@@ -612,10 +612,8 @@ def btn_assemble_init(toolbar):
         button_assemble.configure(fg_color="gray", state="normal")
         button_runsbs.configure(text="Run Step by Step", fg_color="forestgreen", state="!disabled")
 
-        # Remove the "highlight" tag and set the background to white
+        # Remove the "highlight" tag
         asm_zone.tag_remove("highlight", "1.0", "end")
-        asm_zone.tag_add("reset_bg", "1.0", "end")
-        asm_zone.tag_configure("reset_bg", background="white")
 
         # Get the code from the ASM text window
         code = asm_zone.get("1.0", tk.END)
@@ -651,9 +649,8 @@ def btn_assemble_init(toolbar):
                 # Print the error in the debugger window
                 textbox_add_line(debugger_text, error[e]+" at line "+f"{l+1}", "red")  # Usually the error is on the last line as the
 
-                # Remove all existing tags
+                # Remove the "highlight" tag
                 asm_zone.tag_remove("highlight", "1.0", "end")
-                asm_zone.tag_remove("reset_bg", "1.0", "end")
 
                 # Highlight the specific line with a red background
                 start_index = f"{l+1}.0 linestart"
