@@ -58,7 +58,7 @@ def imm_recognition(instruction:str,size:int):
     n=len(instruction)
     error=[]
     hexa=['0','1','2','3','4','5','6','7','8','9','A','B','C','D','F']
-
+    imm_bin=''
 
     #Acquisition du nombre de imm
     if instruction.count('#')==1:
@@ -72,26 +72,26 @@ def imm_recognition(instruction:str,size:int):
             error.append("There's no number after #.")
         #Mise en binaire du nombre
         imm_bin=DecToBin(int(imm)) 
-    elif instruction.count('0b')==1:
+    elif instruction.count('0X')==1:
         m=1
         imm=''
-        if (instruction[instruction.find('0b')+2] in hexa)==True:
-            while (instruction.find('0b')+1+m<n)and((instruction[instruction.find('0b')+1+m] in hexa)==True):
-                imm+=instruction[instruction.find('0b')+1+m:instruction.find('0b')+m+2]
+        if (instruction[instruction.find('0X')+2] in hexa)==True:
+            while (instruction.find('0X')+1+m<n)and((instruction[instruction.find('0X')+1+m] in hexa)==True):
+                imm+=instruction[instruction.find('0X')+1+m:instruction.find('0X')+m+2]
                 m+=1
         else:
-            error.append("There's no number after 0b.")
-        imm_bin=imm
-    elif instruction.count('0x')==1:
-        m=1
-        imm=''
-        if (instruction[instruction.find('0x')+2] in hexa)==True:
-            while (instruction.find('0x')+1+m<n)and((instruction[instruction.find('0x')+1+m] in hexa)==True):
-                imm+=instruction[instruction.find('0x')+1+m:instruction.find('0x')+m+2]
-                m+=1
-        else:
-            error.append("There's no number after 0x.")
+            error.append("There's no number after 0X.")
         imm_bin=DecToBin(int(imm,16))
+    elif instruction.count('0B')==1:
+        m=1
+        imm=''
+        if (instruction[instruction.find('0B')+2] in hexa)==True:
+            while (instruction.find('0B')+1+m<n)and((instruction[instruction.find('0B')+1+m] in hexa)==True):
+                imm+=instruction[instruction.find('0B')+1+m:instruction.find('0B')+m+2]
+                m+=1
+        else:
+            error.append("There's no number after 0B.")
+        imm_bin=imm
     else:
         error.append("The number type doesn't match with any known type")
 
