@@ -303,7 +303,7 @@ begin
                         signD_cond <="1111";
             end if;
             
-            if (iD_instruction(15 downto 11)="00111") --SUB Rd, Rn, Rm
+            if (iD_instruction(15 downto 9)="0001101") --SUB Rd, Rn, Rm
                 then    signD_enW<='1';
                         signD_enMEM<='0';
                         signD_RW<='0';
