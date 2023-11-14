@@ -22,6 +22,18 @@ def B_instruct_simu(instruction:str,split_instructions:list,line:int):
     elif instruction[0:4]=='BNE ':
         #BNE label
         line_update,error=BNE_label_simu(instruction,label_list,line)
+    elif instruction[0:4]=='BGE ':
+        #BNE label
+        line_update,error=BGE_label_simu(instruction,label_list,line)
+    elif instruction[0:4]=='BLT ':
+        #BNE label
+        line_update,error=BLT_label_simu(instruction,label_list,line)
+    elif instruction[0:4]=='BGT ':
+        #BNE label
+        line_update,error=BGT_label_simu(instruction,label_list,line)
+    elif instruction[0:4]=='BLE ':
+        #BNE label
+        line_update,error=BLE_label_simu(instruction,label_list,line)
     elif instruction[0:2]=='B ':
         #B label
         line_update,error=B_label_simu(instruction,label_list,line)
@@ -53,7 +65,7 @@ def BNE_label_simu(instruction:str,label_list,line:int):
     n=len(instruction)
     jumpDec,error=jump_length_simu(instruction[4:n+1],label_list,line,7)
 
-    if virtual_register[8]!=0:
+    if virtual_register[8][1]!='0':
         line_update=line+jumpDec
 
     return line_update,error
@@ -65,10 +77,59 @@ def BEQ_label_simu(instruction:str,label_list,code_ASM,line:int):
     n=len(instruction)
     jumpDec,error=jump_length_simu(instruction[4:n+1],label_list,line,7)
 
-    if virtual_register[8]==0:
+    if virtual_register[8][1]=='1':
         line_update=line+jumpDec
         
     return line_update,error
+
+def BGE_label_simu(instruction:str,label_list,code_ASM,line:int):
+    """Traduction de l'instruction BGE label
+    """
+    line_update=line+1
+    n=len(instruction)
+    jumpDec,error=jump_length_simu(instruction[4:n+1],label_list,line,7)
+
+    if virtual_register[8][0]==virtual_register[8][2]:
+        line_update=line+jumpDec
+        
+    return line_update,error
+
+def BLT_label_simu(instruction:str,label_list,code_ASM,line:int):
+    """Traduction de l'instruction BLT label
+    """
+    line_update=line+1
+    n=len(instruction)
+    jumpDec,error=jump_length_simu(instruction[4:n+1],label_list,line,7)
+
+    if virtual_register[8][0]!=virtual_register[8][2]:
+        line_update=line+jumpDec
+        
+    return line_update,error
+    
+def BGT_label_simu(instruction:str,label_list,code_ASM,line:int):
+    """Traduction de l'instruction BGT label
+    """
+    line_update=line+1
+    n=len(instruction)
+    jumpDec,error=jump_length_simu(instruction[4:n+1],label_list,line,7)
+
+    if (virtual_register[8][1]=='0')and(virtual_register[8][0]==virtual_register[8][2]):
+        line_update=line+jumpDec
+        
+    return line_update,error
+
+def BLE_label_simu(instruction:str,label_list,code_ASM,line:int):
+    """Traduction de l'instruction BLE label
+    """
+    line_update=line+1
+    n=len(instruction)
+    jumpDec,error=jump_length_simu(instruction[4:n+1],label_list,line,7)
+
+    if (virtual_register[8][1]=='1')and(virtual_register[8][0]!=virtual_register[8][2]):
+        line_update=line+jumpDec
+        
+    return line_update,error
+
 
 
 def jump_length_simu(label:str,label_list:list,line:int,size:int):
