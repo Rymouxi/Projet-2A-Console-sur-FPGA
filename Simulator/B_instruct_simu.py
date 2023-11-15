@@ -70,7 +70,7 @@ def BNE_label_simu(instruction:str,label_list,line:int):
 
     return line_update,error
 
-def BEQ_label_simu(instruction:str,label_list,code_ASM,line:int):
+def BEQ_label_simu(instruction:str,label_list,line:int):
     """Traduction de l'instruction B label
     """
     line_update=line+1
@@ -82,7 +82,7 @@ def BEQ_label_simu(instruction:str,label_list,code_ASM,line:int):
         
     return line_update,error
 
-def BGE_label_simu(instruction:str,label_list,code_ASM,line:int):
+def BGE_label_simu(instruction:str,label_list,line:int):
     """Traduction de l'instruction BGE label
     """
     line_update=line+1
@@ -94,7 +94,7 @@ def BGE_label_simu(instruction:str,label_list,code_ASM,line:int):
         
     return line_update,error
 
-def BLT_label_simu(instruction:str,label_list,code_ASM,line:int):
+def BLT_label_simu(instruction:str,label_list,line:int):
     """Traduction de l'instruction BLT label
     """
     line_update=line+1
@@ -106,7 +106,7 @@ def BLT_label_simu(instruction:str,label_list,code_ASM,line:int):
         
     return line_update,error
     
-def BGT_label_simu(instruction:str,label_list,code_ASM,line:int):
+def BGT_label_simu(instruction:str,label_list,line:int):
     """Traduction de l'instruction BGT label
     """
     line_update=line+1
@@ -118,7 +118,7 @@ def BGT_label_simu(instruction:str,label_list,code_ASM,line:int):
         
     return line_update,error
 
-def BLE_label_simu(instruction:str,label_list,code_ASM,line:int):
+def BLE_label_simu(instruction:str,label_list,line:int):
     """Traduction de l'instruction BLE label
     """
     line_update=line+1
