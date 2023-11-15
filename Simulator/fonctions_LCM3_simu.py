@@ -230,7 +230,7 @@ def CMP_simu(instruction:str,line:int):
     Le registre NZVC est le 9ème 
     """
     register_update=[]
-    NZVC='0000'
+    NZVC=''
     error=[]
     count=instruction.count("#")+instruction.count("0B")+instruction.count("0X")
 
@@ -258,13 +258,22 @@ def CMP_simu(instruction:str,line:int):
             #Calcul du NZVC
             if Rn_value-int(imm8,2)<0:
                 #N=1
-                NZVC[0]='1'
+                NZVC+='1'
+            else:
+                #N=0
+                NZVC+='0'
             if Rn_value-int(imm8,2)==0:
                 #Z=1
-                NZVC[1]='1'
-            if len(bin(Rn_value-int(imm8,2)))>max((len(Rn_value)+2),(len(imm8)+2)):
+                NZVC+='1'
+            else:
+                #Z=0
+                NZVC+='0'
+            if len(bin(Rn_value-int(imm8,2)))>max((len(DecToBin(Rn_value))+2),(len(imm8)+2)):
                 #V=1
-                NZVC[2]='1'
+                NZVC+='1'
+            else:
+                #V=0
+                NZVC+='0'
             #Le C de NZVC n'est pas encore fait
 
             #Simulation interne des registres
@@ -451,7 +460,7 @@ def SUB_simu(instruction:str,line:int):
             sub_value=Rn_value-int(imm3,2)
 
             if sub_value<0:
-                error.append("imm number is too big to substract to register R"+int(Rd,2))
+                error.append("imm number is too big to substract to register R"+str(int(Rd,2)))
                 error.append(line)
             else:
                 #Simulation interne des registres
@@ -486,7 +495,7 @@ def SUB_simu(instruction:str,line:int):
             sub_value=Rd_value-int(imm8,2)
             
             if sub_value<0:
-                error.append("imm number is too big to substract to register R"+int(Rd,2))
+                error.append("imm number is too big to substract to register R"+str(int(Rd,2)))
                 error.append(line)
             else:
                 #Simulation interne des registres
