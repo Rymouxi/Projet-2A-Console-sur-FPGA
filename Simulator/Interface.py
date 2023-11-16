@@ -636,10 +636,11 @@ def btn_assemble_init(toolbar):
             print(instruction_translation(code))
 
             for l in range(len(line_update)-2):
-                if bitstream[line_update[l]]!='':
-                    mem_edit(ram_code_tree, line_update[line_update[l]], bitstream[line_update[l]], split_instructions[line_update[l]])
-                    pip_edit(split_instructions[line_update[l]])
-                    textbox_add_line(binary_text, bitstream[line_update[l]])
+                if len(bitstream)!=0:
+                    if bitstream[line_update[l]]!='':
+                        mem_edit(ram_code_tree, line_update[line_update[l]], bitstream[line_update[l]], split_instructions[line_update[l]])
+                        pip_edit(split_instructions[line_update[l]])
+                        textbox_add_line(binary_text, bitstream[line_update[l]])
                 if memory_update[line_update[l]]!=[]:
                     mem_edit(ram_user_tree, memory_update[line_update[l]][0], memory_update[line_update[l]][1], "User")
                 if register_update[line_update[l]]!=[]:
