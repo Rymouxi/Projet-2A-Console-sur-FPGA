@@ -17,17 +17,21 @@ def register_recognition(instruction:str):
 
     if iteration==0:
         error.append("There's no register in this instruction")
-    
     else:
         for i in range(iteration):
             m=1
             register=''
             n_=len(instruction)
-            while (instruction.find('R')+m<n_)and(instruction[instruction.find('R')+m].isdigit()):
-                register+=instruction[instruction.find('R')+m:instruction.find('R')+m+1]
-                m+=1
-            instruction=instruction[0:instruction.find('R')]+instruction[instruction.find('R')+len(register):n]
-            register_dec.append(int(register))
+            if instruction.find('R')+1>=n_:
+                error.append("There's no number after the register")
+            elif instruction[instruction.find('R')+1].isdigit()==False:
+                error.append("There's no number after the register")
+            else:
+                while (instruction.find('R')+m<n_)and(instruction[instruction.find('R')+m].isdigit()):
+                    register+=instruction[instruction.find('R')+m:instruction.find('R')+m+1]
+                    m+=1
+                instruction=instruction[0:instruction.find('R')]+instruction[instruction.find('R')+len(register):n]
+                register_dec.append(int(register))
 
     #Mise en binaire des registres
     register_bin=[DecToBin(register_dec[i]) for i in range(len(register_dec))] #register_bin est une liste de str
@@ -64,34 +68,43 @@ def imm_recognition(instruction:str,size:int):
     if instruction.count('#')==1:
         m=1
         imm=''
-        if instruction[instruction.find('#')+1].isdigit()==True:
+        if instruction.find('#')+1>=n:
+            error.append("There's no number after the register")
+        elif instruction[instruction.find('#')+1].isdigit()==True:
             while (instruction.find('#')+m<n)and((instruction[instruction.find('#')+m] in hexa)==True):
                 imm+=instruction[instruction.find('#')+m:instruction.find('#')+m+1]
                 m+=1
+            #Mise en binaire du nombre
+            imm_bin=DecToBin(int(imm))
         else:
             error.append("There's no number after #.")
-        #Mise en binaire du nombre
-        imm_bin=DecToBin(int(imm)) 
+ 
     elif instruction.count('0X')==1:
         m=1
         imm=''
-        if (instruction[instruction.find('0X')+2] in hexa)==True:
+        if instruction.find('0X')+2>=n:
+            error.append("There's no number after the register")
+        elif (instruction[instruction.find('0X')+2] in hexa)==True:
             while (instruction.find('0X')+1+m<n)and((instruction[instruction.find('0X')+1+m] in hexa)==True):
                 imm+=instruction[instruction.find('0X')+1+m:instruction.find('0X')+m+2]
                 m+=1
+            imm_bin=DecToBin(int(imm,16))
         else:
             error.append("There's no number after 0X.")
-        imm_bin=DecToBin(int(imm,16))
+
     elif instruction.count('0B')==1:
         m=1
         imm=''
-        if (instruction[instruction.find('0B')+2] in hexa)==True:
-            while (instruction.find('0B')+1+m<n)and((instruction[instruction.find('0B')+1+m] in hexa)==True):
+        if instruction.find('0B')+2>=n:
+            error.append("There's no number after the register")
+        elif (instruction[instruction.find('0B')+2] in [0,1])==True:
+            while (instruction.find('0B')+1+m<n)and((instruction[instruction.find('0B')+1+m] in [0,1])==True):
                 imm+=instruction[instruction.find('0B')+1+m:instruction.find('0B')+m+2]
                 m+=1
+            imm_bin=imm
         else:
             error.append("There's no number after 0B.")
-        imm_bin=imm
+
     else:
         error.append("The number type doesn't match with any known type")
 
