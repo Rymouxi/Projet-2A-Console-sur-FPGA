@@ -19,12 +19,7 @@ def instruction_translation(ASM:str):
     error=[]
     virtual_register_init()
     virtual_memory_init()
-    
-    #Réalisation du bitstream
-    i=0
-    for instruction in split_instructions:
-        bitstream.append(instruction_recognition(instruction,i,split_instructions,simu='OFF'))
-        i+=1
+
     
     #Réalisation de la simulation
     split_instructions_with_END=split_instructions+["END"]
@@ -41,6 +36,13 @@ def instruction_translation(ASM:str):
             error.append("There's an infinite loop at line "+str(line_pointer))
             error.append(line_pointer)
             break
+        
+#Réalisation du bitstream seulement si il n'y a pas d'erreurs
+    if len(error)==0:
+        i=0
+        for instruction in split_instructions:
+            bitstream.append(instruction_recognition(instruction,i,split_instructions,simu='OFF'))
+            i+=1
     return split_instructions,line_instruction,bitstream,register_update,line_update,memory_update,error
 
 
