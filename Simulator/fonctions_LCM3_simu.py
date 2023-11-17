@@ -122,11 +122,11 @@ def STR_simu(instruction:str,line:int):
                 error.append(register_recognition(instruction)[1][i])
                 error.append(line)
             error_count+=1
-        if len(virtual_memory_error(register_recognition(instruction)[0][1]))!=0:
+        if len(virtual_memory_error(int(register_recognition(instruction)[0][1],2)))!=0:
             error.append(virtual_memory_error(register_recognition(instruction)[0][1]))
             error.append(line)
-            error_count+=1        
-        if count_R==0:
+            error_count+=1
+        if error_count==0:
             #Rt et Rn sont les numéros (en binaire) des registres dans STR
             Rt=register_recognition(instruction)[0][0]
             Rn=register_recognition(instruction)[0][1]
@@ -166,7 +166,7 @@ def LDR_simu(instruction:str,line:int):
                 error.append(register_recognition(instruction)[1][i])
                 error.append(line)
             error_count+=1
-        if len(virtual_memory_error(register_recognition(instruction)[0][1]))!=0:
+        if len(virtual_memory_error(int(register_recognition(instruction)[0][1],2)))!=0:
             error.append(virtual_memory_error(register_recognition(instruction)[0][1]))
             error.append(line) 
             error_count+=1
