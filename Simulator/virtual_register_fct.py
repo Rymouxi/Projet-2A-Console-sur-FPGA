@@ -8,6 +8,7 @@ def virtual_register_init():
     """Initialisation du tableau de 8 registres: de R0 à R7\n
     R8 est le NZVC"""
     global virtual_register
+    virtual_register=[]
     for i in range(0,9):
         virtual_register.append(0)
         
