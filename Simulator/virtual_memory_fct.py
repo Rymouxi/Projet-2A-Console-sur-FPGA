@@ -28,8 +28,8 @@ def virtual_memory_read(address):
 
 def virtual_memory_error(address):
     error=''
-    for i in range(len(virtual_memory)):
+    for i in range(0,len(virtual_memory),2):
         if virtual_memory[i]==address:
             return error
     error="This address does not exist"
-    return(error)
+    return error
