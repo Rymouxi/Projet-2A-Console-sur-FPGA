@@ -69,7 +69,7 @@ def imm_recognition(instruction:str,size:int):
         m=1
         imm=''
         if instruction.find('#')+1>=n:
-            error.append("There's no number after the register")
+            error.append("A number is missing after #")
         elif instruction[instruction.find('#')+1].isdigit()==True:
             while (instruction.find('#')+m<n)and((instruction[instruction.find('#')+m] in hexa)==True):
                 imm+=instruction[instruction.find('#')+m:instruction.find('#')+m+1]
@@ -77,33 +77,33 @@ def imm_recognition(instruction:str,size:int):
             #Mise en binaire du nombre
             imm_bin=DecToBin(int(imm))
         else:
-            error.append("There's no number after #.")
+            error.append("A number is missing after #")
  
     elif instruction.count('0X')==1:
         m=1
         imm=''
         if instruction.find('0X')+2>=n:
-            error.append("There's no number after the register")
+            error.append("A number is missing after 0X")
         elif (instruction[instruction.find('0X')+2] in hexa)==True:
             while (instruction.find('0X')+1+m<n)and((instruction[instruction.find('0X')+1+m] in hexa)==True):
                 imm+=instruction[instruction.find('0X')+1+m:instruction.find('0X')+m+2]
                 m+=1
             imm_bin=DecToBin(int(imm,16))
         else:
-            error.append("There's no number after 0X.")
+            error.append("A number is missing after 0X")
 
     elif instruction.count('0B')==1:
         m=1
         imm=''
         if instruction.find('0B')+2>=n:
-            error.append("There's no number after the register")
-        elif (instruction[instruction.find('0B')+2] in [0,1])==True:
+            error.append("A number is missing after 0B")
+        elif (instruction[instruction.find('0B')+2] in ['0','1'])==True:
             while (instruction.find('0B')+1+m<n)and((instruction[instruction.find('0B')+1+m] in [0,1])==True):
                 imm+=instruction[instruction.find('0B')+1+m:instruction.find('0B')+m+2]
                 m+=1
             imm_bin=imm
         else:
-            error.append("There's no number after 0B.")
+            error.append("A number is missing after 0B")
 
     else:
         error.append("The number type doesn't match with any known type")
