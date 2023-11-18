@@ -359,11 +359,13 @@ def asm_zone_init(asm_zone_frame):
             event: Usually the release of a key.'''
 
         # Remove existing tags
+        asm_zone.tag_remove("label", "1.0", tk.END)
         asm_zone.tag_remove("comma", "1.0", tk.END)
         asm_zone.tag_remove("register", "1.0", tk.END)
         asm_zone.tag_remove("hash", "1.0", tk.END)
+        asm_zone.tag_remove("hexa", "1.0", tk.END)
+        asm_zone.tag_remove("binary", "1.0", tk.END)
         asm_zone.tag_remove("comment", "1.0", tk.END)
-        asm_zone.tag_remove("label", "1.0", tk.END)
 
         # Iterate through the characters to find and tag text before semicolons
         index = "1.0"
@@ -407,6 +409,26 @@ def asm_zone_init(asm_zone_frame):
             asm_zone.tag_add("hash", start_index, end_index)
             start_index = f"{end_index}+1c"
 
+        # Find and tag hexadecimal
+        start_index = "1.0"
+        while True:
+            start_index = asm_zone.search('0X', start_index, tk.END, regexp=True)
+            if not start_index:
+                break
+            end_index = asm_zone.index(f"{start_index} lineend")
+            asm_zone.tag_add("hexa", start_index, end_index)
+            start_index = f"{end_index}+1c"
+
+        # Find and tag binary
+        start_index = "1.0"
+        while True:
+            start_index = asm_zone.search('0B', start_index, tk.END, regexp=True)
+            if not start_index:
+                break
+            end_index = asm_zone.index(f"{start_index} lineend")
+            asm_zone.tag_add("binary", start_index, end_index)
+            start_index = f"{end_index}+1c"
+
         # Find and tag comments
         start_index = "1.0"
         while True:
@@ -428,6 +450,8 @@ def asm_zone_init(asm_zone_frame):
     asm_zone.tag_configure("register", foreground="forestgreen")
     asm_zone.tag_configure("comma", foreground="black")
     asm_zone.tag_configure("hash", foreground="darkorange")
+    asm_zone.tag_configure("hexa", foreground="orange")
+    asm_zone.tag_configure("binary", foreground="gold")
     asm_zone.tag_configure("comment", foreground="gray")
 
     asm_zone.bind("<Key>", on_key)
