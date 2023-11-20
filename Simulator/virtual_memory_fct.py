@@ -68,3 +68,7 @@ def virtual_memory_sort():
     for i in range(0,n):
         virtual_memory[i]=copy[i]
 
+def virtual_memory_reset():
+    global virtual_memory
+    while len(virtual_memory)!=0:
+        virtual_memory.pop()
