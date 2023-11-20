@@ -44,7 +44,7 @@ def virtual_memory_read(address):
             else:
                 return virtual_memory[virtual_memory.index(address)+1]
         else:
-            return "The address is noot between 0x20000000 and 0x80000000"
+            return "The address is not between 0x20000000 and 0x80000000"
             
 def virtual_memory_sort():
 
