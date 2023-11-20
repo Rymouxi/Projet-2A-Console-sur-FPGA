@@ -1,5 +1,5 @@
 """virtual_memory est une liste contenant les adresses et les valeurs de ces adresses\n
-Les addresses sont en hexadécimal: str commençant par '0x'\n
+les addresses sont en hexadécimal: str commençant par '0x'\n
 Ces valeurs sont en int\n
 virtual_memory est de la forme [adresse1,valeur1,adresse2,valeur2...]"""
 
@@ -39,7 +39,10 @@ def virtual_memory_read(address):
         address=hex(int(address,2))
     if type(address)==str and address[0:2]=='0x':
         if 2147483648>int(address,16)>536870912:
-            return virtual_memory[virtual_memory.index(address)+1]
+            if virtual_memory.count(address)==0:
+                return 0
+            else:
+                return virtual_memory[virtual_memory.index(address)+1]
         else:
             return "The address is noot between 0x20000000 and 0x80000000"
             
