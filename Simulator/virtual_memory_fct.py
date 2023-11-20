@@ -6,7 +6,7 @@ virtual_memory est de la forme [adresse1,valeur1,adresse2,valeur2...]"""
 virtual_memory=[]
 
 def virtual_memory_update(address,value):
-    """Ajout d'une case case mémoire
+    """Ajout d'une case mémoire
     address et value peuvent être sous n'importe quelle forme: décimal, binaire, hexadécimal"""
     global virtual_memory
     if type(address)==int:
