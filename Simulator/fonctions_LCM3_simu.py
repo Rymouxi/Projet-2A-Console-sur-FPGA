@@ -122,11 +122,11 @@ def STR_simu(instruction:str,line:int):
                 error.append(register_recognition(instruction)[1][i])
                 error.append(line)
             error_count+=1
-        if len(virtual_memory_error(int(register_recognition(instruction)[0][1],2)))!=0:
-            error.append(virtual_memory_error(register_recognition(instruction)[0][1]))
+        if len(len(virtual_memory_update(register_recognition(instruction)[0][1])))>0:
+            error.append(virtual_memory_update(register_recognition(instruction)[0][1]))
             error.append(line)
-            error_count+=1
-        if error_count==0:
+            error_count+=1 
+        if count_R==0:
             #Rt et Rn sont les numéros (en binaire) des registres dans STR
             Rt=register_recognition(instruction)[0][0]
             Rn=register_recognition(instruction)[0][1]
@@ -136,7 +136,7 @@ def STR_simu(instruction:str,line:int):
             Rn_value=virtual_register[int(Rn,2)]
             
             #Simulation interne de la mémoire préalablement initialisée
-            virtual_memory_write(hex(Rn_value),hex(Rt_value))
+            virtual_memory_update(hex(Rn_value),hex(Rt_value))
 
             #Rendu externe de la mémoire
             memory_update.append(Rn_value)
@@ -166,8 +166,8 @@ def LDR_simu(instruction:str,line:int):
                 error.append(register_recognition(instruction)[1][i])
                 error.append(line)
             error_count+=1
-        if len(virtual_memory_error(int(register_recognition(instruction)[0][1],2)))!=0:
-            error.append(virtual_memory_error(register_recognition(instruction)[0][1]))
+        if type(virtual_memory_read(register_recognition(instruction)[0][1]))==str:
+            error.append(virtual_memory_read(register_recognition(instruction)[0][1]))
             error.append(line) 
             error_count+=1
         if error_count==0:
@@ -179,15 +179,15 @@ def LDR_simu(instruction:str,line:int):
             Rn_value=virtual_register[int(Rn,2)]
 
             #Simulation interne de la mémoire préalablement initialisée
-            #value est en hexadécimale
-            value=virtual_memory_read(hex(Rn_value))
+            #value est en int
+            value=virtual_memory_read(Rn_value)
 
             #Simulation interne des registres
-            virtual_register_write(int(Rt,2),int(value,16))
+            virtual_register_write(int(Rt,2),value)
 
             #Renvoi des informations nécessaires à la simulation
-            register_update.append(Rt)
-            register_update.append(int(value,16))
+            register_update.append(int(Rt,2))
+            register_update.append(value)
 
         
         
@@ -288,6 +288,7 @@ def CMP_simu(instruction:str,line:int):
             else:
                 #Z=0
                 NZVC+='0'
+            
             if len(bin(Rn_value-int(imm8,2)))>max((len(DecToBin(Rn_value))+2),(len(imm8)+2)):
                 #V=1
                 NZVC+='1'
