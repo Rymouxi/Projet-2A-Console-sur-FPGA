@@ -23,8 +23,8 @@ from instruction_translation import *
 from connection_board import *
 
 # Code a working dark theme
-# Register color highlight when modification
 # Line counter
+# faire couleur pour les crochets
 
 
 
@@ -358,16 +358,8 @@ def asm_zone_init(asm_zone_frame):
             Input:\n
             event: Usually the release of a key.'''
 
-        # Remove existing tags
+        # Label
         asm_zone.tag_remove("label", "1.0", tk.END)
-        asm_zone.tag_remove("comma", "1.0", tk.END)
-        asm_zone.tag_remove("register", "1.0", tk.END)
-        asm_zone.tag_remove("hash", "1.0", tk.END)
-        asm_zone.tag_remove("hexa", "1.0", tk.END)
-        asm_zone.tag_remove("binary", "1.0", tk.END)
-        asm_zone.tag_remove("comment", "1.0", tk.END)
-
-        # Iterate through the characters to find and tag text before semicolons
         index = "1.0"
         while True:
             index = asm_zone.search(':', index, tk.END)
@@ -379,65 +371,39 @@ def asm_zone_init(asm_zone_frame):
             asm_zone.tag_add("label", start_index, end_index)
             index = f"{index}+1c"
 
-        # Find and tag registers
-        start_index = "1.0"
-        while True:
-            start_index = asm_zone.search(' R', start_index, tk.END, regexp=True)
-            if not start_index:
-                break
-            end_index = asm_zone.index(f"{start_index} lineend")
-            asm_zone.tag_add("register", start_index, end_index)
-            start_index = f"{end_index}+1c"
+        # Other colors
 
-        # Find and tag commas
-        start_index = "1.0"
-        while True:
-            start_index = asm_zone.search(',', start_index, tk.END, regexp=True)
-            if not start_index:
-                break
-            end_index = asm_zone.index(f"{start_index}+1c")
-            asm_zone.tag_add("comma", start_index, end_index)
-            start_index = f"{end_index}+1c"
+        # Define patterns and corresponding tags
+        patterns = {
+            ' R': "register",
+            '[\\[\\]]': "bracket",
+            ',': "comma",
+            '#': "hash",
+            '0X': "hexa",
+            '0B': "binary",
+            ';': "comment",
+        }
 
-        # Find and tag hashs and numbers
-        start_index = "1.0"
-        while True:
-            start_index = asm_zone.search('#', start_index, tk.END, regexp=True)
-            if not start_index:
-                break
-            end_index = asm_zone.index(f"{start_index} lineend")
-            asm_zone.tag_add("hash", start_index, end_index)
-            start_index = f"{end_index}+1c"
+        # Remove existing tags
+        for tag in patterns.values():
+            asm_zone.tag_remove(tag, "1.0", tk.END)
 
-        # Find and tag hexadecimal
-        start_index = "1.0"
-        while True:
-            start_index = asm_zone.search('0X', start_index, tk.END, regexp=True)
-            if not start_index:
-                break
-            end_index = asm_zone.index(f"{start_index} lineend")
-            asm_zone.tag_add("hexa", start_index, end_index)
-            start_index = f"{end_index}+1c"
+        # Iterate through the patterns and tag the text accordingly
+        for pattern, tag in patterns.items():
+            start_index = "1.0"
+            while True:
+                start_index = asm_zone.search(pattern, start_index, tk.END, regexp=True)
+                if not start_index:
+                    break
 
-        # Find and tag binary
-        start_index = "1.0"
-        while True:
-            start_index = asm_zone.search('0B', start_index, tk.END, regexp=True)
-            if not start_index:
-                break
-            end_index = asm_zone.index(f"{start_index} lineend")
-            asm_zone.tag_add("binary", start_index, end_index)
-            start_index = f"{end_index}+1c"
+                # Compute end_index based on the pattern
+                if pattern == ',' or pattern == '[\\[\\]]':
+                    end_index = asm_zone.index(f"{start_index}+1c")
+                else:
+                    end_index = asm_zone.index(f"{start_index} lineend")
 
-        # Find and tag comments
-        start_index = "1.0"
-        while True:
-            start_index = asm_zone.search(';', start_index, tk.END, regexp=True)
-            if not start_index:
-                break
-            end_index = asm_zone.index(f"{start_index} lineend")
-            asm_zone.tag_add("comment", start_index, end_index)
-            start_index = f"{end_index}+1c"
+                asm_zone.tag_add(tag, start_index, end_index)
+                start_index = f"{end_index}+1c"
 
     # Create the text zone
     global asm_zone
@@ -449,6 +415,7 @@ def asm_zone_init(asm_zone_frame):
     asm_zone.tag_configure("label", foreground="red")
     asm_zone.tag_configure("register", foreground="forestgreen")
     asm_zone.tag_configure("comma", foreground="black")
+    asm_zone.tag_configure("bracket", foreground="limegreen")
     asm_zone.tag_configure("hash", foreground="darkorange")
     asm_zone.tag_configure("hexa", foreground="orange")
     asm_zone.tag_configure("binary", foreground="gold")
@@ -720,6 +687,7 @@ def btn_assemble_init():
         asm_zone.tag_remove("highlight", "1.0", "end")
 
         # Get the code from the ASM text window
+        global code
         code = asm_zone.get("1.0", tk.END)
 
         # Funny text variations for when user tries to assemble empty code
@@ -737,19 +705,10 @@ def btn_assemble_init():
             run_state = 0
             
         else:
-            split_instructions,line_instruction,bitstream,register_update,line_update,memory_update,error = instruction_translation(code)
+            _, _, _, _, line_update, _, error = instruction_translation(code)
             print(instruction_translation(code))
 
-            for l in range(len(line_update)-2):
-                if len(bitstream)!=0:
-                    if bitstream[line_update[l]]!='':
-                        mem_edit(ram_code_tree, line_update[line_update[l]], bitstream[line_update[l]], split_instructions[line_update[l]])
-                        pip_edit(split_instructions[line_update[l]])
-                        textbox_add_line(binary_text, bitstream[line_update[l]])
-                if memory_update[line_update[l]]!=[]:
-                    mem_edit(ram_user_tree, memory_update[line_update[l]][0], memory_update[line_update[l]][1], "User")
-                if register_update[line_update[l]]!=[]:
-                    reg_edit(register_update[line_update[l]][0], register_update[line_update[l]][1])
+            l = len(line_update)-3
 
             for e in range(len(error)//2):
                 # Print the error in the debugger window
@@ -786,9 +745,22 @@ def btn_run_init():
 
         button_run.configure(state="disabled", fg_color="gray")
         button_runsbs.configure(text="Run Step by Step", fg_color="gray", state="disabled")
+
+        split_instructions, _, bitstream, register_update, line_update, memory_update, _ = instruction_translation(code)
+
+        for l in range(len(line_update)-2):
+            if len(bitstream)!=0:
+                if bitstream[line_update[l]]!='':
+                    mem_edit(ram_code_tree, line_update[line_update[l]], bitstream[line_update[l]], split_instructions[line_update[l]])
+                    pip_edit(split_instructions[line_update[l]])
+                    textbox_add_line(binary_text, bitstream[line_update[l]])
+            if memory_update[line_update[l]]!=[]:
+                mem_edit(ram_user_tree, memory_update[line_update[l]][0], memory_update[line_update[l]][1], "User")
+            if register_update[line_update[l]]!=[]:
+                reg_edit(register_update[line_update[l]][0], register_update[line_update[l]][1])
         
-        for i in range(8):
-            reg_edit(i, virtual_register[i])
+        #for i in range(8):
+        #    reg_edit(i, virtual_register[i])
         #for i in range(0, len(virtual_memory), 2):
         #    mem_edit(virtual_memory[i], virtual_memory[i+1])
 
