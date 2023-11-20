@@ -1,6 +1,7 @@
 from instruction_recognition import*
 from treatment import*
-from virtual_register_fct import virtual_register_init
+from virtual_register_fct import virtual_register_reset
+from virtual_memory_fct import virtual_memory_init
 
 def instruction_translation(ASM:str):
     """Programme global de traduction d'un code ASM en code machine
@@ -17,7 +18,7 @@ def instruction_translation(ASM:str):
     memory_update=[]
     error=[]
     virtual_register_init()
-
+    virtual_memory_reset()
     
     #Réalisation de la simulation
     split_instructions_with_END=split_instructions+["END"]
