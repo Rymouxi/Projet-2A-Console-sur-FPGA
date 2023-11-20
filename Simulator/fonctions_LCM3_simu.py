@@ -126,7 +126,7 @@ def STR_simu(instruction:str,line:int):
             error.append(virtual_memory_update(register_recognition(instruction)[0][1]))
             error.append(line)
             error_count+=1 
-        if count_R==0:
+        if error_count==0:
             #Rt et Rn sont les numéros (en binaire) des registres dans STR
             Rt=register_recognition(instruction)[0][0]
             Rn=register_recognition(instruction)[0][1]
@@ -188,9 +188,7 @@ def LDR_simu(instruction:str,line:int):
             #Renvoi des informations nécessaires à la simulation
             register_update.append(int(Rt,2))
             register_update.append(value)
-
-        
-        
+            
     else:
         error.append("Number of arguments in LDR line "+str(line)+" doesn't match")
         error.append(line)
