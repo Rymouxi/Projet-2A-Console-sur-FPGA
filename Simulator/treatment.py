@@ -12,7 +12,7 @@ def saut_ligne(code_text:str):
             for indent in range(indent_count):
                 code_loop=code_loop[0:code_loop.find("\t")]+code_loop[code_loop.find("\t")+1:n]
         if code_loop[0:code_loop.find("\n")].count(";")!=0:
-            code_loop=code_loop[0:code_loop.find(';')]+code_loop[code_loop.find("\n")-1:n]
+            code_loop=code_loop[0:code_loop.find(';')]+code_loop[code_loop.find("\n"):n]
         code_asm.append(code_loop[0:code_loop.find('\n')])
         code_loop=code_loop[code_loop.find('\n')+1:n]
         n=len(code_loop)
