@@ -116,7 +116,7 @@ def imm_recognition(instruction:str,size:int):
             imm_bin='0'+imm_bin
         imm_final=imm_bin
     elif d<0:
-        error.append('Number #'+imm+' is too big for this instruction.')
+        error.append('Number #'+imm+' is too big for this instruction')
     else:
         imm_final=imm_bin
     
