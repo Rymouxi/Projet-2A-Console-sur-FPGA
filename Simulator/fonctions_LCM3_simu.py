@@ -122,8 +122,8 @@ def STR_simu(instruction:str,line:int):
                 error.append(register_recognition(instruction)[1][i])
                 error.append(line)
             error_count+=1
-        if len(len(virtual_memory_update(register_recognition(instruction)[0][1])))>0:
-            error.append(virtual_memory_update(register_recognition(instruction)[0][1]))
+        if len(virtual_memory_update(int(register_recognition(instruction)[0][1],2),int(register_recognition(instruction)[0][0],2)))>0:
+            error.append(virtual_memory_update(int(register_recognition(instruction)[0][1],2),int(register_recognition(instruction)[0][0],2)))
             error.append(line)
             error_count+=1 
         if error_count==0:
