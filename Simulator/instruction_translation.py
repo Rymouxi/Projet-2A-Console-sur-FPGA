@@ -1,7 +1,7 @@
 from instruction_recognition import*
 from treatment import*
-from virtual_register_fct import virtual_register_reset
-from virtual_memory_fct import virtual_memory_init
+from virtual_register_fct import virtual_register_init
+from virtual_memory_fct import virtual_memory_reset
 
 def instruction_translation(ASM:str):
     """Programme global de traduction d'un code ASM en code machine
