@@ -14,7 +14,7 @@ def virtual_memory_update(address,value):
     if type(address)==str and address[0:2]=='0b':
         address=hex(int(address,2))
     if type(address)==str and address[0:2]=='0x':
-        if   2147483648>int(address,16)>536870912:
+        if   int('20000000',16)>int(address,16)>int('80000000',16):
             if type(value)==str and value[0:2]=='0x':
                 value=int(value,16)
             if type(value)==str and value[0:2]=='0b':
@@ -38,7 +38,7 @@ def virtual_memory_read(address):
     if type(address)==str and address[0:2]=='0b':
         address=hex(int(address,2))
     if type(address)==str and address[0:2]=='0x':
-        if 2147483648>int(address,16)>536870912:
+        if int('20000000',16)>int(address,16)>int('80000000',16):
             if virtual_memory.count(address)==0:
                 return 0
             else:
