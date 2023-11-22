@@ -24,7 +24,8 @@ from connection_board import *
 
 # Code a working dark theme
 # Line counter
-# faire couleur pour les crochets
+# write a proper run
+# write a proper step by step
 
 
 
@@ -105,11 +106,11 @@ def reg_edit(Rx: int, value: int):
 
     # Update the displayed values in the new mode
     if 0 <= Rx < 8:
-        new_value = "0x"+format(value, '08x') if current_mode == "Switch to dec" else str(value)
+        new_value = "0x"+format(value, "08x") if current_mode == "Switch to dec" else str(value)
         reg_label = ttk.Label(reg_frame, text=f"R{Rx}:", foreground=txt_color, background=bkg_color)  # Register name and its color
 
     elif Rx == 8:
-        new_value = "0b"+format(value, '04b') if current_mode == "Switch to dec" else str(value)
+        new_value = "0b"+format(value, "04b") if current_mode == "Switch to dec" else str(value)
         reg_label = ttk.Label(reg_frame, text=f"NZVC:", foreground=txt_color, background=bkg_color)  # Register name and its color
 
     registers[Rx].set(new_value)    
@@ -129,7 +130,7 @@ def mem_edit(memory_tree, line: int, binary_value="0", instruction="", type="Cod
         type: Type of the Array (Code or User).\n
         color: Name of the color in which the line will be displayed.'''
 
-    hex_value = "0x"+format(int(binary_value, 2), '04x') if type=="Code" else "0x"+format(int(binary_value, 2), '08x')  # Changes from binary to hex
+    hex_value = "0x"+format(int(binary_value, 2), "04x") if type=="Code" else "0x"+format(int(binary_value, 2), "08x")  # Changes from binary to hex
     tags = "even" if line % 2 == 0 else "odd"
 
     if line < len(memory_tree.get_children()):
@@ -140,7 +141,7 @@ def mem_edit(memory_tree, line: int, binary_value="0", instruction="", type="Cod
 
     else:
         # Line doesn't exist, insert a new line
-        address = "0x"+format(line*2+134217728, '08x') if type=="Code" else "0x"+format(line*4+536870912, '08x')
+        address = "0x"+format(line*2+134217728, "08x") if type=="Code" else "0x"+format(line*4+536870912, "08x")
         memory_tree.insert("", tk.END, values=(address, hex_value, instruction), tags=(tags))
 
     memory_tree.tag_configure("even", background="gainsboro", foreground=color)  # One color on even numbered lines
@@ -154,10 +155,10 @@ def textbox_add_line(text_widget, line: str, color="black"):
         line: String you wanna display.\n
         color: color of the text.'''
 
-    text_widget.configure(state='normal')  # Set the widget to normal state to allow editing
+    text_widget.configure(state="normal")  # Set the widget to normal state to allow editing
     text_widget.tag_configure(color, foreground=color)  # Configure a tag with the specified color
-    text_widget.insert('end', line + '\n', (color,))  # Add the line to the end and include a newline character
-    text_widget.configure(state='disabled')  # Set the widget back to disabled state
+    text_widget.insert("end", line + "\n", (color,))  # Add the line to the end and include a newline character
+    text_widget.configure(state="disabled")  # Set the widget back to disabled state
 
 
 def pip_edit(pip_text):
@@ -291,7 +292,7 @@ def memory_arrays_init():
 
     # Creation of the Code RAM Tree (array)
     global ram_code_tree
-    ram_code_tree = ttk.Treeview(ram_code_frame, columns=("Address", "Value", "Instruction"), show='headings')
+    ram_code_tree = ttk.Treeview(ram_code_frame, columns=("Address", "Value", "Instruction"), show="headings")
     ram_code_tree.heading("Address", text="Address")  # Title/heading text
     ram_code_tree.heading("Value", text="Value")
     ram_code_tree.heading("Instruction", text="Instruction")
@@ -302,7 +303,7 @@ def memory_arrays_init():
 
     # Creation of the User RAM Tree (array)
     global ram_user_tree
-    ram_user_tree = ttk.Treeview(ram_user_frame, columns=("Address", "Value"), show='headings')
+    ram_user_tree = ttk.Treeview(ram_user_frame, columns=("Address", "Value"), show="headings")
     ram_user_tree.heading("Address", text="Address")  # Title/heading text
     ram_user_tree.heading("Value", text="Value")
     ram_user_tree.column("Address", width=150)         # Column widths
@@ -362,7 +363,7 @@ def asm_zone_init(asm_zone_frame):
         asm_zone.tag_remove("label", "1.0", tk.END)
         index = "1.0"
         while True:
-            index = asm_zone.search(':', index, tk.END)
+            index = asm_zone.search(":", index, tk.END)
             if not index:
                 break
             # Tag the text before the semicolon
@@ -375,13 +376,13 @@ def asm_zone_init(asm_zone_frame):
 
         # Define patterns and corresponding tags
         patterns = {
-            ' R': "register",
-            '[\\[\\]]': "bracket",
-            ',': "comma",
-            '#': "hash",
-            '0X': "hexa",
-            '0B': "binary",
-            ';': "comment",
+            " R": "register",
+            "[\\[\\]]": "bracket",
+            ",": "comma",
+            "#": "hash",
+            "0X": "hexa",
+            "0B": "binary",
+            ";": "comment",
         }
 
         # Remove existing tags
@@ -397,7 +398,7 @@ def asm_zone_init(asm_zone_frame):
                     break
 
                 # Compute end_index based on the pattern
-                if pattern == ',' or pattern == '[\\[\\]]':
+                if pattern == "," or pattern == "[\\[\\]]":
                     end_index = asm_zone.index(f"{start_index}+1c")
                 else:
                     end_index = asm_zone.index(f"{start_index} lineend")
@@ -564,7 +565,7 @@ def btn_file_menu_init():
         # Open the file dialog to import code
         file_path = tk.filedialog.askopenfilename(filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
         if file_path:
-            with open(file_path, 'r') as file:
+            with open(file_path, "r") as file:
                 imported_code = file.read()
 
                 # Pastes imported code into the text area
@@ -582,7 +583,7 @@ def btn_file_menu_init():
  
         # If the user selected a file location, saves the content of the text area to the file
         if file_path:
-            with open(file_path, 'w') as file:
+            with open(file_path, "w") as file:
                 saved_code = asm_zone.get("1.0", tk.END)  # Gets the code from the text area
                 file.write(saved_code)
 
@@ -594,7 +595,7 @@ def btn_file_menu_init():
 
         file_path = tk.filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
         if file_path:
-            with open(file_path, 'w') as file:
+            with open(file_path, "w") as file:
                 saved_code = asm_zone.get("1.0", tk.END)  # Gets the code from the text area
                 file.write(saved_code)
 
@@ -627,7 +628,7 @@ def btn_settings_menu_init():
         style.configure("Theme.TLabelframe", background=bkg_color)
 
         custom_label = tk.Label(reg_frame, text="Registers", background=bkg_color, foreground=txt_color)  # Replace colors
-        reg_frame['labelwidget'] = custom_label  # Set the custom label widget
+        reg_frame["labelwidget"] = custom_label  # Set the custom label widget
 
     def theme_toggle_light():
         '''Toggles light theme.'''
@@ -642,7 +643,7 @@ def btn_settings_menu_init():
         style.configure("Theme.TLabelframe", background=bkg_color)
 
         custom_label = tk.Label(reg_frame, text="Registers", background=bkg_color, foreground=txt_color)  # Replace colors
-        reg_frame['labelwidget'] = custom_label  # Set the custom label widget
+        reg_frame["labelwidget"] = custom_label  # Set the custom label widget
         
     settings_menu.menu.add_command(label="Dark mode", command=theme_toggle_dark)
     settings_menu.menu.add_command(label="Light mode", command=theme_toggle_light)
@@ -721,7 +722,7 @@ def btn_assemble_init():
                 start_index = f"{l+1}.0 linestart"
                 end_index = f"{l+1}.0 lineend"
                 asm_zone.tag_add("highlight", start_index, end_index)
-                asm_zone.tag_configure("highlight", background="red")
+                asm_zone.tag_configure("highlight", background="salmon", foreground="darkred")
 
             if error==[]:
                 textbox_add_line(debugger_text, "Assembly complete", "forestgreen")
@@ -750,7 +751,7 @@ def btn_run_init():
 
         for l in range(len(line_update)-2):
             if len(bitstream)!=0:
-                if bitstream[line_update[l]]!='':
+                if bitstream[line_update[l]]!="":
                     mem_edit(ram_code_tree, line_update[line_update[l]], bitstream[line_update[l]], split_instructions[line_update[l]])
                     pip_edit(split_instructions[line_update[l]])
                     textbox_add_line(binary_text, bitstream[line_update[l]])
@@ -809,8 +810,9 @@ def btn_step_init():
 def btn_reset_init():
     '''Creates the reset button which resets the registers, the memory, and the pipeline.'''
 
-    button_reset = ctk.CTkButton(toolbar_frame, text="Reset", command=reset, width=90, height=18, font = ("Arial", 10), fg_color="gray")
+    button_reset = ctk.CTkButton(toolbar_frame, text="Reset", command=reset, width=90, height=18, font = ("Arial", 10), fg_color="forestgreen")
     button_reset.pack(side="right", padx=18)
+    button_reset.configure(state="!disabled")
 
 
 def btn_connect_init():
@@ -819,13 +821,14 @@ def btn_connect_init():
     def connect_update():
         if ser:
             disconnect_board()
-            button_runsbs.configure(text="Disconnect Board", fg_color="firebrick", mode="!disabled")
+            button_connect.configure(text="Disconnect Board", fg_color="firebrick")
         else:
             connect_board()
-            button_runsbs.configure(text="Connect Board", fg_color="gray")
+            button_connect.configure(text="Connect Board", fg_color="forestgreen")
 
-    button_connect = ctk.CTkButton(toolbar_frame, text="Connect Board", command=connect_update, width=90, height=18, font = ("Arial", 10), fg_color="gray")
+    button_connect = ctk.CTkButton(toolbar_frame, text="Connect Board", command=connect_update, width=90, height=18, font = ("Arial", 10), fg_color="forestgreen")
     button_connect.pack(side="right", padx=0)
+    button_connect.configure(state="!disabled")
 
 
 def btn_dowload_init():
@@ -943,7 +946,7 @@ def help_simulator_docu():
     scrollbar_init(popup_frame, documentation_text_widget)
 
     documentation_text_widget.insert(tk.END, documentation_text)  # Insert the text
-    documentation_text_widget.configure(state='disabled', font=("Helvetica",12))  # Make it un-editable
+    documentation_text_widget.configure(state="disabled", font=("Helvetica",12))  # Make it un-editable
 
 
 
