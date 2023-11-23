@@ -24,8 +24,8 @@ from connection_board import *
 
 # Code a working dark theme
 # Line counter
-# write a proper run
-# write a proper step by step
+# optimize the pip run
+# replace the run button by a resume run when in a step by step by filling it from the end to the start
 
 
 
@@ -93,35 +93,36 @@ bkg_color = "whitesmoke"  # Default background color for themes
 
 
 
-# ---------- Interface Edition Functions (for Lael and Cyprien) ---------- #
+# ---------- Interface Edition Functions (for simulation) ---------- #
 
 
 def reg_edit(Rx: int, value: int):
-    '''Edits the registers' values and colors.\n
+    '''Edits the registers' values and colors. Intended for direct use by run and runsbs.\n
         Inputs:\n
         Rx: Index of the register (between 0 and 15).\n
         value: New value to put into the register.'''
 
-    current_mode = display_mode.get()
+    current_mode = display_mode.get()  # Gets the current mode (hex or dec)
 
-    # Update the displayed values in the new mode
+    # Update the displayed values according to the mode (hex or dec)
     if 0 <= Rx < 8:
-        new_value = "0x"+format(value, "08x") if current_mode == "Switch to dec" else str(value)
+        new_value = "0x"+format(value, "08x") if current_mode == "Switch to dec" else str(value)      # Register value
         reg_label = ttk.Label(reg_frame, text=f"R{Rx}:", foreground=txt_color, background=bkg_color)  # Register name and its color
 
+    # The 8th reg is the NZVC to be displayed in binary, not hex
     elif Rx == 8:
-        new_value = "0b"+format(value, "04b") if current_mode == "Switch to dec" else str(value)
+        new_value = "0b"+format(value, "04b") if current_mode == "Switch to dec" else str(value)     # Register value
         reg_label = ttk.Label(reg_frame, text=f"NZVC:", foreground=txt_color, background=bkg_color)  # Register name and its color
 
-    registers[Rx].set(new_value)    
+    registers[Rx].set(new_value)  # Global variable of registers
 
     reg_field = ttk.Label(reg_frame, textvariable=registers[Rx], foreground=txt_color, background=bkg_color)  # Register value and its color
-    reg_label.grid(row=Rx, column=0, sticky="w", padx=5, pady=2)  # Register's name Config and size
-    reg_field.grid(row=Rx, column=1, sticky="w", padx=5, pady=2)  # Register's value Config and size
+    reg_label.grid(row=Rx, column=0, sticky="w", padx=5, pady=2)  # Register names config and size
+    reg_field.grid(row=Rx, column=1, sticky="w", padx=5, pady=2)  # Register values config and size
 
 
 def mem_edit(memory_tree, line: int, binary_value="0", instruction="", type="Code", color="black"):
-    '''Edits the array values, instructions, and colors.\n
+    '''Edits the array values, instructions, and colors. Intended for direct use by run and runsbs.\n
         Inputs:\n
         memory_tree: Array to edit.\n
         line: Number of the line to modify.\n
@@ -131,13 +132,12 @@ def mem_edit(memory_tree, line: int, binary_value="0", instruction="", type="Cod
         color: Name of the color in which the line will be displayed.'''
 
     hex_value = "0x"+format(int(binary_value, 2), "04x") if type=="Code" else "0x"+format(int(binary_value, 2), "08x")  # Changes from binary to hex
-    tags = "even" if line % 2 == 0 else "odd"
+    tags = "even" if line % 2 == 0 else "odd"  # Tags of the lines background
 
     if line < len(memory_tree.get_children()):
         # Line exists, update the values
         item_id = memory_tree.get_children()[line]  # Gets the item ID for the line
-        memory_tree.item(item_id, values=(memory_tree.item(item_id, "values")[0], hex_value, instruction))  # Updates the value
-        memory_tree.item(item_id, tags=tags)
+        memory_tree.item(item_id, values=(memory_tree.item(item_id, "values")[0], hex_value, instruction), tags=tags)  # Updates the values
 
     else:
         # Line doesn't exist, insert a new line
@@ -155,14 +155,15 @@ def textbox_add_line(text_widget, line: str, color="black"):
         line: String you wanna display.\n
         color: color of the text.'''
 
-    text_widget.configure(state="normal")  # Set the widget to normal state to allow editing
+    text_widget.configure(state="normal")               # Set the widget to normal state to allow editing
     text_widget.tag_configure(color, foreground=color)  # Configure a tag with the specified color
-    text_widget.insert("end", line + "\n", (color,))  # Add the line to the end and include a newline character
-    text_widget.configure(state="disabled")  # Set the widget back to disabled state
+    text_widget.insert("end", line + "\n", (color,))    # Add the line to the end and include a newline character
+    text_widget.configure(state="disabled")             # Set the widget back to disabled state
 
 
-def pip_edit(pip_text):
-    '''Iterates the pipeline and adds a new instruction column.'''
+def pip_edit(pip_text: str):
+    '''Iterates the pipeline and adds a new instruction column.\n
+        Intended to run_step_by_step, not optimised to run a high number of instructions in one go.'''
 
     def pip_get_column(c: int):
         '''Retrieves the content of a specific column in the pipeline array.
@@ -214,30 +215,27 @@ def pip_edit(pip_text):
 def main_window_init():
     '''This function initializes the main window and calls all the other initialisation functions.'''
 
+    global window, main_frame, toolbar_frame, paned_window, debugger_frame
+
     # Creation of the main window
-    global window
     window = ctk.CTk()
     window.title("ENSEA's Python LCM3 ASM Simulator") 
-    window.geometry("980x720")      # Initial size of the window
-    global main_frame
+    window.geometry("980x720")         # Initial size of the window
     main_frame = ctk.CTkFrame(window)  # Main frame
     main_frame.pack(expand=True, fill="both")
 
     # Creation of the other frames
-    global toolbar_frame
-    toolbar_frame = ctk.CTkFrame(main_frame)  # Frame for the top toolbar
+    toolbar_frame = ctk.CTkFrame(main_frame)  # Top toolbar frame
     toolbar_frame.pack(side="top", fill="x")
 
-    texts_frame = ctk.CTkFrame(main_frame)  # Main frame
+    texts_frame = ctk.CTkFrame(main_frame)  # ASM and debugger frame
     texts_frame.pack(side="left", fill="both", expand=True, pady=8)
-    global paned_window
-    paned_window = ttk.Panedwindow(texts_frame, orient=tk.VERTICAL)
+    paned_window = ttk.Panedwindow(texts_frame, orient=tk.VERTICAL)  # Panned window for the ASM and the debugger
     paned_window.pack(expand=True, fill="both")
 
-    asm_zone_frame = ttk.LabelFrame(paned_window, text="ASM Zone")
+    asm_zone_frame = ttk.LabelFrame(paned_window, text="ASM Zone")  # ASM frame
     asm_zone_frame.grid(row=0, column=0, sticky="nsew")
-    global debugger_frame
-    debugger_frame = ttk.LabelFrame(paned_window, text="Debugger")
+    debugger_frame = ttk.LabelFrame(paned_window, text="Debugger")  # debugger frame
     debugger_frame.grid(row=1, column=0, sticky="nsew")
     paned_window.add(asm_zone_frame, weight=4)
     paned_window.add(debugger_frame, weight=1)
@@ -248,21 +246,21 @@ def main_window_init():
     registers_init()               # Register list frame on the right of the assembly zone
     pipeline_init()                # Pipeline array frame at the bottom
 
-    # Creation of the toolbar buttons
-    btn_file_menu_init()
-    btn_settings_menu_init()
-    btn_help_menu_init()
-    btn_dowload_init()
-    btn_connect_init()
-    btn_reset_init()
-    btn_step_init()
-    btn_runsbs_init()
-    btn_run_init()
-    btn_assemble_init()
+    # Buttons creation 
+    btn_file_menu_init()           # File menu button
+    btn_settings_menu_init()       # Settings menu button
+    btn_help_menu_init()           # Help menu button
+    btn_dowload_init()             # Download code button
+    btn_connect_init()             # Connect board button
+    btn_reset_init()               # Reset button
+    btn_step_init()                # Step-> button
+    btn_runsbs_init()              # Run step by step button
+    btn_run_init()                 # Run in one shot button
+    btn_assemble_init()            # Code assembly button
 
-    ctk.set_appearance_mode("Light")
+    ctk.set_appearance_mode("Light")  # Light theme is the default theme
 
-    window.mainloop()
+    window.mainloop()  # All the code must be contained in this loop
 
 
 def scrollbar_init(frame, scrollable):
@@ -273,25 +271,25 @@ def scrollbar_init(frame, scrollable):
 
         scrollbar = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=scrollable.yview)  # Creation of a vertical scrollbar
         scrollbar.pack(side="right", fill="y")
-        scrollable.config(yscrollcommand=scrollbar.set)
+        scrollable.config(yscrollcommand=scrollbar.set)  # Assignation to a scrollable element
 
 
 def memory_arrays_init():
     '''Creates the left frames with memory arrays and the bitstream.'''
 
+    global notebook, ram_code_tree, ram_user_tree, binary_text
+
     # Creation of the two tabs (Code and User Ram)
-    global notebook
     notebook = ttk.Notebook(main_frame)
     notebook.pack(side="right", fill="both", pady=10)
     ram_code_frame = ttk.Frame(notebook)
     ram_user_frame = ttk.Frame(notebook)
     binary_frame = ttk.Frame(notebook)
-    notebook.add(ram_code_frame, text="Code RAM")  # Display "Code RAM" on the tab
-    notebook.add(ram_user_frame, text="User RAM")  # Display "User RAM" on the tab
-    notebook.add(binary_frame, text="Binary Code")  # Display "Binary" on the tab
+    notebook.add(ram_code_frame, text="Code RAM")     # Display "Code RAM" on the tab
+    notebook.add(ram_user_frame, text="User RAM")     # Display "User RAM" on the tab
+    notebook.add(binary_frame, text="Binary Code")    # Display "Binary" on the tab
 
     # Creation of the Code RAM Tree (array)
-    global ram_code_tree
     ram_code_tree = ttk.Treeview(ram_code_frame, columns=("Address", "Value", "Instruction"), show="headings")
     ram_code_tree.heading("Address", text="Address")  # Title/heading text
     ram_code_tree.heading("Value", text="Value")
@@ -299,16 +297,15 @@ def memory_arrays_init():
     ram_code_tree.column("Address", width=70)         # Column widths
     ram_code_tree.column("Value", width=50)
     ram_code_tree.column("Instruction", width=180)
-    scrollbar_init(ram_code_frame, ram_code_tree)
+    scrollbar_init(ram_code_frame, ram_code_tree)     # Code RAM scrollbar
 
     # Creation of the User RAM Tree (array)
-    global ram_user_tree
     ram_user_tree = ttk.Treeview(ram_user_frame, columns=("Address", "Value"), show="headings")
     ram_user_tree.heading("Address", text="Address")  # Title/heading text
     ram_user_tree.heading("Value", text="Value")
-    ram_user_tree.column("Address", width=150)         # Column widths
+    ram_user_tree.column("Address", width=150)        # Column widths
     ram_user_tree.column("Value", width=150)
-    scrollbar_init(ram_user_frame, ram_user_tree)
+    scrollbar_init(ram_user_frame, ram_user_tree)     # User RAM scrollbar
 
     # Initialization of the Code RAM
     for i in range(256):
@@ -321,28 +318,29 @@ def memory_arrays_init():
     ram_user_tree.pack(fill="both", expand=True, padx=3, pady=3)
 
     # Creation of the Bitstream window
-    global binary_text
     binary_text = tk.Text(binary_frame, width=40, height=10, state=tk.DISABLED)
     binary_text.pack(side="left", fill="both", expand=True, padx=3, pady=3)
-    scrollbar_init(binary_text, binary_text)
+    scrollbar_init(binary_text, binary_text)  # Binary window scrollbar
 
 
 def asm_zone_init(asm_zone_frame):
     '''Creates the asm text frame.\n
         Input: asm_zone_frame: Frame in which the asm window will be created.'''
     
+    global asm_zone
+
     def on_key(event=None):
         '''Takes care of the buttons depending on assembled state and changes letters to upper case.\n
             Input:\n
             event: Usually the pressing of a key.'''
 
+        global run_state
+
         # Reinitializes the buttons so assembly needs to be done again
         button_assemble.configure(fg_color="forestgreen", state="!disabled")    
         button_runsbs.configure(text="Run Step by Step", fg_color="gray", state="disabled")
         button_run.configure(state="disabled", fg_color="gray")
-        button_step.configure(state="disabled")
-
-        global run_state
+        button_step.configure(state="disabled", fg_color="gray")
         run_state = 0
 
         # Raises letters to upper case
@@ -359,13 +357,14 @@ def asm_zone_init(asm_zone_frame):
             Input:\n
             event: Usually the release of a key.'''
 
-        # Label
+        # Color for labels
         asm_zone.tag_remove("label", "1.0", tk.END)
         index = "1.0"
         while True:
             index = asm_zone.search(":", index, tk.END)
             if not index:
                 break
+
             # Tag the text before the semicolon
             start_index = asm_zone.index(f"{index} linestart")
             end_index = asm_zone.index(f"{index}+1c")
@@ -403,11 +402,10 @@ def asm_zone_init(asm_zone_frame):
                 else:
                     end_index = asm_zone.index(f"{start_index} lineend")
 
-                asm_zone.tag_add(tag, start_index, end_index)
-                start_index = f"{end_index}+1c"
+                asm_zone.tag_add(tag, start_index, end_index)  # Tags the part we want to colorise
+                start_index = f"{end_index}+1c"                # Goes to next character
 
     # Create the text zone
-    global asm_zone
     asm_zone = tk.Text(asm_zone_frame, width=40, height=30, bg="white", fg="blue")
     asm_zone.pack(side="left", fill="both", expand=True)
     scrollbar_init(asm_zone, asm_zone)
@@ -422,12 +420,15 @@ def asm_zone_init(asm_zone_frame):
     asm_zone.tag_configure("binary", foreground="gold")
     asm_zone.tag_configure("comment", foreground="gray")
 
+    # Bind functions to key events
     asm_zone.bind("<Key>", on_key)
     asm_zone.bind("<KeyRelease>", update_colors)
 
 
 def registers_init():
     '''Initializes the registers' value and window.'''
+
+    global reg_frame, display_mode
 
     def toggle_display():
         '''Toggles between decimal and hex display for registers.'''
@@ -438,15 +439,13 @@ def registers_init():
         
         reg_update()
 
-    style = ttk.Style()
+    style = ttk.Style()  # Style for light and dark themes
     style.configure("Theme.TLabelframe", background=bkg_color)
 
-    global reg_frame
-    reg_frame = ttk.LabelFrame(main_frame, text="Registers", style="Theme.TLabelframe")
+    reg_frame = ttk.LabelFrame(main_frame, text="Registers", style="Theme.TLabelframe")  # Refister frame
     reg_frame.pack(side="right", fill="y", pady=10, padx=5)
 
     # Button to toggle between decimal and hex display
-    global display_mode
     display_mode = tk.StringVar()
     display_mode.set("Switch to dec")  # Initial display mode is hex
     display_button = ttk.Button(reg_frame, textvariable=display_mode, command=toggle_display)
@@ -460,22 +459,24 @@ def registers_init():
 
 
 def reg_update():
-    '''Updates the registers.'''
+    '''Updates the registers.\n
+        Usually to change the mode (hex or dec), the theme, or the text color.'''
 
     for i in range(8):
         current_value_str = registers[i].get()
-        current_value = int(current_value_str[2:], 16) if current_value_str and len(current_value_str) > 2 else int(current_value_str)  # Interpret the current value as hex
-        reg_edit(i, current_value)
+        current_value = int(current_value_str[2:], 16) if current_value_str and len(current_value_str) > 2 else int(current_value_str)  # Interprets current value as hex or dec
+        reg_edit(i, current_value)  # Updates R0 to R7
     current_value_str = registers[8].get()
-    current_value = int(current_value_str[2:], 2) if current_value_str and len(current_value_str) > 2 else int(current_value_str)  # Interpret the current value as binary
-    reg_edit(8, current_value)
+    current_value = int(current_value_str[2:], 2) if current_value_str and len(current_value_str) > 2 else int(current_value_str)  # Interprets current value as binary or dec
+    reg_edit(8, current_value)  # Updates NZVC
 
 
 def pipeline_init():
     '''Creates the pipeline frame.'''
     
-    # Pipeline frame at the bottom
     global pip_frame
+
+    # Pipeline frame at the bottom
     pip_frame = ttk.LabelFrame(window, text="Pipeline")
     pip_frame.pack(side="bottom", fill="both", padx=10, pady=10)
 
@@ -511,6 +512,7 @@ def debugger_init():
     '''Creates the debugger text frame.'''
 
     global debugger_text
+
     debugger_text = tk.Text(debugger_frame, width=40, height=10, state=tk.DISABLED, background="gainsboro")
     debugger_text.pack(side="left", fill="both", expand=True, padx=6, pady=6)
     scrollbar_init(debugger_text, debugger_text)
@@ -525,12 +527,6 @@ def debugger_init():
 
 def btn_file_menu_init():
     '''Creates and initializes the file menu.'''
-
-    file_menu = ttk.Menubutton(toolbar_frame, text="File", direction="below")  # File menu button
-    file_menu.pack(side="left")
-
-    file_menu.menu = tk.Menu(file_menu, tearoff=0)  # File menu "menu"
-    file_menu["menu"] = file_menu.menu
 
     def new_file():
         '''Creates a new blank code page. If code is present in the text window, asks if the user wants to save the current code.\n
@@ -599,6 +595,13 @@ def btn_file_menu_init():
                 saved_code = asm_zone.get("1.0", tk.END)  # Gets the code from the text area
                 file.write(saved_code)
 
+    # File menu setup
+    file_menu = ttk.Menubutton(toolbar_frame, text="File", direction="below")  # File menu button
+    file_menu.pack(side="left")
+
+    file_menu.menu = tk.Menu(file_menu, tearoff=0)  # File menu "menu"
+    file_menu["menu"] = file_menu.menu
+
     file_menu.menu.add_command(label="New File", command=new_file)
     file_menu.menu.add_command(label="Import", command=import_code)
     file_menu.menu.add_separator()
@@ -609,16 +612,12 @@ def btn_file_menu_init():
 
 def btn_settings_menu_init():
     '''Creates and initializes the settings menu'''
-
-    settings_menu = ttk.Menubutton(toolbar_frame, text="Settings", direction="below")
-    settings_menu.pack(side="left")
-
-    settings_menu.menu = tk.Menu(settings_menu, tearoff=0)  # File menu "menu"
-    settings_menu["menu"] = settings_menu.menu
     
     def theme_toggle_dark():
         '''Toggles dark theme.'''
+
         global txt_color, bkg_color
+
         txt_color = "white"  # Default text color for themes
         bkg_color = "#424242"  # Default background color for themestxt_color
         ctk.set_appearance_mode("dark")
@@ -634,6 +633,7 @@ def btn_settings_menu_init():
         '''Toggles light theme.'''
 
         global txt_color, bkg_color
+
         txt_color = "black"  # Default text color for themes
         bkg_color = "whitesmoke"  # Default background color for themestxt_color
         ctk.set_appearance_mode("light")
@@ -644,7 +644,14 @@ def btn_settings_menu_init():
 
         custom_label = tk.Label(reg_frame, text="Registers", background=bkg_color, foreground=txt_color)  # Replace colors
         reg_frame["labelwidget"] = custom_label  # Set the custom label widget
-        
+    
+    # Settings menu setup
+    settings_menu = ttk.Menubutton(toolbar_frame, text="Settings", direction="below")
+    settings_menu.pack(side="left")
+
+    settings_menu.menu = tk.Menu(settings_menu, tearoff=0)  # File menu "menu"
+    settings_menu["menu"] = settings_menu.menu
+
     settings_menu.menu.add_command(label="Dark mode", command=theme_toggle_dark)
     settings_menu.menu.add_command(label="Light mode", command=theme_toggle_light)
     settings_menu.pack()
@@ -653,16 +660,17 @@ def btn_settings_menu_init():
 def btn_help_menu_init():
     '''Creates and initializes the help menu.'''
 
+    def help_lcm3_docu():
+        '''Opens an online documentation of the LCM3 instructions.'''
+
+        webbrowser.open_new("https://moodle.ensea.fr/pluginfile.php/24675/mod_resource/content/1/LCM3_Instructions_2017.pdf")
+
+    # Help menu setup
     help_menu = ttk.Menubutton(toolbar_frame, text="Help", direction="below")  # Help menu button
     help_menu.pack(side="left")
 
     help_menu.menu = tk.Menu(help_menu, tearoff=0)  # Help menu "menu"
     help_menu["menu"] = help_menu.menu
-
-    def help_lcm3_docu():
-        '''Onpens an online documentation of the LCM3 instructions.'''
-
-        webbrowser.open_new("https://moodle.ensea.fr/pluginfile.php/24675/mod_resource/content/1/LCM3_Instructions_2017.pdf")
 
     help_menu.menu.add_command(label="This Simulator Documentation", command=help_simulator_docu)
     help_menu.menu.add_separator()
@@ -672,24 +680,23 @@ def btn_help_menu_init():
 def btn_assemble_init():
     '''Create the assemble button'''
 
+    global button_assemble
+
     def assemble():
         '''Assembles the code'''
 
+        global run_state, code, split_instructions, bitstream, register_update, line_update, memory_update
+
+
         reset()
 
-        global run_state
+        # Buttons states update
+        button_assemble.configure(fg_color="gray", state="disabled")
         run_state = 1
 
-        button_assemble.configure(fg_color="gray", state="disabled")
-        button_runsbs.configure(text="Run Step by Step", fg_color="forestgreen", state="!disabled")
-        button_run.configure(state="!disabled", fg_color="forestgreen")
+        asm_zone.tag_remove("highlight_error", "1.0", "end")  # Removes the "highlight_error" tag
 
-        # Remove the "highlight" tag
-        asm_zone.tag_remove("highlight", "1.0", "end")
-
-        # Get the code from the ASM text window
-        global code
-        code = asm_zone.get("1.0", tk.END)
+        code = asm_zone.get("1.0", tk.END)                    # Gets the code from the ASM text window
 
         # Funny text variations for when user tries to assemble empty code
         variations = ["sipping a coconut", "catching some rays", "in a hammock", "on a beach", "snorkeling", "in a tropical paradise", "surfing the clouds",
@@ -697,43 +704,48 @@ def btn_assemble_init():
         "sunbathing", "in a day spa", "on a coffee break", "chilling in a hammock", "vacationing", "on a beach", "gone", "too short", "transparent", "too small"]
         random_variation = random.choice(variations)
 
+        # Check if code is empty
         if code == "\n":
             textbox_add_line(debugger_text, "Assembling air? Your code's "+random_variation+".", "blue")
-            button_assemble.configure(fg_color="forestgreen", state="!disabled")
-            button_runsbs.configure(text="Run Step by Step", fg_color="gray", state="disabled")
-            button_run.configure(state="disabled", fg_color="gray")
-            button_step.configure(state="disabled")
-            run_state = 0
-            
-        else:
-            _, _, _, _, line_update, _, error = instruction_translation(code)
-            print(instruction_translation(code))
 
-            l = len(line_update)-3
+            # Buttons states update
+            button_assemble.configure(fg_color="forestgreen", state="!disabled")
+            run_state = 0
+        
+        else:
+            split_instructions, _, bitstream, register_update, line_update, memory_update, error = instruction_translation(code)
+
+            # Fills the Code RAM array and the bitstream frame
+            for l in range(len(line_update)-2):
+                if len(bitstream)!=0:
+                    if bitstream[line_update[l]]!="":
+                        mem_edit(ram_code_tree, line_update[line_update[l]], bitstream[line_update[l]], split_instructions[line_update[l]])
+                        textbox_add_line(binary_text, bitstream[line_update[l]])
 
             for e in range(len(error)//2):
                 # Print the error in the debugger window
-                textbox_add_line(debugger_text, str(error[e])+" at line "+f"{l+1}", "red")  # Usually the error is on the last line as the
-
-                # Remove the "highlight" tag
-                asm_zone.tag_remove("highlight", "1.0", "end")
+                textbox_add_line(debugger_text, str(error[e])+" at line "+f"{error[e+1]}", "red")  # Usually the error is on the last line as the
 
                 # Highlight the specific line with a red background
-                start_index = f"{l+1}.0 linestart"
-                end_index = f"{l+1}.0 lineend"
-                asm_zone.tag_add("highlight", start_index, end_index)
-                asm_zone.tag_configure("highlight", background="salmon", foreground="darkred")
+                start_index = f"{error[e+1]+1}.0 linestart"
+                end_index = f"{error[e+1]+1}.0 lineend"
+                asm_zone.tag_add("highlight_error", start_index, end_index)
+                asm_zone.tag_configure("highlight_error", background="salmon", foreground="darkred")
 
+            # Check is code is empty of errors
             if error==[]:
                 textbox_add_line(debugger_text, "Assembly complete", "forestgreen")
+
+                # Buttons states update
+                button_runsbs.configure(text="Run Step by Step", fg_color="forestgreen", state="!disabled")
+                button_run.configure(state="!disabled", fg_color="forestgreen")
+
             else:
+                # Buttons states update
                 button_assemble.configure(fg_color="forestgreen", state="!disabled")
-                button_runsbs.configure(text="Run Step by Step", fg_color="gray", state="disabled")
-                button_run.configure(state="disabled", fg_color="gray")
-                button_step.configure(state="disabled")
                 run_state = 0
 
-    global button_assemble
+    # Assembly button setup
     button_assemble = ctk.CTkButton(toolbar_frame, text="Assemble", command=assemble, width=90, height=18, font = ("Arial", 10), fg_color="forestgreen", state="!disabled")
     button_assemble.pack(side="right", padx=18)
 
@@ -741,33 +753,31 @@ def btn_assemble_init():
 def btn_run_init():
     '''Creates the run_step_by_step button which allows to simulate the code, one line at a time, on the computer.'''
 
+    global button_run
+
     def run():
         '''Simulates on the computer the execution of the code, all at once.'''
 
         button_run.configure(state="disabled", fg_color="gray")
         button_runsbs.configure(text="Run Step by Step", fg_color="gray", state="disabled")
 
-        split_instructions, _, bitstream, register_update, line_update, memory_update, _ = instruction_translation(code)
-
         for l in range(len(line_update)-2):
-            if len(bitstream)!=0:
-                if bitstream[line_update[l]]!="":
-                    mem_edit(ram_code_tree, line_update[line_update[l]], bitstream[line_update[l]], split_instructions[line_update[l]])
-                    pip_edit(split_instructions[line_update[l]])
-                    textbox_add_line(binary_text, bitstream[line_update[l]])
-            if memory_update[line_update[l]]!=[]:
-                mem_edit(ram_user_tree, memory_update[line_update[l]][0], memory_update[line_update[l]][1], "User")
-            if register_update[line_update[l]]!=[]:
-                reg_edit(register_update[line_update[l]][0], register_update[line_update[l]][1])
-        
-        #for i in range(8):
-        #    reg_edit(i, virtual_register[i])
-        #for i in range(0, len(virtual_memory), 2):
-        #    mem_edit(virtual_memory[i], virtual_memory[i+1])
+            if len(line_update)-l > 23:  # Only generates the last 22 instructions that can be see in the pipeline
+                print("pass")
+                pass
+            else:
+                print(split_instructions[line_update[l]])
+                if len(bitstream)!=0:
+                    if bitstream[line_update[l]]!="":
+                        pip_edit(split_instructions[line_update[l]])
+        for i in range(8):
+            reg_edit(i, virtual_register[i])
+        for i in range(0, len(virtual_memory), 2):
+            mem_edit(ram_user_tree, i, virtual_memory[i], virtual_memory[i+1])
 
         button_assemble.configure(fg_color="forestgreen", state="!disabled")
 
-    global button_run
+    # Run button setup
     button_run = ctk.CTkButton(toolbar_frame, text="Run", command=run, width=90, height=18, font = ("Arial", 10), fg_color="gray", state="disabled")
     button_run.pack(side="right", padx=0)
 
@@ -775,25 +785,27 @@ def btn_run_init():
 def btn_runsbs_init():
     '''Creates the run_step_by_step button which allows to simulate the code, one line at a time, on the computer.'''
 
+    global button_runsbs
+
     def run_step_by_step():
         '''Simulates on the computer the execution of the code, step by step.'''
 
         global run_state
 
-        if run_state == 1:
+        if run_state == 1:  # If just assembled, allows the step and the stop
             
             button_runsbs.configure(text="S T O P", fg_color="firebrick")
             button_run.configure(state="disabled", fg_color="gray")
             button_step.configure(state="!disabled", fg_color="forestgreen")
             run_state = 2
 
-        elif run_state == 2:
+        elif run_state > 1:  # If in a sbs, requires new assembly
             button_runsbs.configure(text="Run Step by Step", fg_color="gray", state="disabled")
             button_step.configure(state="disabled", fg_color="gray")
             button_assemble.configure(fg_color="forestgreen", state="!disabled")
-            run_state = 1
+            run_state = 0
 
-    global button_runsbs
+    # Run step by setp button setup
     button_runsbs = ctk.CTkButton(toolbar_frame, text="Run Step by Step", command=run_step_by_step, width=90, height=18, font = ("Arial", 10), fg_color="gray", state="disabled")
     button_runsbs.pack(side="right", padx=18)
 
@@ -802,6 +814,33 @@ def btn_step_init():
     '''Creates the run_step_by_step button which allows to simulate the code, one line at a time, on the computer.'''
 
     global button_step
+
+    def step_iter():
+        '''Simulates on the computer the execution of the code, step by step.'''
+
+        global run_state
+
+        # Iterates through the instructions
+        if run_state < (len(line_update)):
+            if len(bitstream)!=0:
+                if bitstream[line_update[run_state-2]] != "":
+                    pip_edit(split_instructions[line_update[run_state-2]])
+            if memory_update[line_update[run_state-2]] != []:
+                mem_edit(ram_user_tree, memory_update[line_update[run_state-2]][0], memory_update[line_update[run_state-2]][1], "User")
+            if register_update[line_update[run_state-2]] != []:
+                reg_edit(register_update[line_update[run_state-2]][0], register_update[line_update[run_state-2]][1])
+            
+            run_state += 1
+
+        # Disables the buttons when the sbs is finished
+        if run_state == (len(line_update)):
+            button_assemble.configure(fg_color="forestgreen", state="!disabled")
+            button_runsbs.configure(text="Run Step by Step", fg_color="gray", state="disabled")
+            button_run.configure(state="disabled", fg_color="gray")
+            button_step.configure(state="disabled", fg_color="gray")
+            run_state = 0
+
+    # Step-> button setup
     button_step = ctk.CTkButton(toolbar_frame, text="Step ->", command=step_iter, width=90, height=18, font = ("Arial", 10), fg_color="gray")
     button_step.pack(side="right", padx=0)
     button_step.configure(state="disabled")
@@ -810,6 +849,7 @@ def btn_step_init():
 def btn_reset_init():
     '''Creates the reset button which resets the registers, the memory, and the pipeline.'''
 
+    # Reset button setup
     button_reset = ctk.CTkButton(toolbar_frame, text="Reset", command=reset, width=90, height=18, font = ("Arial", 10), fg_color="forestgreen")
     button_reset.pack(side="right", padx=18)
     button_reset.configure(state="!disabled")
@@ -826,6 +866,7 @@ def btn_connect_init():
             connect_board()
             button_connect.configure(text="Connect Board", fg_color="forestgreen")
 
+    # Connect board button setup
     button_connect = ctk.CTkButton(toolbar_frame, text="Connect Board", command=connect_update, width=90, height=18, font = ("Arial", 10), fg_color="forestgreen")
     button_connect.pack(side="right", padx=0)
     button_connect.configure(state="!disabled")
@@ -834,22 +875,17 @@ def btn_connect_init():
 def btn_dowload_init():
     '''Creates the download button which downloads the code in the text window into the board, and executes it.'''
 
+    # Download code button setup
     button_download = ctk.CTkButton(toolbar_frame, text="Download Code", command=download_code, width=90, height=18, font = ("Arial", 10), fg_color="gray")
     button_download.pack(side="right", padx=18)
     button_download.configure(state="disabled")
     # To remove as soon as the simulator is connected to a board !
 
 
-# (To be implemented)
-def step_iter():
-    '''Simulates on the computer the execution of the code, step by step.'''
-
-    # ...
-
-
 def reset():
     '''Resets the registers, the memory, and the pipeline.'''
 
+    # Resets the info frames
     notebook.destroy()
     memory_arrays_init()
     reg_frame.destroy()
@@ -859,6 +895,7 @@ def reset():
     debugger_text.destroy()
     debugger_init()
 
+    # Resets buttons that can change state
     button_step.destroy()
     button_runsbs.destroy()
     button_run.destroy()
