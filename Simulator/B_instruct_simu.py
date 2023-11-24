@@ -65,7 +65,7 @@ def BNE_label_simu(instruction:str,label_list,line:int):
     n=len(instruction)
     jumpDec,error=jump_length_simu(instruction[4:n+1],label_list,line,7)
 
-    if virtual_register[8][1]!='0':
+    if virtual_register[8]!=0:
         line_update=line+jumpDec
 
     return line_update,error
@@ -77,7 +77,7 @@ def BEQ_label_simu(instruction:str,label_list,line:int):
     n=len(instruction)
     jumpDec,error=jump_length_simu(instruction[4:n+1],label_list,line,7)
 
-    if virtual_register[8][1]=='1':
+    if virtual_register[8]==0:
         line_update=line+jumpDec
         
     return line_update,error
@@ -89,7 +89,7 @@ def BGE_label_simu(instruction:str,label_list,line:int):
     n=len(instruction)
     jumpDec,error=jump_length_simu(instruction[4:n+1],label_list,line,7)
 
-    if virtual_register[8][0]==virtual_register[8][2]:
+    if virtual_register[8]>=0:
         line_update=line+jumpDec
         
     return line_update,error
@@ -101,7 +101,7 @@ def BLT_label_simu(instruction:str,label_list,line:int):
     n=len(instruction)
     jumpDec,error=jump_length_simu(instruction[4:n+1],label_list,line,7)
 
-    if virtual_register[8][0]!=virtual_register[8][2]:
+    if virtual_register[8]<0:
         line_update=line+jumpDec
         
     return line_update,error
@@ -113,7 +113,7 @@ def BGT_label_simu(instruction:str,label_list,line:int):
     n=len(instruction)
     jumpDec,error=jump_length_simu(instruction[4:n+1],label_list,line,7)
 
-    if (virtual_register[8][1]=='0')and(virtual_register[8][0]==virtual_register[8][2]):
+    if virtual_register[8]>0:
         line_update=line+jumpDec
         
     return line_update,error
@@ -125,7 +125,7 @@ def BLE_label_simu(instruction:str,label_list,line:int):
     n=len(instruction)
     jumpDec,error=jump_length_simu(instruction[4:n+1],label_list,line,7)
 
-    if (virtual_register[8][1]=='1')and(virtual_register[8][0]!=virtual_register[8][2]):
+    if virtual_register[8]<=0:
         line_update=line+jumpDec
         
     return line_update,error
