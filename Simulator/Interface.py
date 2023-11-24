@@ -24,9 +24,7 @@ from connection_board import *
 
 # Code a working dark theme
 # Line counter
-# optimize the pip run
-# replace the run button by a resume run when in a step by step by filling it from the end to the start
-
+# optimize the pip run by filling it from the end to the start
 
 
 
@@ -131,7 +129,7 @@ def mem_edit(memory_tree, line: int, binary_value="0", instruction="", type="Cod
         type: Type of the Array (Code or User).\n
         color: Name of the color in which the line will be displayed.'''
 
-    hex_value = "0x"+format(int(binary_value, 2), "04x") if type=="Code" else "0x"+format(int(binary_value, 2), "08x")  # Changes from binary to hex
+    hex_value = "0x"+format(int(binary_value, 2), "04x") if type == "Code" else "0x"+format(int(binary_value, 2), "08x")  # Changes from binary to hex
     tags = "even" if line % 2 == 0 else "odd"  # Tags of the lines background
 
     if line < len(memory_tree.get_children()):
@@ -141,7 +139,7 @@ def mem_edit(memory_tree, line: int, binary_value="0", instruction="", type="Cod
 
     else:
         # Line doesn't exist, insert a new line
-        address = "0x"+format(line*2+134217728, "08x") if type=="Code" else "0x"+format(line*4+536870912, "08x")
+        address = "0x"+format(line*2+134217728, "08x") if type == "Code" else "0x"+format(line*4+536870912, "08x")
         memory_tree.insert("", tk.END, values=(address, hex_value, instruction), tags=(tags))
 
     memory_tree.tag_configure("even", background="gainsboro", foreground=color)  # One color on even numbered lines
@@ -381,8 +379,7 @@ def asm_zone_init(asm_zone_frame):
             "#": "hash",
             "0X": "hexa",
             "0B": "binary",
-            ";": "comment",
-        }
+            ";": "comment"}
 
         # Remove existing tags
         for tag in patterns.values():
@@ -687,7 +684,6 @@ def btn_assemble_init():
 
         global run_state, code, split_instructions, bitstream, register_update, line_update, memory_update
 
-
         reset()
 
         # Buttons states update
@@ -717,8 +713,8 @@ def btn_assemble_init():
 
             # Fills the Code RAM array and the bitstream frame
             for l in range(len(line_update)-2):
-                if len(bitstream)!=0:
-                    if bitstream[line_update[l]]!="":
+                if len(bitstream) != 0:
+                    if bitstream[line_update[l]] != "":
                         mem_edit(ram_code_tree, line_update[line_update[l]], bitstream[line_update[l]], split_instructions[line_update[l]])
                         textbox_add_line(binary_text, bitstream[line_update[l]])
 
@@ -733,7 +729,7 @@ def btn_assemble_init():
                 asm_zone.tag_configure("highlight_error", background="salmon", foreground="darkred")
 
             # Check is code is empty of errors
-            if error==[]:
+            if error == []:
                 textbox_add_line(debugger_text, "Assembly complete", "forestgreen")
 
                 # Buttons states update
@@ -758,22 +754,24 @@ def btn_run_init():
     def run():
         '''Simulates on the computer the execution of the code, all at once.'''
 
-        button_run.configure(state="disabled", fg_color="gray")
+        button_run.configure(text="Run", state="disabled", fg_color="gray")
         button_runsbs.configure(text="Run Step by Step", fg_color="gray", state="disabled")
+        button_step.configure(state="disabled", fg_color="gray")
 
-        for l in range(len(line_update)-2):
-            if len(line_update)-l > 23:  # Only generates the last 22 instructions that can be see in the pipeline
-                print("pass")
-                pass
-            else:
-                print(split_instructions[line_update[l]])
-                if len(bitstream)!=0:
-                    if bitstream[line_update[l]]!="":
-                        pip_edit(split_instructions[line_update[l]])
         for i in range(8):
             reg_edit(i, virtual_register[i])
         for i in range(0, len(virtual_memory), 2):
             mem_edit(ram_user_tree, i, virtual_memory[i], virtual_memory[i+1])
+
+        for l in range(len(line_update)-2):
+            if len(line_update)-l > 23:  # Only generates the last 22 instructions that can be see in the pipeline
+                pass
+            if l < run_state-2:  # Only execute remaining instructions if clicked on resume
+                pass
+            else:
+                if len(bitstream) != 0:
+                    if bitstream[line_update[l]] != "":
+                        pip_edit(split_instructions[line_update[l]])
 
         button_assemble.configure(fg_color="forestgreen", state="!disabled")
 
@@ -795,12 +793,13 @@ def btn_runsbs_init():
         if run_state == 1:  # If just assembled, allows the step and the stop
             
             button_runsbs.configure(text="S T O P", fg_color="firebrick")
-            button_run.configure(state="disabled", fg_color="gray")
+            button_run.configure(text="Resume")
             button_step.configure(state="!disabled", fg_color="forestgreen")
             run_state = 2
 
         elif run_state > 1:  # If in a sbs, requires new assembly
             button_runsbs.configure(text="Run Step by Step", fg_color="gray", state="disabled")
+            button_run.configure(text="Run", state="disabled", fg_color="gray")
             button_step.configure(state="disabled", fg_color="gray")
             button_assemble.configure(fg_color="forestgreen", state="!disabled")
             run_state = 0
@@ -836,7 +835,7 @@ def btn_step_init():
         if run_state == (len(line_update)):
             button_assemble.configure(fg_color="forestgreen", state="!disabled")
             button_runsbs.configure(text="Run Step by Step", fg_color="gray", state="disabled")
-            button_run.configure(state="disabled", fg_color="gray")
+            button_run.configure(text="Run", state="disabled", fg_color="gray")
             button_step.configure(state="disabled", fg_color="gray")
             run_state = 0
 
