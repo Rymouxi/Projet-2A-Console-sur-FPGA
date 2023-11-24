@@ -10,7 +10,7 @@ La fonction prend donc en arguments "ON" ou "OFF" selon le mode.
 """
 
 
-def instruction_recognition(instruction:str,line:int,split_instructions:list,simu='OFF'):
+def instruction_recognition(instruction:str,line:int,simu='OFF'):
     """Reconnaissance des instructions données
     line_update pointe vers la prochaine ligne qui va être simulée par le programme
     """
@@ -31,7 +31,7 @@ def instruction_recognition(instruction:str,line:int,split_instructions:list,sim
             elif instruction[0:3]=='AND':
                 bitstream=AND_bitstream(instruction,line)
             elif instruction[0]=='B':
-                bitstream=B_instruct_bitstream(instruction,split_instructions,line)
+                bitstream=B_instruct_bitstream(instruction,line)
             elif instruction[0:3]=='CMP':
                 bitstream=CMP_bitstream(instruction,line)
             elif instruction[0:3]=='EOR':
@@ -57,7 +57,7 @@ def instruction_recognition(instruction:str,line:int,split_instructions:list,sim
             elif instruction[0:4]=='AND ':
                 register_update,error=AND_simu(instruction,line)
             elif instruction[0]=='B':
-                line_update,error=B_instruct_simu(instruction,split_instructions,line)
+                line_update,error=B_instruct_simu(instruction,line)
             elif instruction[0:4]=='CMP ':
                 register_update,error=CMP_simu(instruction,line)
             elif instruction[0:4]=='EOR ':
