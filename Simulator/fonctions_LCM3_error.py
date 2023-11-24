@@ -76,25 +76,6 @@ def LSL_simu(instruction:str,line:int):
                 error.append(imm_recognition(instruction,5)[1][i])
                 error.append(line)   
             error_count+=1         
-        if error_count==0:
-            #Rd, Rm et imm5 sont les numéros (en binaire) des registres dans AND
-            Rd=register_recognition(instruction)[0][0]
-            Rm=register_recognition(instruction)[0][1]
-            imm5=imm_recognition(instruction,5)[0]
-
-            #La valeur de Rm en décimale
-            Rm_value=virtual_register[int(Rm,2)]
-
-            #Opération d'instruction LSL en décimale
-            lsl_value=Rm_value << int(imm5,2)
-
-            #Simulation interne des registres
-            virtual_register_write(int(Rd,2),lsl_value)
-
-            #Renvoi des informations nécessaires à la simulation
-            register_update.append(int(Rd,2))
-            register_update.append(lsl_value)
-
 
     else:
         error.append("Number of argument in LSL line "+str(line)+" doesn't match. LSL instructions must be of form 'LSL Rd,Rm,#imm5'.")
