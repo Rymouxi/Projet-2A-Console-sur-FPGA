@@ -25,22 +25,22 @@ def instruction_translation(ASM:str):
     
     #Vérification d'erreurs de syntaxe
     error_syntax=error_handler_main(split_instruction)
-    
+    error.extend(error_syntax)
     #Réalisation de la simulation
-    split_instructions_with_END=split_instruction+["END"]
-    j=0
-    while split_instructions_with_END[line_pointer]!="END":
-        instruction=split_instructions_with_END[line_pointer]
-        register_update_instruction,line_pointer,memory_update_instruction,error_instruction=instruction_recognition(instruction,line_pointer,split_instruction,simu='ON')
-        register_update.append(register_update_instruction)
-        line_update.append(line_pointer)
-        memory_update.append(memory_update_instruction)
-        error=error+error_instruction
-        j+=1
-        if j>1000:
-            error.append("There's an infinite loop at line "+str(line_pointer))
-            error.append(line_pointer)
-            break
+    if len(error_syntax)==0:
+        split_instructions_with_END=split_instruction+["END"]
+        j=0
+        while split_instructions_with_END[line_pointer]!="END":
+            instruction=split_instructions_with_END[line_pointer]
+            register_update_instruction,line_pointer,memory_update_instruction,error_simu=instruction_recognition(instruction,line_pointer,split_instruction,simu='ON')
+            register_update.append(register_update_instruction)
+            line_update.append(line_pointer)
+            memory_update.append(memory_update_instruction)
+            error.extend(error_simu)
+            j+=1
+            if j>1000:
+                error.extend(["There's an infinite loop" ,line_pointer])
+                break
         
 #Réalisation du bitstream seulement si il n'y a pas d'erreurs
     if len(error)==0:

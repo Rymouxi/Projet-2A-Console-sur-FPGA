@@ -15,47 +15,42 @@ def B_instruct_simu(instruction:str,line:int):
     """
     #Ici on peut, au besoin, rajouter BGE, BLT, BGT, BLE
     line_update=0
-    error=[]
+    error_simu=[]
     if instruction[0:4]=='BEQ ':
         #BEQ label
-        line_update,error=BEQ_label_simu(instruction,line)
+        line_update,error_simu=BEQ_label_simu(instruction,line)
     elif instruction[0:4]=='BNE ':
         #BNE label
-        line_update,error=BNE_label_simu(instruction,line)
+        line_update,error_simu=BNE_label_simu(instruction,line)
     elif instruction[0:4]=='BGE ':
         #BNE label
-        line_update,error=BGE_label_simu(instruction,line)
+        line_update,error_simu=BGE_label_simu(instruction,line)
     elif instruction[0:4]=='BLT ':
         #BNE label
-        line_update,error=BLT_label_simu(instruction,line)
+        line_update,error_simu=BLT_label_simu(instruction,line)
     elif instruction[0:4]=='BGT ':
         #BNE label
-        line_update,error=BGT_label_simu(instruction,line)
+        line_update,error_simu=BGT_label_simu(instruction,line)
     elif instruction[0:4]=='BLE ':
         #BNE label
-        line_update,error=BLE_label_simu(instruction,line)
+        line_update,error_simu=BLE_label_simu(instruction,line)
     elif instruction[0:2]=='B ':
         #B label
-        line_update,error=B_label_simu(instruction,line)
-    else:
-        error.append("Syntax Error")
-        error.append(line)
-    return line_update,error
+        line_update,error_simu=B_label_simu(instruction,line)
+
+    return line_update,error_simu
 
 
 def B_label_simu(instruction:str,line:int):
     """Traduction de l'instruction B label
     """ 
     line_update=0
-
-    error=[]
-
     n=len(instruction)
-    jumpDec,error=jump_length_simu(instruction[2:n+1],line,10)
+    jumpDec,error_simu=jump_length_simu(instruction[2:n+1],line,10)
 
     line_update=line+jumpDec
 
-    return line_update,error
+    return line_update,error_simu
 
 
 def BNE_label_simu(instruction:str,line:int):
@@ -63,72 +58,72 @@ def BNE_label_simu(instruction:str,line:int):
     """
     line_update=line+1
     n=len(instruction)
-    jumpDec,error=jump_length_simu(instruction[4:n+1],line,7)
+    jumpDec,error_simu=jump_length_simu(instruction[4:n+1],line,7)
 
     if virtual_register[8]!=0:
         line_update=line+jumpDec
 
-    return line_update,error
+    return line_update,error_simu
 
 def BEQ_label_simu(instruction:str,line:int):
     """Traduction de l'instruction B label
     """
     line_update=line+1
     n=len(instruction)
-    jumpDec,error=jump_length_simu(instruction[4:n+1],line,7)
+    jumpDec,error_simu=jump_length_simu(instruction[4:n+1],line,7)
 
     if virtual_register[8]==0:
         line_update=line+jumpDec
         
-    return line_update,error
+    return line_update,error_simu
 
 def BGE_label_simu(instruction:str,line:int):
     """Traduction de l'instruction BGE label
     """
     line_update=line+1
     n=len(instruction)
-    jumpDec,error=jump_length_simu(instruction[4:n+1],line,7)
+    jumpDec,error_simu=jump_length_simu(instruction[4:n+1],line,7)
 
     if virtual_register[8]>=0:
         line_update=line+jumpDec
         
-    return line_update,error
+    return line_update,error_simu
 
 def BLT_label_simu(instruction:str,line:int):
     """Traduction de l'instruction BLT label
     """
     line_update=line+1
     n=len(instruction)
-    jumpDec,error=jump_length_simu(instruction[4:n+1],line,7)
+    jumpDec,error_simu=jump_length_simu(instruction[4:n+1],line,7)
 
     if virtual_register[8]<0:
         line_update=line+jumpDec
         
-    return line_update,error
+    return line_update,error_simu
     
 def BGT_label_simu(instruction:str,line:int):
     """Traduction de l'instruction BGT label
     """
     line_update=line+1
     n=len(instruction)
-    jumpDec,error=jump_length_simu(instruction[4:n+1],line,7)
+    jumpDec,error_simu=jump_length_simu(instruction[4:n+1],line,7)
 
     if virtual_register[8]>0:
         line_update=line+jumpDec
         
-    return line_update,error
+    return line_update,error_simu
 
 def BLE_label_simu(instruction:str,line:int):
     """Traduction de l'instruction BLE label
     """
     line_update=line+1
     n=len(instruction)
-    jumpDec,error=jump_length_simu(instruction[4:n+1],line,7)
+    jumpDec,error_simu=jump_length_simu(instruction[4:n+1],line,7)
 
     if virtual_register[8]<=0:
         line_update=line+jumpDec
         
-    return line_update,error
+    return line_update,error_simu
 
 
 
@@ -137,20 +132,13 @@ def jump_length_simu(label:str,line:int,size:int):
     Par exemple, si l'instruction première est BNE label, l'argument en entrée de cette fonction sera label\n
     Cette instruction renvoie le saut à faire"""
 
-    error=[]
-    if label not in label_table:
-        error.append("The label of branch line "+line+" is not defined" )
-        error.append(line)
+    error_simu=[]
+    index=label_table.index(label)
+    #Taille du saut en décimale
+    jumpDec=label_table[index+1]-line
 
-    else:
-    
-        index=label_table.index(label)
-        #Taille du saut en décimale
-        jumpDec=label_table[index+1]-line
+    #Détection d'un label trop éloigné 
+    if 2**size-1<jumpDec:
+        error_simu.extend(["The label of branch line"+line+"is too far",line])
 
-        #Détection d'un label trop éloigné 
-        if 2**size-1<jumpDec:
-            error.append("The label of branch line"+line+"is too far")
-            error.append(line)
-
-    return jumpDec,error
+    return jumpDec,error_simu

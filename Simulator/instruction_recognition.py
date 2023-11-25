@@ -19,7 +19,7 @@ def instruction_recognition(instruction:str,line:int,simu='OFF'):
     register_update=[]
     memory_update=[]
     line_update=line+1
-    error=[]
+    error_simu=[]
 
 
     if simu=='OFF':
@@ -51,30 +51,28 @@ def instruction_recognition(instruction:str,line:int,simu='OFF'):
     elif simu=='ON':
         if n>0:
             if instruction.count(':')==1:
-                return register_update,line_update,memory_update,error
+                return register_update,line_update,memory_update,error_simu
             elif instruction[0:4]=='ADD ':
-                register_update,error=ADD_simu(instruction,line)
+                register_update=ADD_simu(instruction,line)
             elif instruction[0:4]=='AND ':
-                register_update,error=AND_simu(instruction,line)
+                register_update=AND_simu(instruction,line)
             elif instruction[0]=='B':
                 line_update,error=B_instruct_simu(instruction,line)
             elif instruction[0:4]=='CMP ':
-                register_update,error=CMP_simu(instruction,line)
+                register_update=CMP_simu(instruction,line)
             elif instruction[0:4]=='EOR ':
-                register_update,error=EOR_simu(instruction,line)
+                register_update=EOR_simu(instruction,line)
             elif instruction[0:4]=='LDR ':
-                register_update,error=LDR_simu(instruction,line)
+                register_update,error_simu=LDR_simu(instruction,line)
             elif instruction[0:4]=='LSL ':
-                register_update,error=LSL_simu(instruction,line)
+                register_update=LSL_simu(instruction,line)
             elif instruction[0:4]=='MOV ':
-                register_update,error=MOV_simu(instruction,line)
+                register_update=MOV_simu(instruction,line)
             elif instruction[0:4]=='STR ':
-                register_update,memory_update,error=STR_simu(instruction,line)
+                memory_update,error_simu=STR_simu(instruction,line)
             elif instruction[0:4]=='SUB ':
-                register_update,error=SUB_simu(instruction,line)
+                register_update,error_simu=SUB_simu(instruction,line)
 
-            else:
-                error.append("Syntax error")
-                error.append(line)
-        return register_update,line_update,memory_update,error
+
+        return register_update,line_update,memory_update,error_simu
     
