@@ -1,4 +1,3 @@
-from label_recognition import label_table
 from virtual_register_fct import virtual_register
 
 
@@ -131,7 +130,8 @@ def jump_length_simu(label:str,line:int,size:int):
     """Cette fonction prend l'instruction sans l'embranchement même conditionnelle\n
     Par exemple, si l'instruction première est BNE label, l'argument en entrée de cette fonction sera label\n
     Cette instruction renvoie le saut à faire"""
-
+    
+    from label_recognition import label_table
     error_simu=[]
     index=label_table.index(label)
     #Taille du saut en décimale

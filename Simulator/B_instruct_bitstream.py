@@ -1,5 +1,4 @@
 from treatment import DecToBinCom
-from label_recognition import label_table
 from virtual_register_fct import virtual_register
 
 """La génération du bitstream des instructions de branchement B.
@@ -111,6 +110,8 @@ def jump_length_bitstream(label:str,line:int,size:int):
     """Cette fonction prend l'instruction sans l'embranchement même conditionnelle\n
     Par exemple, si l'instruction première est BNE label, l'argument en entrée de cette fonction sera label\n
     Cette instruction renvoie le saut converti en binaire complément à 2"""
+
+    from label_recognition import label_table
     jumpBin=''    
     index=label_table.index(label)
     #Taille du saut en décimale

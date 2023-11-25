@@ -2,15 +2,14 @@
 Il ne s'agit seulement des valeurs décimales de ces registres (plus simple pour la manipulation)\n
 Leur numéros respectifs sont considérés instinctifs\n"""
 
-virtual_register=[]
+virtual_register=[0 for i in range(9)]
 
-def virtual_register_init():
+def virtual_register_reset():
     """Initialisation du tableau de 8 registres: de R0 à R7\n
     R8 est le NZVC"""
     global virtual_register
-    virtual_register=[]
-    for i in range(0,9):
-        virtual_register.append(0)
+    for i in range(9):
+        virtual_register[i]=0
         
 
 def virtual_register_write(reg_number:int,reg_value:int):

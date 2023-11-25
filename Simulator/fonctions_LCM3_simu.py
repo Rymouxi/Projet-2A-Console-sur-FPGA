@@ -74,9 +74,8 @@ def STR_simu(instruction:str,line:int):
     error_count=0
 
     #STR Rt,[Rn]
-    if len(virtual_memory_update(int(register_recognition(instruction)[0][1],2),int(register_recognition(instruction)[0][0],2)))>0:
-        error_simu.append(virtual_memory_update(int(register_recognition(instruction)[0][1],2),int(register_recognition(instruction)[0][0],2)))
-        error_simu.append(line)
+    if virtual_memory_address_check(virtual_register[int(register_recognition(instruction)[1],2)]):
+        error_simu.extend([virtual_memory_address_check(virtual_register[int(register_recognition(instruction)[1],2)]),line])
         error_count+=1 
     if error_count==0:
         #Rt et Rn sont les numéros (en binaire) des registres dans STR
@@ -104,7 +103,7 @@ def LDR_simu(instruction:str,line:int):
     error_simu=[]
 
     #LDR Rt,[Rn]
-    if type(virtual_memory_read(register_recognition(instruction)[0][1]))==str:
+    if type(virtual_memory_read(virtual_register[register_recognition(instruction)[1]]))==str:
         error_simu.append(virtual_memory_read(register_recognition(instruction)[0][1]))
         error_simu.append(line) 
         error_count+=1
@@ -165,7 +164,7 @@ def CMP_simu(instruction:str,line:int):
 
     #CMP Rn,#imm8
     #Rn et imm8 sont les numéros (en binaire) des registres dans CMP
-    Rn=register_recognition(instruction)
+    Rn=register_recognition(instruction)[0]
     imm8=imm_recognition(instruction,8)
 
     #Valeur de Rn en décimale
@@ -178,7 +177,7 @@ def CMP_simu(instruction:str,line:int):
     virtual_register_write(8,cmp_value)
 
     #Renvoi des informations nécessaires à la simulation
-    register_update.extend(8,cmp_value)#Le registre 8 correspond au NZVC
+    register_update.extend([8,cmp_value])#Le registre 8 correspond au NZVC
         
     return register_update
 
