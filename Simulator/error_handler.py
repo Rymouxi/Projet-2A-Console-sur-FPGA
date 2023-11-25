@@ -6,44 +6,49 @@ def error_handler_main(split_instruction):
 
     error_table=[]
     possible_instructions=['ADD ','AND ','BNE ','BEQ ','BGE ','BLT ','BGT ','BLE ','CMP ','EOR ','LDR ','LSL ','MOV ','STR ','SUB ']
-    for instruction in split_instruction:
-
-        if (instruction[0:4] in possible_instructions)or(instruction[0:2]=='B '):
+    for i,instruction in enumerate(split_instruction):
+        if (instruction[0:4] in possible_instructions)or(instruction[0:2]=='B ')or(instruction.count(':')==1)or(instruction==''):
             if instruction[0:4]==possible_instructions[0]:
-                error_table.append(error_handler_add(instruction[4::]))
+                error_table.extend(error_table_extension(error_handler_add(instruction[4::]),i))
             if instruction[0:4]==possible_instructions[1]:
-                error_table.append(error_handler_and(instruction[4::]))
+                error_table.extend(error_table_extension(error_handler_and(instruction[4::]),i))
             if instruction[0:4]==possible_instructions[2]:
-                error_table.append(error_handler_b_instruct(instruction[4::]))
+                error_table.extend(error_table_extension(error_handler_b_instruct(instruction[4::]),i))
             if instruction[0:4]==possible_instructions[3]:
-                error_table.append(error_handler_b_instruct(instruction[4::]))
+                error_table.extend(error_table_extension(error_handler_b_instruct(instruction[4::]),i))
             if instruction[0:4]==possible_instructions[4]:
-                error_table.append(error_handler_b_instruct(instruction[4::]))
+                error_table.extend(error_table_extension(error_handler_b_instruct(instruction[4::]),i))
             if instruction[0:4]==possible_instructions[5]:
-                error_table.append(error_handler_b_instruct(instruction[4::]))
+                error_table.extend(error_table_extension(error_handler_b_instruct(instruction[4::]),i))
             if instruction[0:4]==possible_instructions[6]:
-                error_table.append(error_handler_b_instruct(instruction[4::]))
+                error_table.extend(error_table_extension(error_handler_b_instruct(instruction[4::]),i))
             if instruction[0:4]==possible_instructions[7]:
-                error_table.append(error_handler_b_instruct(instruction[4::]))
+                error_table.extend(error_table_extension(error_handler_b_instruct(instruction[4::]),i))
             if instruction[0:4]==possible_instructions[8]:
-                error_table.append(error_handler_cmp(instruction[4::]))
+                error_table.extend(error_table_extension(error_handler_cmp(instruction[4::]),i))
             if instruction[0:4]==possible_instructions[9]:
-                error_table.append(error_handler_eor(instruction[4::]))
+                error_table.extend(error_table_extension(error_handler_eor(instruction[4::]),i))
             if instruction[0:4]==possible_instructions[10]:
-                error_table.append(error_handler_ldr(instruction[4::]))
+                error_table.extend(error_table_extension(error_handler_ldr(instruction[4::]),i))
             if instruction[0:4]==possible_instructions[11]:
-                error_table.append(error_handler_lsl(instruction[4::]))
+                error_table.extend(error_table_extension(error_handler_lsl(instruction[4::]),i))
             if instruction[0:4]==possible_instructions[12]:
-                error_table.append(error_handler_mov(instruction[4::]))
+                error_table.extend(error_table_extension(error_handler_mov(instruction[4::]),i))
             if instruction[0:4]==possible_instructions[13]:
-                error_table.append(error_handler_str(instruction[4::]))
+                error_table.extend(error_table_extension(error_handler_str(instruction[4::]),i))
             if instruction[0:4]==possible_instructions[14]:
-                error_table.append(error_handler_sub(instruction[4::]))
+                error_table.extend(error_table_extension(error_handler_sub(instruction[4::]),i))
             if instruction[0:2]=='B ':
-                error_table.append(error_handler_b_instruct(instruction[2::]))
-            
+                error_table.extend(error_table_extension(error_handler_b_instruct(instruction[2::]),i))
+        else:
+            error_table.extend(["Syntax error",i])    
     return error_table
 
+def error_table_extension(error_handler_table,line):
+    error_table=[]
+    for error in error_handler_table:
+        error_table.extend([error,line])
+    return error_table
 
 def error_handler_add(instruction_without_action):
     """There are 3 different possibilities for this action:\n
