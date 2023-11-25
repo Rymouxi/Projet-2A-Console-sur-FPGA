@@ -3,6 +3,7 @@ from treatment import*
 from virtual_register_fct import virtual_register_init
 from virtual_memory_fct import virtual_memory_reset
 from label_recognition import label_recognition
+from error_handler import error_handler_main
 
 def instruction_translation(ASM:str):
     """Programme global de traduction d'un code ASM en code machine
@@ -21,6 +22,9 @@ def instruction_translation(ASM:str):
     virtual_register_init()
     virtual_memory_reset()
     label_recognition(split_instruction)
+    
+    #Vérification d'erreurs de syntaxe
+    error_syntax=error_handler_main(split_instruction)
     
     #Réalisation de la simulation
     split_instructions_with_END=split_instruction+["END"]
