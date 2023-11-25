@@ -1,3 +1,5 @@
+from label_recognition import label_table
+
 """Il s'agit d'un fichier avec des fonctions prenant une liste d'instruction et regardant si elle convient au format voulu"""
 
 def error_handler_main(split_instruction):
@@ -43,42 +45,184 @@ def error_handler_main(split_instruction):
     return error_table
 
 
-def error_handler_add():
+def error_handler_add(instruction_without_action):
+    """There are 3 different possibilities for this action:\n
+    ADD Rd,Rn,#imm3\n
+    ADD Rd,#imm8\n
+    ADD Rd,Rn,Rm"""
     error=[]
-    return error
-def error_handler_and ():
-    error=[]
-    return error
-def error_handler_b_instruct():
-    error=[]
+    R_count=instruction_without_action.count('R')
+    if R_count==1:
+        error.extend(register_error_handler(instruction_without_action))
+        error.extend(imm_error_handler(instruction_without_action,8))
+    elif R_count==2:
+        error.extend(register_error_handler(instruction_without_action))
+        error.extend(imm_error_handler(instruction_without_action,3))       
+    elif R_count==3:
+        error.extend(register_error_handler(instruction_without_action))
+    else:
+        error.append("The number of register doesn't match for this instruction")
     return error
 
-def error_handler_cmp ():
+def error_handler_and (instruction_without_action):
+    """There is 1 possibility for this action:\n
+    AND Rd,Rn\n"""
     error=[]
-    return error
-def error_handler_eor ():
-    error=[]
-    return error
-def error_handler_ldr ():
-    error=[]
-    return error
-def error_handler_lsl ():
-    error=[]
-    return error
-def error_handler_mov ():
-    error=[]
-    return error
-def error_handler_str ():
-    error=[]
-    return error
-def error_handler_sub ():
-    error=[]
-    return error
-def error_handler_b ():
-    error=[]
+    R_count=instruction_without_action.count('R')
+    if R_count!=2:
+        error.append("The number of register doesn't match for this instruction")
+    elif R_count==2:
+        error.extend(register_error_handler(instruction_without_action))
     return error
 
 
+def error_handler_cmp (instruction_without_action):
+    """There is 1 possibility for this action:\n
+    CMP Rd,#imm8\n"""
+    error=[]
+    R_count=instruction_without_action.count('R')
+    if R_count!=1:
+        error.append("The number of register doesn't match for this instruction")
+    elif R_count==1:
+        error.extend(register_error_handler(instruction_without_action))
+        error.extend(imm_error_handler(instruction_without_action,8))
+    return error
+
+def error_handler_eor (instruction_without_action):
+    """There is 1 possibility for this action:\n
+    EOR Rd,Rm\n"""
+    error=[]
+    R_count=instruction_without_action.count('R')
+    if R_count!=2:
+        error.append("The number of register doesn't match for this instruction")
+    elif R_count==2:
+        error.extend(register_error_handler(instruction_without_action))
+    return error
+
+def error_handler_ldr (instruction_without_action):
+    """There is 1 possibility for this action:\n
+    LDR Rt,[Rn]\n"""
+    error=[]
+    R_count=instruction_without_action.count('R')
+    if R_count!=2:
+        error.append("The number of register doesn't match for this instruction")
+    elif R_count==2:
+        error.extend(register_error_handler(instruction_without_action))
+    return error
+
+def error_handler_lsl (instruction_without_action):
+    """There is 1 possibility for this action:\n
+    LSL Rd,Rm,#imm8\n"""
+    error=[]
+    R_count=instruction_without_action.count('R')
+    if R_count!=2:
+        error.append("The number of register doesn't match for this instruction")
+    elif R_count==2:
+        error.extend(register_error_handler(instruction_without_action))
+        error.extend(imm_error_handler(instruction_without_action,5))
+    return error
+
+def error_handler_mov (instruction_without_action):
+    """There are 2 possibilities for this action:\n
+    MOV Rd,#imm8\n
+    MOV Rd,Rm"""
+    error=[]
+    R_count=instruction_without_action.count('R')
+    if R_count==1:
+        error.extend(register_error_handler(instruction_without_action))
+        error.extend(imm_error_handler(instruction_without_action,8))
+    elif R_count==2:
+        error.extend(register_error_handler(instruction_without_action))
+    else:
+        error.append("The number of register doesn't match for this instruction")
+    return error
+
+def error_handler_str (instruction_without_action):
+    """There is 1 possibility for this action:\n
+    STR Rt,[Rn]\n"""
+    error=[]
+    R_count=instruction_without_action.count('R')
+    if R_count!=2:
+        error.append("The number of register doesn't match for this instruction")
+    elif R_count==2:
+        error.extend(register_error_handler(instruction_without_action))
+    return error
+
+def error_handler_sub (instruction_without_action):
+    """There are 3 different possibilities for this action:\n
+    SUB Rd,Rn,#imm3\n
+    SUB Rd,#imm8\n
+    SUB Rd,Rn,Rm"""
+    error=[]
+    R_count=instruction_without_action.count('R')
+    if R_count==1:
+        error.extend(register_error_handler(instruction_without_action))
+        error.extend(imm_error_handler(instruction_without_action,8))
+    elif R_count==2:
+        error.extend(register_error_handler(instruction_without_action))
+        error.extend(imm_error_handler(instruction_without_action,3))       
+    elif R_count==3:
+        error.extend(register_error_handler(instruction_without_action))
+    else:
+        error.append("The number of register doesn't match for this instruction")
+    return error
+
+def error_handler_b_instruct(instruction_without_action):
+    """These kind of instruction only look if the label they indicate exists\n"""
+    error=[]
+    n=len(instruction_without_action)
+    label=''
+    for i in range(n):
+        if instruction_without_action[i].isalpha():
+            label+=instruction_without_action[i]
+    if label not in label_table:
+        error.append("This label doesn't exist")    
+    return error
 
 
+def register_error_handler(instruction_without_action):
 
+    error=[]
+    register_number=['0','1','2','3','4','5','6','7']
+    count_R=instruction_without_action.count('R')
+    for i in range(count_R):
+        if instruction_without_action[instruction_without_action.find('R')+1] not in register_number:
+            error.append("This register number doesn't exist")
+        instruction_without_action=instruction_without_action[instruction_without_action.find('R')+2::]
+    return error
+
+def imm_error_handler(instruction_without_action,size):
+    
+    error=[]
+    hexa=['0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F']
+    if instruction_without_action.find('0X')!=-1:
+        m=2
+        number_hexa=''
+        while instruction_without_action[instruction_without_action.find('0X')+m] in hexa:
+            number_hexa+=instruction_without_action[instruction_without_action.find('0X')+m]
+        if len(number_hexa)==0:
+            error.append("No number") 
+        if int(number_hexa,16)>2**size:
+            error.append("This number is too big for this instruction")
+
+    elif instruction_without_action.find('0B')!=-1:
+        m=2
+        number_binary=''
+        while instruction_without_action[instruction_without_action.find('0X')+m] in hexa[0:2]:
+            number_hexa+=instruction_without_action[instruction_without_action.find('0X')+m]
+        if len(number_binary)==0:
+            error.append("No number") 
+        if int(number_binary,2)>2**size:
+            error.append("This number is too big for this instruction")
+    elif instruction_without_action.find('#')!=-1:
+        m=2
+        number_integer=''
+        while instruction_without_action[instruction_without_action.find('0X')+m] in hexa[0:2]:
+            number_integer+=instruction_without_action[instruction_without_action.find('0X')+m]
+        if len(number_integer)==0:
+            error.append("No number") 
+        if int(number_integer)>2**size:
+            error.append("This number is too big for this instruction")
+    else:
+        error.append("The number format doesn't correspond to the expected ones")
+    return error
