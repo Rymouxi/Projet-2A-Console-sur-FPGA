@@ -11,7 +11,9 @@ def virtual_register_reset():
     for i in range(9):
         virtual_register[i]=0
         
+        
 
+        
 def virtual_register_write(reg_number:int,reg_value:int):
     """reg_number est le numéro du registre à modifier\n
     reg_value est la valeur à mettre dans ce registre\n
