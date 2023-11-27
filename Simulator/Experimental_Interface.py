@@ -63,8 +63,12 @@ class EnseaSimulator(ctk.CTk):
         self.central_frame.add(self.right_frame, weight=1)
 
         # Register Frame on the left of Right Frame
+        self.register_window = RegisterWindow(self.right_frame)
+        self.right_frame.add(self.register_window, weight=1)
 
         # Memory and binary arrays on the right of Right Frame
+        self.mem_and_bin = MemAndBin(self.right_frame)
+        self.right_frame.add(self.mem_and_bin, weight=1)
 
         # Pipeline window at the bottom
         self.pipeline_window = PipelineWindow(self)
@@ -135,6 +139,113 @@ class DebuggerWindow(ctk.CTkFrame):
     def insert_content(self, content):
         '''Inserts the content in the text box.'''
         return self.textbox.insert(tk.END, content)
+
+
+
+
+
+
+# ---------- Register Window ---------- #
+
+class RegisterWindow(ctk.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master)
+
+        self.frame = ctk.CTkFrame(self, corner_radius=0)
+        self.frame.pack(side="top", fill="both", expand=True)
+
+        self.title = ctk.CTkLabel(self.frame, text="Registers", bg_color="transparent")
+        self.title.pack(side="top", fill="x")
+
+
+
+
+
+
+# ---------- Memory Arrays and Binary ---------- #
+
+class MemAndBin(ctk.CTkTabview):
+    def __init__(self, master):
+        super().__init__(master)
+
+        # create tabs
+        self.add("tab 1")
+        self.add("tab 2")
+
+        # add widgets on tabs
+        self.label = ctk.CTkLabel(master=self.tab("tab 1"))
+        self.label.grid(row=0, column=0, padx=20, pady=0)
+
+
+
+
+
+
+# ---------- Pipeline window ---------- #
+
+class PipelineWindow(ctk.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master)
+
+        headers = ["Fetch", "Decode", "Execute"]
+
+
+        # Create header labels on the left
+        for i, header in enumerate(headers):
+            header_label = ctk.CTkLabel(self, text=header, padx=5, pady=2, anchor="w")
+            header_label.grid(row=i, column=0, sticky="nsew")
+
+        # Create data entry widgets on the right
+        for i in range(3):
+            for j in range(20):
+                entry = ctk.CTkEntry(self, state="readonly", width=4)
+                entry.insert(0, "")
+                entry.grid(row=i, column=j + 1, sticky="nsew")
+
+        # Configure grid weights for resizing
+        for i in range(3):
+            self.grid_rowconfigure(i, weight=1)
+
+        for j in range(21):
+            self.grid_columnconfigure(j, weight=1)
+
+    def get_cell(self, row, col):
+        '''Get the value in the specified cell.'''
+
+        if 0 <= row <= 3 and 1 <= col <= 21:
+            return self.entry_widgets[row][col - 1].get()
+
+    def set_cell(self, row, col, value):
+        '''Set the value in the specified cell.'''
+        
+        if 0 <= row <= 3 and 1 <= col <= 21:
+            self.entry_widgets[row][col - 1].configure(state="normal")  # Make editable temporarily
+            self.entry_widgets[row][col - 1].delete(0, tk.END)
+            self.entry_widgets[row][col - 1].insert(0, value)
+            self.entry_widgets[row][col - 1].configure(state="readonly")  # Make readonly again
+
+
+
+
+
+
+# ---------- Toolbar ---------- #
+
+class Toolbar(ctk.CTkFrame):
+    def __init__(self, master, asm_window):
+        super().__init__(master)
+        
+        # File menu
+        self.file_menu = FileMenu(self, asm_window)
+        self.file_menu.pack(side="left")
+
+        # Settings menu
+        self.settings_menu = SettingsMenu(self)
+        self.settings_menu.pack(side="left")
+
+        # Help menu
+        self.help_menu = HelpMenu(self)
+        self.help_menu.pack(side="left")
 
 
 
@@ -214,11 +325,11 @@ class FileMenu(ctk.CTkFrame):
                     saved_code = asm_window.get_text_content()  # Gets the code from the text area
                     file.write(saved_code)
 
-        # Menu button
+        # File menu button
         self = tk.ttk.Menubutton(self, text="File", direction="below")
         self.pack(side="left")
 
-        # Create a dropdown menu for the File button
+        # Dropdown menu for the File button
         self.menu = tk.Menu(self, tearoff=0)
         self["menu"] = self.menu  # Assign the menu to the button
 
@@ -244,11 +355,11 @@ class SettingsMenu(ctk.CTkFrame):
 
             ctk.set_appearance_mode("light")
 
-        # Create a Settings menu button
+        # Settings menu button
         self = tk.ttk.Menubutton(self, text="Settings", direction="below")
         self.pack(side="left")
 
-        # Create a dropdown menu for the File button
+        # Dropdown menu for the File button
         self.menu = tk.Menu(self, tearoff=0)
         self["menu"] = self.menu  # Assign the menu to the button
 
@@ -266,12 +377,15 @@ class HelpMenu(ctk.CTkFrame):
 
             webbrowser.open_new("https://moodle.ensea.fr/pluginfile.php/24675/mod_resource/content/1/LCM3_Instructions_2017.pdf")
 
+        # Help menu button
         self = tk.ttk.Menubutton(self, text="Help", direction="below")  # Help menu button
         self.pack(side="left")
 
+        # Dropdown menu for the Help Button
         self.menu = tk.Menu(self, tearoff=0)  # Help menu "menu"
         self["menu"] = self.menu
 
+        # Add items to the File menu
         self.menu.add_command(label="This Simulator Documentation", command=SimulatorDocumentation)
         self.menu.add_separator()
         self.menu.add_command(label="LCM3 Documentation", command=help_lcm3_docu)
@@ -348,73 +462,6 @@ class SimulatorDocumentation(ctk.CTkToplevel):
 
         self.text_widget.insert(tk.END, self.text)
         self.text_widget.configure(state="disabled", font=("Helvetica",12))
-
-
-
-
-
-
-# ---------- Pipeline window ---------- #
-
-class PipelineWindow(ctk.CTkFrame):
-    def __init__(self, master):
-        super().__init__(master)
-
-        headers = ["Fetch", "Decode", "Execute"]
-
-
-        # Create header labels on the left
-        for i, header in enumerate(headers):
-            header_label = ctk.CTkLabel(self, text=header, padx=5, pady=2, anchor="w")
-            header_label.grid(row=i, column=0, sticky="nsew")
-
-        # Create data entry widgets on the right
-        for i in range(3):
-            for j in range(20):
-                entry = ctk.CTkEntry(self, state="readonly", width=4)
-                entry.insert(0, "")
-                entry.grid(row=i, column=j + 1, sticky="nsew")
-
-        # Configure grid weights for resizing
-        for i in range(3):
-            self.grid_rowconfigure(i, weight=1)
-
-        for j in range(21):
-            self.grid_columnconfigure(j, weight=1)
-
-    def get_cell(self, row, col):
-        '''Get the value in the specified cell.'''
-        return self.entry_widgets[row][col - 1].get()
-
-    def set_cell(self, row, col, value):
-        '''Set the value in the specified cell.'''
-        self.entry_widgets[row][col - 1].configure(state="normal")  # Make editable temporarily
-        self.entry_widgets[row][col - 1].delete(0, tk.END)
-        self.entry_widgets[row][col - 1].insert(0, value)
-        self.entry_widgets[row][col - 1].configure(state="readonly")  # Make readonly again
-
-
-
-
-
-
-# ---------- Toolbar ---------- #
-
-class Toolbar(ctk.CTkFrame):
-    def __init__(self, master, asm_window):
-        super().__init__(master)
-        
-        # File menu
-        self.file_menu = FileMenu(self, asm_window)
-        self.file_menu.pack(side="left")
-
-        # Settings menu
-        self.settings_menu = SettingsMenu(self)
-        self.settings_menu.pack(side="left")
-
-        # Help menu
-        self.help_menu = HelpMenu(self)
-        self.help_menu.pack(side="left")
 
 
 
