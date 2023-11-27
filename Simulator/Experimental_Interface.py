@@ -38,17 +38,21 @@ class EnseaSimulator(ctk.CTk):
         self.title("ENSEA's Python LCM3 ASM Simulator")
         self.geometry("980x720")
 
-        # Create a PanedWindow
-        self.paned_window = tk.PanedWindow(self, orient=tk.HORIZONTAL, sashwidth=5, borderwidth=0, background="black")
-        self.paned_window.pack(side="bottom", expand=True, fill="both")
+        # Pipeline window
+        self.pipeline_window = PipelineWindow(self)
+        self.pipeline_window.pack(side="bottom", fill="x")
+
+        # Central Frame
+        self.central_frame = tk.ttk.PanedWindow(self, orient=tk.HORIZONTAL)
+        self.central_frame.pack(side="bottom", expand=True, fill="both")
 
         # ASM Window on the left
-        self.asm_window = ASMWindow(self.paned_window)
-        self.paned_window.add(self.asm_window)
+        self.asm_window = ASMWindow(self.central_frame)
+        self.central_frame.add(self.asm_window, weight=1)
 
-        # Empty frame on the right (for now)
-        self.empty_frame = ctk.CTkFrame(self.paned_window)
-        self.paned_window.add(self.empty_frame)
+        # Right Frame
+        self.right_frame = tk.ttk.PanedWindow(self, orient=tk.HORIZONTAL)
+        self.central_frame.add(self.right_frame, weight=1)
 
         # Toolbar
         self.toolbar = Toolbar(self, self.asm_window)
@@ -295,14 +299,20 @@ class SimulatorDocumentation(ctk.CTkToplevel):
 
 
 
-# ---------- ASMWindow ---------- #
+# ---------- ASM Window ---------- #
 
 class ASMWindow(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
 
-        self.textbox = ctk.CTkTextbox(master=self, width=400, corner_radius=0)
-        self.textbox.pack(side="top", fill="both", expand=True)
+        self.asm_frame = ctk.CTkFrame(self, corner_radius=0)
+        self.asm_frame.pack(side="top", fill="both", expand=True)
+
+        self.title = ctk.CTkLabel(self.asm_frame, text="ASM Code Window", bg_color="transparent")
+        self.title.pack(side="top")
+
+        self.textbox = ctk.CTkTextbox(self.asm_frame)
+        self.textbox.pack(side="top", fill="both")
 
     def get_text_content(self):
         '''Gets the content of the text box.'''
@@ -317,6 +327,15 @@ class ASMWindow(ctk.CTkFrame):
         return self.textbox.insert(tk.END, content)
     
 
+
+
+
+
+# ---------- Pipeline window ---------- #
+
+class PipelineWindow(ctk.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master)
 
 
 
