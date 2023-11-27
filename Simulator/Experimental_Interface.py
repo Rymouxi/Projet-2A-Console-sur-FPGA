@@ -14,7 +14,6 @@
 
 
 import tkinter as tk
-from tkinter import ttk
 import customtkinter as ctk
 import webbrowser
 
@@ -32,20 +31,28 @@ file_path = None
 # ---------- Simulator ---------- #
 
 class EnseaSimulator(ctk.CTk):
-    def __init__(self):
+    def __init__(self):        
         super().__init__()
 
-        # Title
+        # Simulator title
         self.title("ENSEA's Python LCM3 ASM Simulator")
         self.geometry("980x720")
 
-        # Coding window creation
-        self.asm_window = ASMWindow(self)
-        self.asm_window.pack(side="bottom", fill="x", expand=True)
+        # Create a PanedWindow
+        self.paned_window = tk.PanedWindow(self, orient=tk.HORIZONTAL, sashwidth=5, borderwidth=0, background="black")
+        self.paned_window.pack(side="bottom", expand=True, fill="both")
 
-        # Toolbar creation
+        # ASM Window on the left
+        self.asm_window = ASMWindow(self.paned_window)
+        self.paned_window.add(self.asm_window)
+
+        # Empty frame on the right (for now)
+        self.empty_frame = ctk.CTkFrame(self.paned_window)
+        self.paned_window.add(self.empty_frame)
+
+        # Toolbar
         self.toolbar = Toolbar(self, self.asm_window)
-        self.toolbar.pack(side="bottom", fill="x")
+        self.toolbar.pack(fill="x")
 
 
 
@@ -57,17 +64,16 @@ class EnseaSimulator(ctk.CTk):
 class Toolbar(ctk.CTkFrame):
     def __init__(self, master, asm_window):
         super().__init__(master)
-        self.pack(side="top", fill="x")
-
-        # File menu creation
+        
+        # File menu
         self.file_menu = FileMenu(self, asm_window)
         self.file_menu.pack(side="left")
 
-        # Settings menu creation
+        # Settings menu
         self.settings_menu = SettingsMenu(self)
         self.settings_menu.pack(side="left")
 
-        # Help menu creation
+        # Help menu
         self.help_menu = HelpMenu(self)
         self.help_menu.pack(side="left")
 
@@ -149,7 +155,7 @@ class FileMenu(ctk.CTkFrame):
                     saved_code = asm_window.get_text_content()  # Gets the code from the text area
                     file.write(saved_code)
 
-        # Create a File menu button
+        # Menu button
         self = tk.ttk.Menubutton(self, text="File", direction="below")
         self.pack(side="left")
 
@@ -201,7 +207,7 @@ class HelpMenu(ctk.CTkFrame):
 
             webbrowser.open_new("https://moodle.ensea.fr/pluginfile.php/24675/mod_resource/content/1/LCM3_Instructions_2017.pdf")
 
-        self = ttk.Menubutton(self, text="Help", direction="below")  # Help menu button
+        self = tk.ttk.Menubutton(self, text="Help", direction="below")  # Help menu button
         self.pack(side="left")
 
         self.menu = tk.Menu(self, tearoff=0)  # Help menu "menu"
@@ -286,6 +292,9 @@ class SimulatorDocumentation(ctk.CTkToplevel):
 
 
 
+
+
+
 # ---------- ASMWindow ---------- #
 
 class ASMWindow(ctk.CTkFrame):
@@ -311,11 +320,6 @@ class ASMWindow(ctk.CTkFrame):
 
 
 
-
-class Test():
-    def __init__():
-        super().__init__()
-        print("bruh")
 
 
 class MyCheckboxFrame(ctk.CTkFrame):
