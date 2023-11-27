@@ -138,26 +138,6 @@ class DebuggerWindow(ctk.CTkFrame):
 
 
 
-# ---------- Toolbar ---------- #
-
-class Toolbar(ctk.CTkFrame):
-    def __init__(self, master, asm_window):
-        super().__init__(master)
-        
-        # File menu
-        self.file_menu = FileMenu(self, asm_window)
-        self.file_menu.pack(side="left")
-
-        # Settings menu
-        self.settings_menu = SettingsMenu(self)
-        self.settings_menu.pack(side="left")
-
-        # Help menu
-        self.help_menu = HelpMenu(self)
-        self.help_menu.pack(side="left")
-
-
-
 
 
 
@@ -374,42 +354,74 @@ class SimulatorDocumentation(ctk.CTkToplevel):
 
 
 
-
-
-
-
-
-
 # ---------- Pipeline window ---------- #
 
 class PipelineWindow(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
 
+        headers = ["Fetch", "Decode", "Execute"]
+
+
+        # Create header labels on the left
+        for i, header in enumerate(headers):
+            header_label = ctk.CTkLabel(self, text=header, padx=5, pady=2, anchor="w")
+            header_label.grid(row=i, column=0, sticky="nsew")
+
+        # Create data entry widgets on the right
+        for i in range(3):
+            for j in range(20):
+                entry = ctk.CTkEntry(self, state="readonly", width=4)
+                entry.insert(0, "")
+                entry.grid(row=i, column=j + 1, sticky="nsew")
+
+        # Configure grid weights for resizing
+        for i in range(3):
+            self.grid_rowconfigure(i, weight=1)
+
+        for j in range(21):
+            self.grid_columnconfigure(j, weight=1)
+
+    def get_cell(self, row, col):
+        '''Get the value in the specified cell.'''
+        return self.entry_widgets[row][col - 1].get()
+
+    def set_cell(self, row, col, value):
+        '''Set the value in the specified cell.'''
+        self.entry_widgets[row][col - 1].configure(state="normal")  # Make editable temporarily
+        self.entry_widgets[row][col - 1].delete(0, tk.END)
+        self.entry_widgets[row][col - 1].insert(0, value)
+        self.entry_widgets[row][col - 1].configure(state="readonly")  # Make readonly again
 
 
 
 
-class MyCheckboxFrame(ctk.CTkFrame):
-    def __init__(self, master):
+
+
+# ---------- Toolbar ---------- #
+
+class Toolbar(ctk.CTkFrame):
+    def __init__(self, master, asm_window):
         super().__init__(master)
-        self.checkbox_1 = ctk.CTkCheckBox(self, text="checkbox 1")
-        self.checkbox_1.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="w")
-        self.checkbox_2 = ctk.CTkCheckBox(self, text="checkbox 2")
-        self.checkbox_2.grid(row=1, column=0, padx=10, pady=(10, 0), sticky="w")
-        self.checkbox_3 = ctk.CTkCheckBox(self, text="checkbox 3")
-        self.checkbox_3.grid(row=2, column=0, padx=10, pady=(10, 0), sticky="w")
         
-    def get(self):
-        checked_checkboxes = []
-        if self.checkbox_1.get() == 1:
-            checked_checkboxes.append(self.checkbox_1.cget("text"))
-        if self.checkbox_2.get() == 1:
-            checked_checkboxes.append(self.checkbox_2.cget("text"))
-        if self.checkbox_3.get() == 1:
-            checked_checkboxes.append(self.checkbox_3.cget("text"))
-        return checked_checkboxes
+        # File menu
+        self.file_menu = FileMenu(self, asm_window)
+        self.file_menu.pack(side="left")
 
+        # Settings menu
+        self.settings_menu = SettingsMenu(self)
+        self.settings_menu.pack(side="left")
+
+        # Help menu
+        self.help_menu = HelpMenu(self)
+        self.help_menu.pack(side="left")
+
+
+
+
+
+
+# ---------- Code ---------- #
 
 app = EnseaSimulator()
 app.mainloop()
