@@ -38,28 +38,103 @@ class EnseaSimulator(ctk.CTk):
         self.title("ENSEA's Python LCM3 ASM Simulator")
         self.geometry("980x720")
 
-        # Pipeline window
-        self.pipeline_window = PipelineWindow(self)
-        self.pipeline_window.pack(side="bottom", fill="x")
+        # Main Frame under the Toolbar
+        self.main_frame = tk.ttk.PanedWindow(self, orient=tk.VERTICAL)
+        self.main_frame.pack(side="bottom", expand=True, fill="both")
 
-        # Central Frame
-        self.central_frame = tk.ttk.PanedWindow(self, orient=tk.HORIZONTAL)
-        self.central_frame.pack(side="bottom", expand=True, fill="both")
+        # Central Frame above the Pipeline
+        self.central_frame = tk.ttk.PanedWindow(self.main_frame, orient=tk.HORIZONTAL)
+        self.main_frame.add(self.central_frame, weight=5)
 
-        # ASM Window on the left
-        self.asm_window = ASMWindow(self.central_frame)
-        self.central_frame.add(self.asm_window, weight=1)
+        # Coding Frame on the left
+        self.coding_frame = tk.ttk.PanedWindow(self.central_frame, orient=tk.VERTICAL)
+        self.central_frame.add(self.coding_frame, weight=1)
+
+        # ASM Window at the top of Coding Frame
+        self.asm_window = ASMWindow(self.coding_frame)
+        self.coding_frame.add(self.asm_window, weight=1)
+
+        # Debugger at the bottom of Coding Frame
+        self.debugger_window = DebuggerWindow(self.coding_frame)
+        self.coding_frame.add(self.debugger_window, weight=1)
 
         # Right Frame
-        self.right_frame = tk.ttk.PanedWindow(self, orient=tk.HORIZONTAL)
+        self.right_frame = tk.ttk.PanedWindow(self.central_frame, orient=tk.HORIZONTAL)
         self.central_frame.add(self.right_frame, weight=1)
 
-        # Toolbar
+        # Register Frame on the left of Right Frame
+
+        # Memory and binary arrays on the right of Right Frame
+
+        # Pipeline window at the bottom
+        self.pipeline_window = PipelineWindow(self)
+        self.main_frame.add(self.pipeline_window, weight=1)
+
+        # Toolbar at the top
         self.toolbar = Toolbar(self, self.asm_window)
         self.toolbar.pack(fill="x")
 
 
 
+
+
+
+
+# ---------- ASM Window ---------- #
+
+class ASMWindow(ctk.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master)
+
+        self.frame = ctk.CTkFrame(self, corner_radius=0)
+        self.frame.pack(side="top", fill="both", expand=True)
+
+        self.title = ctk.CTkLabel(self.frame, text="ASM Code Window", bg_color="transparent")
+        self.title.pack(side="top", fill="x")
+
+        self.textbox = ctk.CTkTextbox(self.frame)
+        self.textbox.pack(side="top", fill="both")
+
+    def get_text_content(self):
+        '''Gets the content of the text box.'''
+        return self.textbox.get("1.0", tk.END)
+    
+    def delete_content(self):
+        '''Deletes the content of the text box.'''
+        return self.textbox.delete("1.0", tk.END)
+    
+    def insert_content(self, content):
+        '''Inserts the content in the text box.'''
+        return self.textbox.insert(tk.END, content)
+    
+
+
+
+
+
+# ---------- Debugger Window ---------- #
+
+class DebuggerWindow(ctk.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master)
+
+        self.frame = ctk.CTkFrame(self, corner_radius=0)
+        self.frame.pack(side="top", fill="both", expand=True)
+
+        self.title = ctk.CTkLabel(self.frame, text="Debugger", bg_color="transparent")
+        self.title.pack(side="top", fill="x")
+
+        self.textbox = ctk.CTkTextbox(self.frame)
+        self.textbox.pack(side="top", fill="both")
+        self.textbox.configure(state="disabled")
+    
+    def delete_content(self):
+        '''Deletes the content of the text box.'''
+        return self.textbox.delete("1.0", tk.END)
+    
+    def insert_content(self, content):
+        '''Inserts the content in the text box.'''
+        return self.textbox.insert(tk.END, content)
 
 
 
@@ -299,33 +374,7 @@ class SimulatorDocumentation(ctk.CTkToplevel):
 
 
 
-# ---------- ASM Window ---------- #
 
-class ASMWindow(ctk.CTkFrame):
-    def __init__(self, master):
-        super().__init__(master)
-
-        self.asm_frame = ctk.CTkFrame(self, corner_radius=0)
-        self.asm_frame.pack(side="top", fill="both", expand=True)
-
-        self.title = ctk.CTkLabel(self.asm_frame, text="ASM Code Window", bg_color="transparent")
-        self.title.pack(side="top")
-
-        self.textbox = ctk.CTkTextbox(self.asm_frame)
-        self.textbox.pack(side="top", fill="both")
-
-    def get_text_content(self):
-        '''Gets the content of the text box.'''
-        return self.textbox.get("1.0", tk.END)
-    
-    def delete_content(self):
-        '''Deletes the content of the text box.'''
-        return self.textbox.delete("1.0", tk.END)
-    
-    def insert_content(self, content):
-        '''Inserts the content in the text box.'''
-        return self.textbox.insert(tk.END, content)
-    
 
 
 
