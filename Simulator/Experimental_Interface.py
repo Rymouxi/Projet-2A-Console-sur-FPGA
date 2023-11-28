@@ -78,6 +78,8 @@ class EnseaSimulator(ctk.CTk):
         self.toolbar = Toolbar(self, self.asm_window)
         self.toolbar.pack(fill="x")
 
+        self.mem_and_bin.code_memory.set_line_values(2, 4, "bruh")
+
 
 
 
@@ -95,7 +97,7 @@ class ASMWindow(ctk.CTkFrame):
         self.title = ctk.CTkLabel(self.frame, text="ASM Code Window", bg_color="transparent")
         self.title.pack(side="top", fill="x")
 
-        self.textbox = ctk.CTkTextbox(self.frame)
+        self.textbox = ctk.CTkTextbox(self.frame, height=300)
         self.textbox.pack(side="top", fill="both")
 
     def get_text_content(self):
@@ -127,7 +129,7 @@ class DebuggerWindow(ctk.CTkFrame):
         self.title = ctk.CTkLabel(self.frame, text="Debugger", bg_color="transparent")
         self.title.pack(side="top", fill="x")
 
-        self.textbox = ctk.CTkTextbox(self.frame)
+        self.textbox = ctk.CTkTextbox(self.frame, height=300, width=700)
         self.textbox.pack(side="top", fill="both")
         self.textbox.configure(state="disabled")
     
@@ -234,31 +236,99 @@ class MemAndBin(ctk.CTkTabview):
         self.add("User Memory")
         self.add("Binary")
 
-        # add widgets on tabs
-        self.label = ctk.CTkLabel(master=self.tab("Code Memory"))
-        self.label.grid(row=0, column=0, padx=20, pady=0)
+        self.code_memory = CodeMemory(master=self.tab("Code Memory"))
+        self.code_memory.pack(expand=True, fill="both")
+
+        self.user_memory = UserMemory(master=self.tab("User Memory"))
+        self.user_memory.pack(expand=True, fill="both")
+
+        self.binary = BinaryWindow(master=self.tab("Binary"))
+        self.binary.pack(expand=True, fill="both")
 
 
-class CodeRAM(ctk.CTkFrame):
+class CodeMemory(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
 
-        # Create headers
         headers = ["Adress", "Value", "Instruction"]
-        for col, header in enumerate(headers):
-            header_label = ctk.CTkLabel(self, text=header, padx=5, pady=2, anchor="w", font=("Arial", 12, "bold"))
-            header_label.grid(row=0, column=col, sticky="nsew")
 
-        # Create data entry widgets
+        # Treeview
+        self.tree = tk.ttk.Treeview(self, columns=headers, show="headings")
+        for header in headers:
+            self.tree.heading(header, text=header)
+            self.tree.column(header, anchor="center", width=100)
+
+        # Filling the treeview
         for i in range(256):
-            data_label = ctk.CTkLabel(self, text="0", padx=5, pady=2, anchor="w")
-            data_label.grid(row=i+1, column=col, sticky="nsew")
+            address = "0x"+format(i*2+134217728, "08x")
+            hex_value = "0x0000"
+            instruction = ""
+            self.tree.insert("", "end", values=(address, hex_value, instruction))
 
-        # Configure grid weights for resizing
-        for i in range(len(headers)):
-            self.grid_columnconfigure(i, weight=1)
-        for j in range(256):
-            self.grid_rowconfigure(j, weight=1)
+        # Vertical scrollbar
+        self.scrollbar = ctk.CTkScrollbar(self, orientation="vertical", command=self.tree.yview)
+        self.tree.configure(yscrollcommand=self.scrollbar.set)
+
+        # Pack components
+        self.tree.pack(side="left", fill="both", expand=True)
+        self.scrollbar.pack(side="right", fill="y")
+
+    def set_line_values(self, index, value, instruction):
+        '''Set values for a chosen line in the treeview.'''
+        item_id = self.tree.get_children()[index]  # Get the item ID based on the index
+        self.tree.item(item_id, values=("0x"+format(index*2+134217728, "08x"), value, instruction))
+
+
+class UserMemory(ctk.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master)
+
+        headers = ["Adress", "Value"]
+
+        # Treeview
+        self.tree = tk.ttk.Treeview(self, columns=headers, show="headings")
+        for header in headers:
+            self.tree.heading(header, text=header)
+            self.tree.column(header, anchor="center", width=100)
+
+        # Filling the treeview
+        for i in range(256):
+            address = "0x"+format(i*4+536870912, "08x")
+            hex_value = "0x0000000"
+            instruction = ""
+            self.tree.insert("", "end", values=(address, hex_value))
+
+        # Vertical scrollbar
+        self.scrollbar = ctk.CTkScrollbar(self, orientation="vertical", command=self.tree.yview)
+        self.tree.configure(yscrollcommand=self.scrollbar.set)
+
+        # Pack components
+        self.tree.pack(side="left", fill="both", expand=True)
+        self.scrollbar.pack(side="right", fill="y")
+
+
+class BinaryWindow(ctk.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master)
+
+        self.frame = ctk.CTkFrame(self, corner_radius=0)
+        self.frame.pack(side="top", fill="both", expand=True)
+
+        self.title = ctk.CTkLabel(self.frame, text="Binary", bg_color="transparent")
+        self.title.pack(side="top", fill="x")
+
+        self.textbox = ctk.CTkTextbox(self.frame)
+        self.textbox.pack(side="top", fill="both", expand=True)
+        #self.textbox.configure(state="disabled")
+    
+    def delete_content(self):
+        '''Deletes the content of the text box.'''
+        return self.textbox.delete("1.0", tk.END)
+    
+    def insert_content(self, content):
+        '''Inserts the content in the text box.'''
+        return self.textbox.insert(tk.END, content)
+
 
 
 
