@@ -58,11 +58,9 @@ def error_handler_add(instruction_without_action):
     error=[]
     R_count=instruction_without_action.count('R')
     if R_count==1:
-        error.extend(register_error_handler(instruction_without_action))
-        error.extend(imm_error_handler(instruction_without_action,8))
+        error.extend((register_error_handler(instruction_without_action),imm_error_handler(instruction_without_action,8)))
     elif R_count==2:
-        error.extend(register_error_handler(instruction_without_action))
-        error.extend(imm_error_handler(instruction_without_action,3))       
+        error.extend((register_error_handler(instruction_without_action),imm_error_handler(instruction_without_action,3)))       
     elif R_count==3:
         error.extend(register_error_handler(instruction_without_action))
     else:
@@ -89,8 +87,7 @@ def error_handler_cmp (instruction_without_action):
     if R_count!=1:
         error.append("The number of register doesn't match for this instruction")
     elif R_count==1:
-        error.extend(register_error_handler(instruction_without_action))
-        error.extend(imm_error_handler(instruction_without_action,8))
+        error.extend((register_error_handler(instruction_without_action),imm_error_handler(instruction_without_action,8)))
     return error
 
 def error_handler_eor (instruction_without_action):
@@ -123,8 +120,7 @@ def error_handler_lsl (instruction_without_action):
     if R_count!=2:
         error.append("The number of register doesn't match for this instruction")
     elif R_count==2:
-        error.extend(register_error_handler(instruction_without_action))
-        error.extend(imm_error_handler(instruction_without_action,5))
+        error.extend((register_error_handler(instruction_without_action),imm_error_handler(instruction_without_action,5)))
     return error
 
 def error_handler_mov (instruction_without_action):
@@ -134,8 +130,7 @@ def error_handler_mov (instruction_without_action):
     error=[]
     R_count=instruction_without_action.count('R')
     if R_count==1:
-        error.extend(register_error_handler(instruction_without_action))
-        error.extend(imm_error_handler(instruction_without_action,8))
+        error.extend((register_error_handler(instruction_without_action),imm_error_handler(instruction_without_action,8)))
     elif R_count==2:
         error.extend(register_error_handler(instruction_without_action))
     else:
@@ -161,11 +156,9 @@ def error_handler_sub (instruction_without_action):
     error=[]
     R_count=instruction_without_action.count('R')
     if R_count==1:
-        error.extend(register_error_handler(instruction_without_action))
-        error.extend(imm_error_handler(instruction_without_action,8))
+        error.extend((register_error_handler(instruction_without_action),imm_error_handler(instruction_without_action,8)))
     elif R_count==2:
-        error.extend(register_error_handler(instruction_without_action))
-        error.extend(imm_error_handler(instruction_without_action,3))       
+        error.extend((register_error_handler(instruction_without_action),imm_error_handler(instruction_without_action,3)))       
     elif R_count==3:
         error.extend(register_error_handler(instruction_without_action))
     else:
