@@ -76,7 +76,7 @@ def STR_simu(instruction:str,line:int):
     #STR Rt,[Rn]
     if virtual_memory_address_check(virtual_register[int(register_recognition(instruction)[1],2)]):
         error_simu.extend([virtual_memory_address_check(virtual_register[int(register_recognition(instruction)[1],2)]),line])
-        error_count+=1 
+        error_count+=1
     if error_count==0:
         #Rt et Rn sont les numéros (en binaire) des registres dans STR
         Rt,Rn=register_recognition(instruction)
