@@ -48,7 +48,7 @@ class EnseaSimulator(ctk.CTk):
 
         # Coding Frame on the left
         self.coding_frame = tk.ttk.PanedWindow(self.central_frame, orient=tk.VERTICAL)
-        self.central_frame.add(self.coding_frame, weight=1)
+        self.central_frame.add(self.coding_frame, weight=3)
 
         # ASM Window at the top of Coding Frame
         self.asm_window = ASMWindow(self.coding_frame)
@@ -77,7 +77,6 @@ class EnseaSimulator(ctk.CTk):
         # Toolbar at the top
         self.toolbar = Toolbar(self, self.asm_window)
         self.toolbar.pack(fill="x")
-
 
 
 
@@ -151,11 +150,73 @@ class RegisterWindow(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
 
+        # Frame
         self.frame = ctk.CTkFrame(self, corner_radius=0)
         self.frame.pack(side="top", fill="both", expand=True)
 
+        # Title
         self.title = ctk.CTkLabel(self.frame, text="Registers", bg_color="transparent")
         self.title.pack(side="top", fill="x")
+
+        self.sub_frame = ctk.CTkFrame(self.frame, corner_radius=0)
+        self.sub_frame.pack(side="top", fill="both")
+
+        self.value_labels = []
+
+        # Create data entry widgets
+        for i in range(7):
+            self.register_label = ctk.CTkLabel(self.sub_frame, text=f"R{i}:", padx=5, pady=2, anchor="w")
+            self.register_label.grid(row=i, column=0, sticky="nsew")
+
+            self.value_label = ctk.CTkLabel(self.sub_frame, text="0", padx=5, pady=2, anchor="w")
+            self.value_label.grid(row=i, column=1, sticky="nsew")
+            self.value_labels.append(self.value_label)
+
+        self.register_label = ctk.CTkLabel(self.sub_frame, text="NZVC", padx=5, pady=2, anchor="w")
+        self.register_label.grid(row=7, column=0, sticky="nsew")
+
+        self.value_label = ctk.CTkLabel(self.sub_frame, text="0", padx=5, pady=2, anchor="w")
+        self.value_label.grid(row=7, column=1, sticky="nsew")
+        self.value_labels.append(self.value_label)
+
+        # Configure grid weights for resizing
+        for i in range(8):
+            self.grid_rowconfigure(i, weight=1)
+        for j in range(2):
+            self.grid_columnconfigure(j, weight=1)
+
+        self.state = 0
+        self.button = ctk.CTkButton(self.frame, text="Switch to hex", command=self.change_format)
+        self.button.pack(side="top")
+
+    def get_register_values(self, index: int):
+        '''Return a list of register values.'''
+        return [self.value_labels[index].cget("text")]
+
+    def set_register_values(self, index: int, value: str):
+        '''Set register values using a list.'''
+        self.value_labels[index].configure(text=value)
+
+    def change_format(self):
+        '''Change the format of values to hexadecimal.'''
+        if self.state == 0:
+            for label in self.value_labels:
+                decimal_value = int(label.cget("text"))
+                hex_value = "0x"+format(decimal_value, "08x")
+                label.configure(text=hex_value)
+                self.state = 1
+                self.button.configure(text="Switch to dec")
+        else:
+            for label in self.value_labels:
+                hex_value = label.cget("text")
+                hex_value = hex_value[2:]
+                decimal_value = int(hex_value, 16)
+                label.configure(text=str(decimal_value))
+                self.state = 0
+                self.button.configure(text="Switch to dec")
+
+
+
 
 
 
@@ -169,12 +230,35 @@ class MemAndBin(ctk.CTkTabview):
         super().__init__(master)
 
         # create tabs
-        self.add("tab 1")
-        self.add("tab 2")
+        self.add("Code Memory")
+        self.add("User Memory")
+        self.add("Binary")
 
         # add widgets on tabs
-        self.label = ctk.CTkLabel(master=self.tab("tab 1"))
+        self.label = ctk.CTkLabel(master=self.tab("Code Memory"))
         self.label.grid(row=0, column=0, padx=20, pady=0)
+
+
+class CodeRAM(ctk.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master)
+
+        # Create headers
+        headers = ["Adress", "Value", "Instruction"]
+        for col, header in enumerate(headers):
+            header_label = ctk.CTkLabel(self, text=header, padx=5, pady=2, anchor="w", font=("Arial", 12, "bold"))
+            header_label.grid(row=0, column=col, sticky="nsew")
+
+        # Create data entry widgets
+        for i in range(256):
+            data_label = ctk.CTkLabel(self, text="0", padx=5, pady=2, anchor="w")
+            data_label.grid(row=i+1, column=col, sticky="nsew")
+
+        # Configure grid weights for resizing
+        for i in range(len(headers)):
+            self.grid_columnconfigure(i, weight=1)
+        for j in range(256):
+            self.grid_rowconfigure(j, weight=1)
 
 
 
