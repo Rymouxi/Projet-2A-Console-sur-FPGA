@@ -231,7 +231,7 @@ def ADD_simu(instruction:str,line:int):
     #ADD Rd,#imm8
     elif count_R==1:
         #Rd et imm sont les numéros (en binaire) des registres dans ADD
-        Rd=register_recognition(instruction)
+        Rd=register_recognition(instruction)[0]
         imm8=imm_recognition(instruction,8)
 
         #La valeur de Rd en décimale
