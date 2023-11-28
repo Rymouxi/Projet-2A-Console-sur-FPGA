@@ -211,7 +211,7 @@ def imm_error_handler(instruction_without_action,size):
         m=2
         number_binary=''
         while (instruction_without_action.find('0B')+m<n)and(instruction_without_action[instruction_without_action.find('0B')+m] in hexa[0:2]):
-            number_hexa+=instruction_without_action[instruction_without_action.find('0B')+m]
+            number_binary+=instruction_without_action[instruction_without_action.find('0B')+m]
             m+=1
         if len(number_binary)==0:
             error.append("No number") 

@@ -71,10 +71,10 @@ def imm_recognition(instruction:str,size:int):
 
 
     elif instruction.count('0B')==1:
-        m=1
+        m=0
         imm=''
-        while (instruction.find('0B')+1+m<n)and((instruction[instruction.find('0B')+1+m] in [0,1])==True):
-            imm+=instruction[instruction.find('0B')+1+m:instruction.find('0B')+m+2]
+        while (instruction.find('0B')+2+m<n)and(instruction[instruction.find('0B')+2+m] in ['0','1']):
+            imm+=instruction[instruction.find('0B')+2+m]
             m+=1
         imm_bin=imm
 
