@@ -47,7 +47,8 @@ def error_handler_main(split_instruction):
 def error_table_extension(error_handler_table,line):
     error_table=[]
     for error in error_handler_table:
-        error_table.extend([error,line])
+        if error!=[]:
+            error_table.extend([error,line])
     return error_table
 
 def error_handler_add(instruction_without_action):
