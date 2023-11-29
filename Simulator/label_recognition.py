@@ -1,7 +1,6 @@
 from treatment import *
 
-if 'label_table' not in globals():
-    label_table=[]
+label_table=[]
 
 def label_recognition(split_instruction):
     """Code ASM brute est le code en entier avec les sauts de ligne\n
@@ -11,7 +10,7 @@ def label_recognition(split_instruction):
     """
     #Séparation du code en lignes d'instruction
     global label_table
-    label_table=[]
+    label_table.clear()
     for line,instruction in enumerate(split_instruction):
         #Recherche des ':' dans l'instruction
         if instruction.count(':')==1:
