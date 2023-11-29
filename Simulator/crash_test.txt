@@ -1,0 +1,13 @@
+Here is a list of tests that must be made
+
+
+MOV Instructions:
+
+MOV 
+MOV R0
+MOV R9
+MOV #72
+MOV 0B923
+MOV R1,R3,R4
+MOV R8,R9
+
