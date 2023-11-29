@@ -34,13 +34,23 @@ class EnseaSimulator(ctk.CTk):
     def __init__(self):        
         super().__init__()
 
+        def theme_toggle_dark():
+            '''Toggles dark theme.'''
+
+            ctk.set_appearance_mode("dark")
+
+        def theme_toggle_light():
+            '''Toggles light theme.'''
+
+            ctk.set_appearance_mode("light")
+
         # Simulator title
         self.title("ENSEA's Python LCM3 ASM Simulator")
         self.geometry("980x720")
 
         # Main Frame under the Toolbar
         self.main_frame = tk.ttk.PanedWindow(self, orient=tk.VERTICAL)
-        self.main_frame.pack(side="bottom", expand=True, fill="both")
+        self.main_frame.pack(side="bottom", expand=True, fill="both", pady=5)
 
         # Central Frame above the Pipeline
         self.central_frame = tk.ttk.PanedWindow(self.main_frame, orient=tk.HORIZONTAL)
@@ -75,10 +85,8 @@ class EnseaSimulator(ctk.CTk):
         self.main_frame.add(self.pipeline_window, weight=1)
 
         # Toolbar at the top
-        self.toolbar = Toolbar(self, self.asm_window)
+        self.toolbar = Toolbar(self, self.asm_window, theme_toggle_dark, theme_toggle_light)
         self.toolbar.pack(fill="x")
-
-        self.mem_and_bin.code_memory.set_line_values(2, 4, "bruh")
 
 
 
@@ -97,8 +105,8 @@ class ASMWindow(ctk.CTkFrame):
         self.title = ctk.CTkLabel(self.frame, text="ASM Code Window", bg_color="transparent")
         self.title.pack(side="top", fill="x")
 
-        self.textbox = ctk.CTkTextbox(self.frame, height=300)
-        self.textbox.pack(side="top", fill="both")
+        self.textbox = ctk.CTkTextbox(self.frame, width=700)
+        self.textbox.pack(side="top", fill="both", expand=True)
 
     def get_text_content(self):
         '''Gets the content of the text box.'''
@@ -129,8 +137,8 @@ class DebuggerWindow(ctk.CTkFrame):
         self.title = ctk.CTkLabel(self.frame, text="Debugger", bg_color="transparent")
         self.title.pack(side="top", fill="x")
 
-        self.textbox = ctk.CTkTextbox(self.frame, height=300, width=700)
-        self.textbox.pack(side="top", fill="both")
+        self.textbox = ctk.CTkTextbox(self.frame)
+        self.textbox.pack(side="top", fill="both", expand=True)
         self.textbox.configure(state="disabled")
     
     def delete_content(self):
@@ -202,9 +210,9 @@ class RegisterWindow(ctk.CTkFrame):
     def change_format(self):
         '''Change the format of values to hexadecimal.'''
         if self.state == 0:
-            for label in self.value_labels:
+            for i, label in enumerate(self.value_labels):
                 decimal_value = int(label.cget("text"))
-                hex_value = "0x"+format(decimal_value, "08x")
+                hex_value = "0x"+format(decimal_value, "08x") if i<7 else "0b"+format(decimal_value, "04b")
                 label.configure(text=hex_value)
                 self.state = 1
                 self.button.configure(text="Switch to dec")
@@ -254,6 +262,9 @@ class CodeMemory(ctk.CTkFrame):
 
         # Treeview
         self.tree = tk.ttk.Treeview(self, columns=headers, show="headings")
+        self.tree.tag_configure("even_row", background="#202020", foreground="lightcyan")  # Even row style
+        self.tree.tag_configure("odd_row", background="#101010", foreground="lightcyan")  # Odd row style
+
         for header in headers:
             self.tree.heading(header, text=header)
             self.tree.column(header, anchor="center", width=100)
@@ -263,7 +274,8 @@ class CodeMemory(ctk.CTkFrame):
             address = "0x"+format(i*2+134217728, "08x")
             hex_value = "0x0000"
             instruction = ""
-            self.tree.insert("", "end", values=(address, hex_value, instruction))
+            tags = ("even_row", "odd_row")[i % 2 == 1]
+            self.tree.insert("", "end", values=(address, hex_value, instruction), tags=(tags,))
 
         # Vertical scrollbar
         self.scrollbar = ctk.CTkScrollbar(self, orientation="vertical", command=self.tree.yview)
@@ -276,7 +288,7 @@ class CodeMemory(ctk.CTkFrame):
     def set_line_values(self, index, value, instruction):
         '''Set values for a chosen line in the treeview.'''
         item_id = self.tree.get_children()[index]  # Get the item ID based on the index
-        self.tree.item(item_id, values=("0x"+format(index*2+134217728, "08x"), value, instruction))
+        self.tree.item(item_id, values=("0x"+format(index*2+134217728, "08x"), "0x"+format(value, "04x"), instruction))
 
 
 class UserMemory(ctk.CTkFrame):
@@ -287,6 +299,9 @@ class UserMemory(ctk.CTkFrame):
 
         # Treeview
         self.tree = tk.ttk.Treeview(self, columns=headers, show="headings")
+        self.tree.tag_configure("even_row", background="#202020", foreground="lightcyan")  # Even row style
+        self.tree.tag_configure("odd_row", background="#101010", foreground="lightcyan")  # Odd row style
+
         for header in headers:
             self.tree.heading(header, text=header)
             self.tree.column(header, anchor="center", width=100)
@@ -295,8 +310,8 @@ class UserMemory(ctk.CTkFrame):
         for i in range(256):
             address = "0x"+format(i*4+536870912, "08x")
             hex_value = "0x0000000"
-            instruction = ""
-            self.tree.insert("", "end", values=(address, hex_value))
+            tags = ("even_row", "odd_row")[i % 2 == 1]
+            self.tree.insert("", "end", values=(address, hex_value), tags=(tags,))
 
         # Vertical scrollbar
         self.scrollbar = ctk.CTkScrollbar(self, orientation="vertical", command=self.tree.yview)
@@ -305,6 +320,11 @@ class UserMemory(ctk.CTkFrame):
         # Pack components
         self.tree.pack(side="left", fill="both", expand=True)
         self.scrollbar.pack(side="right", fill="y")
+
+    def set_line_values(self, index, value):
+        '''Set values for a chosen line in the treeview.'''
+        item_id = self.tree.get_children()[index]  # Get the item ID based on the index
+        self.tree.item(item_id, values=("0x"+format(index*4+536870912, "08x"), "0x"+format(value, "08x")))
 
 
 class BinaryWindow(ctk.CTkFrame):
@@ -319,7 +339,7 @@ class BinaryWindow(ctk.CTkFrame):
 
         self.textbox = ctk.CTkTextbox(self.frame)
         self.textbox.pack(side="top", fill="both", expand=True)
-        #self.textbox.configure(state="disabled")
+        self.textbox.configure(state="disabled")
     
     def delete_content(self):
         '''Deletes the content of the text box.'''
@@ -328,7 +348,6 @@ class BinaryWindow(ctk.CTkFrame):
     def insert_content(self, content):
         '''Inserts the content in the text box.'''
         return self.textbox.insert(tk.END, content)
-
 
 
 
@@ -386,20 +405,89 @@ class PipelineWindow(ctk.CTkFrame):
 # ---------- Toolbar ---------- #
 
 class Toolbar(ctk.CTkFrame):
-    def __init__(self, master, asm_window):
+    def __init__(self, master, asm_window, dark_theme, light_theme):
         super().__init__(master)
         
+        # Download Code button
+        self.download_button = DownloadCodeButton(self)
+        self.download_button.pack(side="right", padx=5)
+
+        # Connect Board button
+        self.connect_button = ConnectBoardButton(self)
+        self.connect_button.pack(side="right")
+
+        # Reset button
+        self.reset_button = ResetButton(self)
+        self.reset_button.pack(side="right", padx=5)
+
+        # Step button
+        self.step_button = StepButton(self)
+        self.step_button.pack(side="right")
+
+        # Run Step By Step button
+        self.runsbs_button = RunStepByStepButton(self)
+        self.runsbs_button.pack(side="right", padx=5)
+
+        # Run button
+        self.run_button = RunButton(self)
+        self.run_button.pack(side="right")
+
+        # Assemble button
+        self.assemble_button = AssembleButton(self)
+        self.assemble_button.pack(side="right", padx=5)
+
         # File menu
         self.file_menu = FileMenu(self, asm_window)
         self.file_menu.pack(side="left")
 
         # Settings menu
-        self.settings_menu = SettingsMenu(self)
+        self.settings_menu = SettingsMenu(self, dark_theme, light_theme)
         self.settings_menu.pack(side="left")
 
         # Help menu
         self.help_menu = HelpMenu(self)
         self.help_menu.pack(side="left")
+
+
+
+
+
+
+# ---------- Buttons ---------- #
+
+class DownloadCodeButton(ctk.CTkButton):
+    def __init__(self, master):
+        super().__init__(master, text="Download Code", width=90, height=0, font = ("Arial", 11))
+
+
+class ConnectBoardButton(ctk.CTkButton):
+    def __init__(self, master):
+        super().__init__(master, text="Connect Board", width=90, height=0, font = ("Arial", 11))
+
+
+class ResetButton(ctk.CTkButton):
+    def __init__(self, master):
+        super().__init__(master, text="Reset", width=90, height=0, font = ("Arial", 11))
+
+
+class StepButton(ctk.CTkButton):
+    def __init__(self, master):
+        super().__init__(master, text="Setp->", width=90, height=0, font = ("Arial", 11))
+
+
+class RunStepByStepButton(ctk.CTkButton):
+    def __init__(self, master):
+        super().__init__(master, text="Run Step By Step", width=90, height=0, font = ("Arial", 11))
+
+
+class RunButton(ctk.CTkButton):
+    def __init__(self, master):
+        super().__init__(master, text="Run", width=90, height=0, font = ("Arial", 11))
+
+
+class AssembleButton(ctk.CTkButton):
+    def __init__(self, master):
+        super().__init__(master, text="Assemble", width=90, height=0, font = ("Arial", 11))
 
 
 
@@ -496,18 +584,8 @@ class FileMenu(ctk.CTkFrame):
         
 
 class SettingsMenu(ctk.CTkFrame):
-    def __init__(self, master):
+    def __init__(self, master, dark_theme, light_theme):
         super().__init__(master)
-
-        def theme_toggle_dark():
-            '''Toggles dark theme.'''
-
-            ctk.set_appearance_mode("dark")
-
-        def theme_toggle_light():
-            '''Toggles light theme.'''
-
-            ctk.set_appearance_mode("light")
 
         # Settings menu button
         self = tk.ttk.Menubutton(self, text="Settings", direction="below")
@@ -518,8 +596,8 @@ class SettingsMenu(ctk.CTkFrame):
         self["menu"] = self.menu  # Assign the menu to the button
 
         # Add items to the File menu
-        self.menu.add_command(label="Dark mode", command=theme_toggle_dark)
-        self.menu.add_command(label="Light mode", command=theme_toggle_light)
+        self.menu.add_command(label="Dark mode", command=dark_theme)
+        self.menu.add_command(label="Light mode", command=light_theme)
 
 
 class HelpMenu(ctk.CTkFrame):
