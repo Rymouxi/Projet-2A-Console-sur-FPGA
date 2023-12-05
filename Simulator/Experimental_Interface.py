@@ -44,10 +44,12 @@ class EnseaSimulator(ctk.CTk):
 
             ctk.set_appearance_mode("dark")
 
+
         def theme_toggle_light():
             '''Toggles light theme.'''
 
             ctk.set_appearance_mode("light")
+
 
         def reset():
             '''Resets the values in registers, pipeline, binary, and memory arrays.\n
@@ -72,6 +74,7 @@ class EnseaSimulator(ctk.CTk):
             self.pipeline_window.destroy()
             self.pipeline_window = PipelineWindow(self)
             self.main_frame.add(self.pipeline_window, weight=1)
+
 
         self.title("ENSEA's Python LCM3 ASM Simulator")                                  # Simulator title
         self.geometry("980x720")
@@ -126,14 +129,17 @@ class ASMWindow(ctk.CTkFrame):
         self.textbox = ctk.CTkTextbox(self.frame, width=700)
         self.textbox.pack(side="top", fill="both", expand=True)
 
+
     def get_text_content(self):
         '''Gets the content of the text box.'''
         return self.textbox.get("1.0", tk.END)
-    
+
+
     def delete_content(self):
         '''Deletes the content of the text box.'''
         return self.textbox.delete("1.0", tk.END)
     
+
     def insert_content(self, content):
         '''Inserts the content in the text box.'''
         return self.textbox.insert(tk.END, content)
@@ -159,12 +165,14 @@ class DebuggerWindow(ctk.CTkFrame):
         self.textbox.pack(side="top", fill="both", expand=True)
         self.textbox.configure(state="disabled")
     
+
     def delete_content(self):
         '''Deletes the content of the text box.'''
         self.textbox.configure(state="normal")
         self.textbox.delete("1.0", tk.END)
         self.textbox.configure(state="disabled", text_color="black")
     
+
     def insert_content(self, content, color="white"):
         '''Inserts the content in the text box with specified color.'''
         self.textbox.configure(state="normal")
@@ -221,13 +229,16 @@ class RegisterWindow(ctk.CTkFrame):
         self.button = ctk.CTkButton(self.frame, text="Switch to hex", command=self.change_format)
         self.button.pack(side="top")
 
+
     def get_register_values(self, index: int):
         '''Return a list of register values.'''
         return [self.value_labels[index].cget("text")]
 
+
     def set_register_values(self, index: int, value: str):
         '''Set register values using a list.'''
         self.value_labels[index].configure(text=value)
+
 
     def change_format(self):
         '''Change the format of values to hexadecimal.'''
@@ -246,9 +257,6 @@ class RegisterWindow(ctk.CTkFrame):
                 label.configure(text=str(decimal_value))
                 self.state = 0
                 self.button.configure(text="Switch to dec")
-
-
-
 
 
 
@@ -307,6 +315,7 @@ class CodeMemory(ctk.CTkFrame):
         self.tree.pack(side="left", fill="both", expand=True)
         self.scrollbar.pack(side="right", fill="y")
 
+
     def set_line_values(self, index, value, instruction):
         '''Set values for a chosen line in the treeview.'''
         item_id = self.tree.get_children()[index]  # Get the item ID based on the index
@@ -343,6 +352,7 @@ class UserMemory(ctk.CTkFrame):
         self.tree.pack(side="left", fill="both", expand=True)
         self.scrollbar.pack(side="right", fill="y")
 
+
     def set_line_values(self, index, value):
         '''Set values for a chosen line in the treeview.'''
         item_id = self.tree.get_children()[index]  # Get the item ID based on the index
@@ -363,10 +373,12 @@ class BinaryWindow(ctk.CTkFrame):
         self.textbox.pack(side="top", fill="both", expand=True)
         self.textbox.configure(state="disabled")
     
+
     def delete_content(self):
         '''Deletes the content of the text box.'''
         return self.textbox.delete("1.0", tk.END)
     
+
     def insert_content(self, content):
         '''Inserts the content in the text box.'''
         return self.textbox.insert(tk.END, content)
@@ -403,11 +415,13 @@ class PipelineWindow(ctk.CTkFrame):
         for j in range(21):
             self.grid_columnconfigure(j, weight=1)
 
+
     def get_cell(self, row, col):
         '''Get the value in the specified cell.'''
 
         if 0 <= row <= 3 and 1 <= col <= 21:
             return self.entry_widgets[row][col - 1].get()
+
 
     def set_cell(self, row, col, value):
         '''Set the value in the specified cell.'''
@@ -428,6 +442,26 @@ class PipelineWindow(ctk.CTkFrame):
 class Toolbar(ctk.CTkFrame):
     def __init__(self, master, asm_window, debugger_window, theme_toggle_dark, theme_toggle_light, reset):
         super().__init__(master)
+
+        def download_code():
+            ''''''
+
+
+        def connect_board():
+            ''''''
+
+
+        def step():
+            ''''''
+
+
+        def run_step_by_step():
+            ''''''
+
+
+        def run():
+            ''''''
+
 
         def assemble():
             '''Assembles the code.'''
@@ -450,22 +484,23 @@ class Toolbar(ctk.CTkFrame):
             else:
                 ""
         
-        self.download_button = ctk.CTkButton(self, text="Download Code", width=100, height=10, font = ("Arial", 11), corner_radius=25, hover_color="darkgreen")
+
+        self.download_button = ctk.CTkButton(self, text="Download Code", width=100, height=10, font = ("Arial", 11), corner_radius=25, fg_color="gray", hover_color="darkgreen", state="disabled", command=download_code)
         self.download_button.pack(side="right", padx=5)
 
-        self.connect_button = ctk.CTkButton(self, text="Connect Board", width=100, height=10, font = ("Arial", 11), corner_radius=25, hover_color="darkgreen")
+        self.connect_button = ctk.CTkButton(self, text="Connect Board", width=100, height=10, font = ("Arial", 11), corner_radius=25, fg_color="forestgreen", hover_color="darkgreen", command=connect_board)
         self.connect_button.pack(side="right")
 
         self.reset_button = ctk.CTkButton(self, text="Reset", width=100, height=10, font = ("Arial", 11), corner_radius=25, fg_color="forestgreen", hover_color="darkgreen", command=reset)
         self.reset_button.pack(side="right", padx=5)
 
-        self.step_button = ctk.CTkButton(self, text="Setp->", width=100, height=10, font = ("Arial", 11), corner_radius=25, hover_color="darkgreen")
+        self.step_button = ctk.CTkButton(self, text="Setp->", width=100, height=10, font = ("Arial", 11), corner_radius=25, fg_color="gray", hover_color="darkgreen", state="disabled", command=step)
         self.step_button.pack(side="right")
 
-        self.runsbs_button = ctk.CTkButton(self, text="Run Step By Step", width=100, height=10, font = ("Arial", 11), corner_radius=25, hover_color="darkgreen")
+        self.runsbs_button = ctk.CTkButton(self, text="Run Step By Step", width=100, height=10, font = ("Arial", 11), corner_radius=25, fg_color="gray", hover_color="darkgreen", state="disabled", command=run_step_by_step)
         self.runsbs_button.pack(side="right", padx=5)
 
-        self.run_button = ctk.CTkButton(self, text="Run", width=100, height=10, font = ("Arial", 11), corner_radius=25, hover_color="darkgreen")
+        self.run_button = ctk.CTkButton(self, text="Run", width=100, height=10, font = ("Arial", 11), corner_radius=25, fg_color="gray", hover_color="darkgreen", state="disabled", command=run)
         self.run_button.pack(side="right")
 
         self.assemble_button = ctk.CTkButton(self, text="Assemble", width=100, height=10, font = ("Arial", 11), corner_radius=25, fg_color="forestgreen", hover_color="darkgreen", command=assemble)
@@ -503,6 +538,7 @@ class FileMenu(ctk.CTkFrame):
                     saved_code = asm_window.get_text_content()  # Gets the code from the text area
                     file.write(saved_code)
 
+
         def new_file():
             '''Creates a new blank code page. If code is present in the text window, asks if the user wants to save the current code.\n
                 If yes: Calls the 'save_as' function.\n
@@ -518,6 +554,7 @@ class FileMenu(ctk.CTkFrame):
                     save_as()
             if file_path:
                 asm_window.delete_content()
+
 
         def import_code():
             '''Opens a dialog window to import a code. If code is present in the text window, asks if the user wants to save the current code.\n
@@ -543,6 +580,7 @@ class FileMenu(ctk.CTkFrame):
                     asm_window.delete_content()               # Clears the text area content
                     asm_window.insert_content(imported_code)  # Pastes the code
 
+
         def save():
             '''Overwrites the current save file, or opens a dialog window to create a one.'''
 
@@ -557,6 +595,7 @@ class FileMenu(ctk.CTkFrame):
                 with open(file_path, "w") as file:
                     saved_code = asm_window.get_text_content()  # Gets the code from the text area
                     file.write(saved_code)
+
 
         # File menu button
         self = tk.ttk.Menubutton(self, text="File", direction="below")
@@ -599,6 +638,7 @@ class HelpMenu(ctk.CTkFrame):
             '''Opens an online documentation of the LCM3 instructions.'''
 
             webbrowser.open_new("https://moodle.ensea.fr/pluginfile.php/24675/mod_resource/content/1/LCM3_Instructions_2017.pdf")
+
 
         # Help menu button
         self = tk.ttk.Menubutton(self, text="Help", direction="below")  # Help menu button
