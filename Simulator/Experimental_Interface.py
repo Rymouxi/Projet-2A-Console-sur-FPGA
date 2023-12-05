@@ -58,7 +58,7 @@ class EnseaSimulator(ctk.CTk):
             self.debugger_window.delete_content()
 
             self.toolbar.destroy()
-            self.toolbar = Toolbar(self, self.asm_window, self.debugger_window, theme_toggle_dark, theme_toggle_light, reset)
+            self.toolbar = Toolbar(self, self.asm_window, self.debugger_window, self.mem_and_bin, theme_toggle_dark, theme_toggle_light, reset)
             self.toolbar.pack(fill="x")
 
             self.toolbar.assemble_button.configure(fg_color="forestgreen", state="normal")
@@ -106,7 +106,7 @@ class EnseaSimulator(ctk.CTk):
         self.pipeline_window = PipelineWindow(self)                                      # Pipeline window at the bottom
         self.main_frame.add(self.pipeline_window, weight=1)
 
-        self.toolbar = Toolbar(self, self.asm_window, self.debugger_window, theme_toggle_dark, theme_toggle_light, reset)  # Toolbar at the top
+        self.toolbar = Toolbar(self, self.asm_window, self.debugger_window, self.mem_and_bin, theme_toggle_dark, theme_toggle_light, reset)  # Toolbar at the top
         self.toolbar.pack(fill="x")
 
 
@@ -269,13 +269,44 @@ class MemAndBin(ctk.CTkTabview):
     def __init__(self, master):
         super().__init__(master)
 
-        # create tabs
+        # Tabs
         self.add("Code Memory")
         self.add("User Memory")
         self.add("Binary")
 
-        self.code_memory = CodeMemory(master=self.tab("Code Memory"))
+        # Code Memory
+        
+        self.code_memory = ctk.CTkFrame(master=self.tab("Code Memory"))
         self.code_memory.pack(expand=True, fill="both")
+ 
+        self.code_headers = ["Adress", "Value", "Instruction"]
+        self.code_tree = tk.ttk.Treeview(self.code_memory, columns=self.code_headers, show="headings")
+        self.code_tree.tag_configure("even_row", background="#202020", foreground="lightcyan")  # Even row style
+        self.code_tree.tag_configure("odd_row", background="#101010", foreground="lightcyan")   # Odd row style
+
+        for header in self.code_headers:
+            self.code_tree.heading(header, text=header)
+            self.code_tree.column(header, anchor="center", width=100)
+
+        # Filling the treeview
+        for i in range(256):
+            address = "0x"+format(i*2+134217728, "08x")
+            hex_value = "0x0000"
+            instruction = ""
+            tags = ("even_row", "odd_row")[i % 2 == 1]
+            self.code_tree.insert("", "end", values=(address, hex_value, instruction), tags=(tags,))
+
+        # Vertical scrollbar
+        self.scrollbar = ctk.CTkScrollbar(self.code_memory, orientation="vertical", command=self.code_tree.yview)
+        self.code_tree.configure(yscrollcommand=self.scrollbar.set)
+
+        # Pack components
+        self.code_tree.pack(side="left", fill="both", expand=True)
+        self.scrollbar.pack(side="right", fill="y")
+
+
+
+        # User Memory
 
         self.user_memory = UserMemory(master=self.tab("User Memory"))
         self.user_memory.pack(expand=True, fill="both")
@@ -284,42 +315,14 @@ class MemAndBin(ctk.CTkTabview):
         self.binary.pack(expand=True, fill="both")
 
 
-class CodeMemory(ctk.CTkFrame):
-    def __init__(self, master):
-        super().__init__(master)
-
-        headers = ["Adress", "Value", "Instruction"]
-
-        # Treeview
-        self.tree = tk.ttk.Treeview(self, columns=headers, show="headings")
-        self.tree.tag_configure("even_row", background="#202020", foreground="lightcyan")  # Even row style
-        self.tree.tag_configure("odd_row", background="#101010", foreground="lightcyan")   # Odd row style
-
-        for header in headers:
-            self.tree.heading(header, text=header)
-            self.tree.column(header, anchor="center", width=100)
-
-        # Filling the treeview
-        for i in range(256):
-            address = "0x"+format(i*2+134217728, "08x")
-            hex_value = "0x0000"
-            instruction = ""
-            tags = ("even_row", "odd_row")[i % 2 == 1]
-            self.tree.insert("", "end", values=(address, hex_value, instruction), tags=(tags,))
-
-        # Vertical scrollbar
-        self.scrollbar = ctk.CTkScrollbar(self, orientation="vertical", command=self.tree.yview)
-        self.tree.configure(yscrollcommand=self.scrollbar.set)
-
-        # Pack components
-        self.tree.pack(side="left", fill="both", expand=True)
-        self.scrollbar.pack(side="right", fill="y")
-
-
-    def set_line_values(self, index, value, instruction):
+    def code_mem_set(self, index:str, value:str, instruction:str):
         '''Set values for a chosen line in the treeview.'''
-        item_id = self.tree.get_children()[index]  # Get the item ID based on the index
-        self.tree.item(item_id, values=("0x"+format(index*2+134217728, "08x"), "0x"+format(value, "04x"), instruction))
+        item_id = self.code_tree.get_children()[int(index)]  # Get the item ID based on the index
+        self.code_tree.item(item_id, values=("0x"+format(index*2+134217728, "08x"), "0x"+format(int(value, 2), "04x"), instruction))
+
+
+# Here the item_id gives an error when executing after a reset. Prob a problem of Tcl interpreter accessing the Treeview after .destroy and init
+# ChatGPT said do troubleshooting bruh
 
 
 class UserMemory(ctk.CTkFrame):
@@ -440,7 +443,7 @@ class PipelineWindow(ctk.CTkFrame):
 # ---------- Toolbar ---------- #
 
 class Toolbar(ctk.CTkFrame):
-    def __init__(self, master, asm_window, debugger_window, theme_toggle_dark, theme_toggle_light, reset):
+    def __init__(self, master, asm_window, debugger_window, mem_and_bin, theme_toggle_dark, theme_toggle_light, reset):
         super().__init__(master)
 
         def download_code():
@@ -469,6 +472,7 @@ class Toolbar(ctk.CTkFrame):
             debugger_window.delete_content()
             master.toolbar.assemble_button.configure(self, fg_color="gray", state="disabled")
             code = asm_window.get_text_content()
+            master.toolbar.split_instructions, _, master.toolbar.bitstream, _, master.toolbar.line_update, _, master.toolbar.error = instruction_translation(code)
 
             # Funny text variations for when user tries to assemble empty code
             variations = ["sipping a coconut", "catching some rays", "in a hammock", "on a beach", "snorkeling", "in a tropical paradise", "surfing the clouds",
@@ -482,7 +486,12 @@ class Toolbar(ctk.CTkFrame):
                 master.toolbar.assemble_button.configure(self, fg_color="forestgreen", state="normal")
 
             else:
-                ""
+                # Fills the Code RAM array and the bitstream frame
+                for l in range(len(master.toolbar.line_update)-2):
+                    if len(master.toolbar.bitstream) != 0:
+                        if master.toolbar.bitstream[master.toolbar.line_update[l]] != "":
+                            print(master.toolbar.line_update[l], master.toolbar.bitstream[master.toolbar.line_update[l]])
+                            mem_and_bin.code_mem_set(master.toolbar.line_update[l], master.toolbar.bitstream[master.toolbar.line_update[l]], master.toolbar.split_instructions[master.toolbar.line_update[l]])
         
 
         self.download_button = ctk.CTkButton(self, text="Download Code", width=100, height=10, font = ("Arial", 11), corner_radius=25, fg_color="gray", hover_color="darkgreen", state="disabled", command=download_code)
@@ -514,6 +523,8 @@ class Toolbar(ctk.CTkFrame):
 
         self.help_menu = HelpMenu(self)
         self.help_menu.pack(side="left")
+
+        self.split_instruction, self.line_instruction, self.bitstream, self.register_update, self.line_update, self.memory_update, self.error = [], [], [], [], [], [], []
 
 
 
