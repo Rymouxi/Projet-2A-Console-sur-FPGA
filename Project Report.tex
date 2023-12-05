@@ -1,14 +1,17 @@
 \documentclass{article}
 \usepackage{geometry}
-\geometry{a4paper, top=1.0in, left=0.75in ,bottom=1.44in, right=0.52in}
 \usepackage{graphicx} % Required for inserting images
 \usepackage{hyperref} % Required for the links
+\usepackage{inconsolata}
 \usepackage{xcolor}
 \usepackage{listings} % Required to show code lines
+
+\geometry{a4paper, top=1.0in, left=0.75in ,bottom=1.44in, right=0.52in}
 
 %  Colors for code lines:
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codedeepturquoise}{rgb}{0,0.42,0.44}
 \definecolor{codepurple}{rgb}{0.58,0,0.82}
 \definecolor{codeorange}{rgb}{1,0.53,0.11}
 \definecolor{codeblue}{rgb}{0,0,0.9}
@@ -29,7 +32,50 @@
     stringstyle=\color{codegreen},
     morestring=[b]{'},
     morestring=[b]{"},
-    num
+    numberstyle=\tiny\color{codedeepturquoise},
+    numbers=left,
+    frame=single,
+    breaklines=true,
+    showstringspaces=false,
+    sensitive=true,
+    basicstyle=\ttfamily\fontfamily{zi4}\selectfont,
+}
+\lstdefinelanguage{MyVHDL}{
+    keywords={ADD, AND, B, BGE, BLT, BGT, BLE, CMP, EOR, LDR, LSL, MOV, STR, SUB},
+    keywordstyle=\color{codeblue},
+    morekeywords={[2]while, for, if, else, elif,return},
+    keywordstyle={[2]\color{codepurple}},
+    morekeywords={[3]type,int,str,range,enumerate},%type color
+    keywordstyle={[3]\color{codered}},
+    morekeywords={[4]find,len,count,self,append,DecToBin,print,exit,format,index,isdigit},%Function colors
+    keywordstyle={[4]\color{codeblue}},
+    commentstyle={\color{codegray}},
+    morecomment=[l]{\#},
+    stringstyle=\color{codegreen},
+    morestring=[b]{'},
+    morestring=[b]{"},
+    numberstyle=\tiny\color{codedeepturquoise},
+    numbers=left,
+    frame=single,
+    breaklines=true,
+    showstringspaces=false,
+    sensitive=true,
+    basicstyle=\ttfamily\fontfamily{zi4}\selectfont,
+}
+\lstdefinelanguage{MyASM}{
+    keywords={ADD, AND, B, BGE, BLT, BGT, BLE, CMP, EOR, LDR, LSL, MOV, STR, SUB},
+    keywordstyle=\color{codeblue},
+    morekeywords={[2]R0,R1,R2,R3,R4,R5,R6,R7},
+    keywordstyle={[2]\color{codegreen}},
+    commentstyle={\color{codegray}},
+    morecomment=[l]{;},
+    numberstyle=\tiny\color{codedeepturquoise},
+    numbers=left,
+    frame=single,
+    breaklines=true,
+    showstringspaces=false,
+    sensitive=true,
+    basicstyle=\ttfamily\fontfamily{zi4}\selectfont,
 }
 % Links colors configuration
 \hypersetup{
@@ -37,6 +83,12 @@
     linkcolor=black,
     filecolor=magenta,      
     urlcolor=cyan}
+    
+%Macro Definition
+\newcommand{\code}[1]{\fontfamily{zi4}\texttt{#1}}
+\newcommand{\codebf}[1]{\textbf{\code{#1}}}
+\newcommand{\codeASM}[0]{\code{code\_ASM }}
+\newcommand{\n}[0]{\(\backslash\)n}
 
 % maketitle override to suppress the auto date
 \makeatletter
@@ -83,18 +135,30 @@
 \newpage
 \section{Software}
 \subsection{Simulator}
+
+Let's consider the code we get from the UI is called \codeASM  and is a string containing raw code of ASM. 
 \subsubsection{Global structure}
 \subsubsection{Text slicing}
-\paragraph{}First we had to 
+\paragraph{}
+The very first step of this process is to reshape the data to be easily exploited. To do so we must take into account the fact that the interface is sending us some text in the shape of a string. What we need is a data table whose every argument is a string type instruction.
 
-La première étape était de mettre en forme les données dans la forme que l'on voulait. Pour cela, il faut savoir que l'interface nous envoie un texte sous la forme d'un chaîne de caractère str.
-Ce que nous voulons, c'est un tableau avec chaque instruction, ni plus ni moins.
-\paragraph{Séparateur d'instruction}
-Pour séparer nos instructions entres elles, nous utilisons le caractère séparateur '\(\backslash\)n'. 
+\paragraph{Séparateur d'instruction:}
+To split our instructions, we use the separator '\n'. Le's take an example for the code we get:
+\begin{lstlisting}[language=MyPython]
+code_ASM="MOV R0,#10\nMOV R1,#5"
+\end{lstlisting}
+Here we have 2 instructions: \code{MOV~R0,\#10} and \code{MOV~R1,\#5} that we must separate. To do that we slice the str, cutting the \n and separating these instructions in an array in split\_instructions:
+\begin{lstlisting}[language=MyPython]
+def line_jump(codeASM):
+    split_instruction=[]
+    return split_instructions
+\end{lstlisting}
+
 \begin{lstlisting}[language=MyPython]
 def tamerere():
     return yolo
     type
+    27476
 index=code.find('\n') and this
     #Allez
 \end{lstlisting}
@@ -102,6 +166,7 @@ index=code.find('\n') and this
 
 \subsubsection{Reconnaissance des instructions "Actions"}
 \subsubsection{Reconnaissance des registres}
+Every element of the instruction list is now starting by an action function, in order to recognize an action function (MOV, LDR ...) we put the instruction into a multi if condition checking the first 3 element of every instructions looking for a "MOV" for instance.
 \subsubsection{Reconnaissance des arguments de type nombre}
 \subsubsection{Simulation interne des registres}
 \subsubsection{Simulation interne de la mémoire}
@@ -154,7 +219,11 @@ To code the interface, we used several modules:
 
 \subsubsection{Interface Architecture}
 
-Several key functions and architectural decisions contribute to the effectiveness and clarity of the user interface.
+The interface code is Object-Oriented. There's a class for every CustomTkinter object (every frame/button/etc.).
+
+\paragraph{Toolbar Functionality}
+The toolbar serves as a central hub for quick access to essential functionalities. Here's an overview of the core toolbar functions:
+
 \paragraph{Toolbar Functionality}
 The toolbar serves as a central hub for quick access to essential functionalities. Here's an overview of the core toolbar functions:
 \begin{itemize}
