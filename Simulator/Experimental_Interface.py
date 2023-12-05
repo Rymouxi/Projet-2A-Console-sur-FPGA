@@ -15,7 +15,12 @@
 
 import tkinter as tk
 import customtkinter as ctk
+import random
 import webbrowser
+
+from instruction_translation import *
+
+# change the color of the title of the debugger window when error
 
 
 
@@ -47,10 +52,14 @@ class EnseaSimulator(ctk.CTk):
         def reset():
             '''Resets the values in registers, pipeline, binary, and memory arrays.\n
                 Also reduces the lag by killing and re-initialising frames.'''
-        
+
+            self.debugger_window.delete_content()
+
             self.toolbar.destroy()
-            self.toolbar = Toolbar(self, self.asm_window, theme_toggle_dark, theme_toggle_light, reset)
+            self.toolbar = Toolbar(self, self.asm_window, self.debugger_window, theme_toggle_dark, theme_toggle_light, reset)
             self.toolbar.pack(fill="x")
+
+            self.toolbar.assemble_button.configure(fg_color="forestgreen", state="normal")
 
             self.register_window.destroy()
             self.register_window = RegisterWindow(self.right_frame)
@@ -64,37 +73,37 @@ class EnseaSimulator(ctk.CTk):
             self.pipeline_window = PipelineWindow(self)
             self.main_frame.add(self.pipeline_window, weight=1)
 
-        self.title("ENSEA's Python LCM3 ASM Simulator")                                              # Simulator title
+        self.title("ENSEA's Python LCM3 ASM Simulator")                                  # Simulator title
         self.geometry("980x720")
 
-        self.main_frame = tk.ttk.PanedWindow(self, orient=tk.VERTICAL)                               # Main Frame under the Toolbar
+        self.main_frame = tk.ttk.PanedWindow(self, orient=tk.VERTICAL)                   # Main Frame under the Toolbar
         self.main_frame.pack(side="bottom", expand=True, fill="both", pady=5)
 
-        self.central_frame = tk.ttk.PanedWindow(self.main_frame, orient=tk.HORIZONTAL)               # Central Frame above the Pipeline
+        self.central_frame = tk.ttk.PanedWindow(self.main_frame, orient=tk.HORIZONTAL)   # Central Frame above the Pipeline
         self.main_frame.add(self.central_frame, weight=5)
 
-        self.coding_frame = tk.ttk.PanedWindow(self.central_frame, orient=tk.VERTICAL)               # Coding Frame on the left
+        self.coding_frame = tk.ttk.PanedWindow(self.central_frame, orient=tk.VERTICAL)   # Coding Frame on the left
         self.central_frame.add(self.coding_frame, weight=3)
 
-        self.asm_window = ASMWindow(self.coding_frame)                                               # ASM Window at the top of Coding Frame
+        self.asm_window = ASMWindow(self.coding_frame)                                   # ASM Window at the top of Coding Frame
         self.coding_frame.add(self.asm_window, weight=1)
 
-        self.debugger_window = DebuggerWindow(self.coding_frame)                                     # Debugger at the bottom of Coding Frame
+        self.debugger_window = DebuggerWindow(self.coding_frame)                         # Debugger at the bottom of Coding Frame
         self.coding_frame.add(self.debugger_window, weight=1)
 
-        self.right_frame = tk.ttk.PanedWindow(self.central_frame, orient=tk.HORIZONTAL)              # Right Frame
+        self.right_frame = tk.ttk.PanedWindow(self.central_frame, orient=tk.HORIZONTAL)  # Right Frame
         self.central_frame.add(self.right_frame, weight=1)
 
-        self.register_window = RegisterWindow(self.right_frame)                                      # Register Frame on the left of Right Frame
+        self.register_window = RegisterWindow(self.right_frame)                          # Register Frame on the left of Right Frame
         self.right_frame.add(self.register_window, weight=1)
 
-        self.mem_and_bin = MemAndBin(self.right_frame)                                               # Memory and binary arrays on the right of Right Frame
+        self.mem_and_bin = MemAndBin(self.right_frame)                                   # Memory and binary arrays on the right of Right Frame
         self.right_frame.add(self.mem_and_bin, weight=1)
 
-        self.pipeline_window = PipelineWindow(self)                                                  # Pipeline window at the bottom
+        self.pipeline_window = PipelineWindow(self)                                      # Pipeline window at the bottom
         self.main_frame.add(self.pipeline_window, weight=1)
 
-        self.toolbar = Toolbar(self, self.asm_window, theme_toggle_dark, theme_toggle_light, reset)  # Toolbar at the top
+        self.toolbar = Toolbar(self, self.asm_window, self.debugger_window, theme_toggle_dark, theme_toggle_light, reset)  # Toolbar at the top
         self.toolbar.pack(fill="x")
 
 
@@ -152,11 +161,15 @@ class DebuggerWindow(ctk.CTkFrame):
     
     def delete_content(self):
         '''Deletes the content of the text box.'''
-        return self.textbox.delete("1.0", tk.END)
+        self.textbox.configure(state="normal")
+        self.textbox.delete("1.0", tk.END)
+        self.textbox.configure(state="disabled", text_color="black")
     
-    def insert_content(self, content):
-        '''Inserts the content in the text box.'''
-        return self.textbox.insert(tk.END, content)
+    def insert_content(self, content, color="white"):
+        '''Inserts the content in the text box with specified color.'''
+        self.textbox.configure(state="normal")
+        self.textbox.insert(tk.END, content)
+        self.textbox.configure(state="disabled", text_color=color)
 
 
 
@@ -413,84 +426,59 @@ class PipelineWindow(ctk.CTkFrame):
 # ---------- Toolbar ---------- #
 
 class Toolbar(ctk.CTkFrame):
-    def __init__(self, master, asm_window, theme_toggle_dark, theme_toggle_light, reset):
+    def __init__(self, master, asm_window, debugger_window, theme_toggle_dark, theme_toggle_light, reset):
         super().__init__(master)
-        
-        self.download_button = DownloadCodeButton(self)                 # Download Code button
-        self.download_button.pack(side="right", padx=5)
 
-        self.connect_button = ConnectBoardButton(self)                  # Connect Board button
-        self.connect_button.pack(side="right")
-
-        self.reset_button = ResetButton(self, reset)                    # Reset button
-        self.reset_button.pack(side="right", padx=5)
-
-        self.step_button = StepButton(self)                             # Step button
-        self.step_button.pack(side="right")
-
-        self.runsbs_button = RunStepByStepButton(self)                  # Run Step By Step button
-        self.runsbs_button.pack(side="right", padx=5)
-
-        self.run_button = RunButton(self)                               # Run button
-        self.run_button.pack(side="right")
-
-        self.assemble_button = AssembleButton(self, asm_window, reset)  # Assemble button
-        self.assemble_button.pack(side="right", padx=5)
-
-        self.file_menu = FileMenu(self, asm_window)                                     # File menu
-        self.file_menu.pack(side="left")
-
-        self.settings_menu = SettingsMenu(self, theme_toggle_dark, theme_toggle_light)  # Settings menu
-        self.settings_menu.pack(side="left")
-
-        self.help_menu = HelpMenu(self)                                                 # Help menu
-        self.help_menu.pack(side="left")
-
-
-
-
-
-
-# ---------- Buttons ---------- #
-
-class DownloadCodeButton(ctk.CTkButton):
-    def __init__(self, master):
-        super().__init__(master, text="Download Code", width=100, height=10, font = ("Arial", 11), corner_radius=25)
-
-
-class ConnectBoardButton(ctk.CTkButton):
-    def __init__(self, master):
-        super().__init__(master, text="Connect Board", width=100, height=10, font = ("Arial", 11), corner_radius=25)
-
-
-class ResetButton(ctk.CTkButton):
-    def __init__(self, master, reset):
-        super().__init__(master, text="Reset", width=100, height=10, font = ("Arial", 11), corner_radius=25, command=reset)
-
-
-class StepButton(ctk.CTkButton):
-    def __init__(self, master):
-        super().__init__(master, text="Setp->", width=100, height=10, font = ("Arial", 11), corner_radius=25)
-
-
-class RunStepByStepButton(ctk.CTkButton):
-    def __init__(self, master):
-        super().__init__(master, text="Run Step By Step", width=100, height=10, font = ("Arial", 11), corner_radius=25)
-
-
-class RunButton(ctk.CTkButton):
-    def __init__(self, master):
-        super().__init__(master, text="Run", width=100, height=10, font = ("Arial", 11), corner_radius=25)
-
-
-class AssembleButton(ctk.CTkButton):
-    def __init__(self, master, asm_window, reset):
         def assemble():
             '''Assembles the code.'''
 
-            reset()
+            debugger_window.delete_content()
+            master.toolbar.assemble_button.configure(self, fg_color="gray", state="disabled")
+            code = asm_window.get_text_content()
 
-        super().__init__(master, text="Assemble", width=100, height=10, font = ("Arial", 11), corner_radius=25, command=assemble)
+            # Funny text variations for when user tries to assemble empty code
+            variations = ["sipping a coconut", "catching some rays", "in a hammock", "on a beach", "snorkeling", "in a tropical paradise", "surfing the clouds",
+            "on a spa retreat", "napping in a hammock", "practicing mindfulness", "doing yoga", "enjoying a siesta", "on a cosmic cruise", "in a Zen garden",
+            "sunbathing", "in a day spa", "on a coffee break", "chilling in a hammock", "vacationing", "on a beach", "gone", "too short", "transparent", "too small"]
+            random_variation = random.choice(variations)
+
+            # Check if code is empty
+            if code == "\n":
+                debugger_window.insert_content("Assembling air? Your code's "+random_variation+".", "blue")
+                master.toolbar.assemble_button.configure(self, fg_color="forestgreen", state="normal")
+
+            else:
+                ""
+        
+        self.download_button = ctk.CTkButton(self, text="Download Code", width=100, height=10, font = ("Arial", 11), corner_radius=25, hover_color="darkgreen")
+        self.download_button.pack(side="right", padx=5)
+
+        self.connect_button = ctk.CTkButton(self, text="Connect Board", width=100, height=10, font = ("Arial", 11), corner_radius=25, hover_color="darkgreen")
+        self.connect_button.pack(side="right")
+
+        self.reset_button = ctk.CTkButton(self, text="Reset", width=100, height=10, font = ("Arial", 11), corner_radius=25, fg_color="forestgreen", hover_color="darkgreen", command=reset)
+        self.reset_button.pack(side="right", padx=5)
+
+        self.step_button = ctk.CTkButton(self, text="Setp->", width=100, height=10, font = ("Arial", 11), corner_radius=25, hover_color="darkgreen")
+        self.step_button.pack(side="right")
+
+        self.runsbs_button = ctk.CTkButton(self, text="Run Step By Step", width=100, height=10, font = ("Arial", 11), corner_radius=25, hover_color="darkgreen")
+        self.runsbs_button.pack(side="right", padx=5)
+
+        self.run_button = ctk.CTkButton(self, text="Run", width=100, height=10, font = ("Arial", 11), corner_radius=25, hover_color="darkgreen")
+        self.run_button.pack(side="right")
+
+        self.assemble_button = ctk.CTkButton(self, text="Assemble", width=100, height=10, font = ("Arial", 11), corner_radius=25, fg_color="forestgreen", hover_color="darkgreen", command=assemble)
+        self.assemble_button.pack(side="right", padx=5)
+
+        self.file_menu = FileMenu(self, asm_window)
+        self.file_menu.pack(side="left")
+
+        self.settings_menu = SettingsMenu(self, theme_toggle_dark, theme_toggle_light)
+        self.settings_menu.pack(side="left")
+
+        self.help_menu = HelpMenu(self)
+        self.help_menu.pack(side="left")
 
 
 
