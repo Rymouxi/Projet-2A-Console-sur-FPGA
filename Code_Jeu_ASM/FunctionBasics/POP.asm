@@ -1,0 +1,14 @@
+;POP (R2)
+MOV R0, #0x80000100
+LDR R2, [R0]
+SUB R0, R0, #4
+
+DECALAGE
+     LDR R1, [R0]
+     ADD R0, R0, #4
+     STR R1, [R0]
+     SUB R0, R0, #8
+     CMP R0, #0x80000100
+     BNE DECALAGE
+
+
