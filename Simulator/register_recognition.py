@@ -47,36 +47,35 @@ def imm_recognition(instruction:str,size:int):
     Elle renvoie le nombre correspondant à #imm3/5/8 en binaire str\n
     Ainsi que les erreurs éventuelles"""
     
-    n=len(instruction)
     hexa=['0','1','2','3','4','5','6','7','8','9','A','B','C','D','F']
     imm_bin=''
-
-    #Acquisition du nombre de imm
-    if instruction.count('#')==1:
-        m=1
-        imm=''
-        while (instruction.find('#')+m<n)and((instruction[instruction.find('#')+m] in hexa)==True):
-            imm+=instruction[instruction.find('#')+m:instruction.find('#')+m+1]
-            m+=1
-        #Mise en binaire du nombre
-        imm_bin=DecToBin(int(imm))
- 
-    elif instruction.count('0X')==1:
-        m=1
-        imm=''
-        while (instruction.find('0X')+1+m<n)and((instruction[instruction.find('0X')+1+m] in hexa)==True):
-            imm+=instruction[instruction.find('0X')+1+m:instruction.find('0X')+m+2]
-            m+=1
-        imm_bin=DecToBin(int(imm,16))
-
-
-    elif instruction.count('0B')==1:
+    
+    instruction_imm=instruction[instruction.find("#")+1:]
+    n=len(instruction_imm)
+    
+    if instruction_imm[0:2]=="0x":
         m=0
         imm=''
-        while (instruction.find('0B')+2+m<n)and(instruction[instruction.find('0B')+2+m] in ['0','1']):
-            imm+=instruction[instruction.find('0B')+2+m]
+        while (2+m<n) and ((instruction_imm[2+m] in hexa)==True):
+            imm+=instruction_imm[2+m]
+            m+=1
+        imm_bin=DecToBin(int(imm,16))
+        
+    elif instruction_imm[0:2]=="0b":
+        m=0
+        imm=''
+        while (2+m<n)and(instruction_imm[2+m] in ['0','1']):
+            imm+=instruction_imm[2+m]
             m+=1
         imm_bin=imm
+    else:
+        m=0
+        imm=''
+        while (m<n) and(instruction_imm[m] in hexa[0:10]):
+            imm+=instruction_imm[m]
+            m+=1
+        imm_bin=imm
+
 
     #Complétion des numéros binaires de imm par des 0, si nécessaires
     imm_final=''
