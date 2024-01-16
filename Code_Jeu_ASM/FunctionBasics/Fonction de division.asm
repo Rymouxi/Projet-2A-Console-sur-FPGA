@@ -1,26 +1,29 @@
-;Fonction de division (On retourne R0 qui contient le quotient)
+; Fonction de division
+; Résultat = R1 / R2
+DIV:
+    CMP R2, #0          		; Vérifier si le diviseur R2 est nul
+    BEQ DIV_ERROR       	; Si c'est le cas, afficher une erreur
 
-DIVIDE : 
-	CMP R2, #0	        ;vérifier si le diviseur R2 est nul
-	BEQ DIVIDE_ERROR
+    MOV R0, #0         		 ; Initialiser le résultat à zéro
 
-	MOV R0, 0	        ;initialiser le quotient à 0
-	MOV R3, R1	        ;R1 la dividende
-	
-DIVIDE_LOOP
-	CMP R3, R0	        ;Vérifier si R3 dividende = 0
-	BEQ DIVIDE_DONE
+DIV_LOOP:
+    CMP R1, #0         		; Vérifier si le dividende est nul
+    BEQ DIV_DONE        		; Si c'est le cas, sortir de la boucle
 
-	CMP R3, R2	        ;Vérifier si R3 dividende = R2 diviseur 
-	BNE DIVIDE_INCREMENT
+    CMP R1, R2          		; Vérifier si le dividende est inférieur au diviseur
+    BLT DIV_DONE        		; Si c'est le cas, sortir de la boucle
 
-	SUB R3, R3, R2
-	ADD R0, R0, #1
-	B DIVIDE_LOOP
+    SUB R1, R1, R2      		; Soustraire le diviseur du dividende
+    ADD R0, R0, #1      		; Incrémenter le résultat
 
-DIVIDE_INCREMENT
-ADD R0, R0, #1
-B DIVIDE_DONE
+    B DIV_LOOP          		; Répéter la boucle
 
-DIVIDE_DONE : 
-DIVIDE_ERROR :
+DIV_DONE:
+    ; À ce stade, le résultat est dans le registre R0
+    BX LR               		; Retourner de la fonction
+
+DIV_ERROR:
+    ; Gestion de l'erreur de division par zéro
+    ; (ajouter ici le code pour gérer cette situation)
+    BX LR               		; Retourner de la fonction
+
