@@ -1,21 +1,29 @@
-;Fonction modulo : (On retourne R0 qui contient le reste)
+; Fonction de modulo
+; Résultat = R1 % R2
+MOD:
+    CMP R2, #0          ; Vérifier si le diviseur R2 est nul
+    BEQ MOD_ERROR       ; Si c'est le cas, afficher une erreur
 
-MODULO : 
-	CMP R2, #0          ;vérifier si le diviseur est nul
-	BEQ MODULO_ERROR
-	
-	MOV R0, R1          ;R0 est le le quotient et R1 est la dividende
-	MOV R3, #0          ;R3 est le reste
+    MOV R0, #0          ; Initialiser le résultat à zéro
 
-MODULO_LOOP : 
-	CMP R0, R2          ;Comparer le quotient (la dividende) et le diviseur
-	BEQ MODULO_DONE     ;Si dividende = diviseur, reste = 0
+MOD_LOOP:
+    CMP R1, #0          ; Vérifier si le dividende est nul
+    BEQ MOD_DONE        ; Si c'est le cas, sortir de la boucle
 
-SUB R0, R0, R2          ;Soustraire le diviseur de la dividende
-ADD R3, R3, #1          ;Ajouter 1 au reste
-B MODULO_LOOP
+    CMP R1, R2          ; Vérifier si le dividende est inférieur au diviseur
+    BLT MOD_DONE        ; Si c'est le cas, sortir de la boucle
 
-MODULO_DONE : 
-MOV R0, R3
+    SUB R1, R1, R2      ; Soustraire le diviseur du dividende
 
-MODULO_ERROR : 
+    B MOD_LOOP          ; Répéter la boucle
+
+MOD_DONE:
+    ; À ce stade, le résultat (le modulo) est dans le registre R1
+    MOV R0, R1          ; Copier le modulo dans le registre de résultat (R0)
+    BX LR               ; Retourner de la fonction
+
+MOD_ERROR:
+    ; Gestion de l'erreur de modulo par zéro
+    ; (ajouter ici le code pour gérer cette situation)
+    BX LR               ; Retourner de la fonction
+
