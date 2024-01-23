@@ -144,6 +144,7 @@ def error_handler_mov (instruction):
         error.append("The number of register doesn't match for this instruction")
     return error
 
+
 def error_handler_str (instruction):
     """There is 1 possibility for this action:\n
     STR Rt,[Rn]\n"""
