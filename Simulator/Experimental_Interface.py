@@ -101,8 +101,72 @@ class ASMWindow(ctk.CTkFrame):
         self.title = ctk.CTkLabel(self.frame, text="ASM Code Window", bg_color="transparent")
         self.title.pack(side="top", fill="x")
 
-        self.textbox = ctk.CTkTextbox(self.frame, width=700)
+        self.textbox = ctk.CTkTextbox(self.frame, width=700, text_color="blue")
         self.textbox.pack(side="top", fill="both", expand=True)
+
+        # Configure tags for syntax highlighting
+        self.textbox.tag_config("label", foreground="red")
+        self.textbox.tag_config("register", foreground="forestgreen")
+        self.textbox.tag_config("comma", foreground="magenta")
+        self.textbox.tag_config("bracket", foreground="limegreen")
+        self.textbox.tag_config("hash", foreground="darkorange")
+        self.textbox.tag_config("hexa", foreground="gold")
+        self.textbox.tag_config("binary", foreground="gold")
+        self.textbox.tag_config("comment", foreground="gray")
+
+        # Bind events to update syntax highlighting
+        self.textbox.bind("<KeyRelease>", self.highlight_syntax)
+
+
+    def highlight_syntax(self, event=None):
+        '''Update syntax highlighting.'''
+        
+        # Color for labels
+        self.textbox.tag_remove("label", "1.0", tk.END)
+        index = "1.0"
+        while True:
+            index = self.textbox.search(":", index, tk.END)
+            if not index:
+                break
+
+            # Tag the text before the semicolon
+            start_index = self.textbox.index(f"{index} linestart")
+            end_index = self.textbox.index(f"{index}+1c")
+            self.textbox.tag_add("label", start_index, end_index)
+            index = f"{index}+1c"
+
+        # Other colors
+
+        # Define patterns and corresponding tags
+        patterns = {
+            " R": "register",
+            "[\\[\\]]": "bracket",
+            ",": "comma",
+            "#": "hash",
+            "0X": "hexa",
+            "0B": "binary",
+            ";": "comment"}
+
+        # Remove existing tags
+        for tag in patterns.values():
+            self.textbox.tag_remove(tag, "1.0", tk.END)
+
+        # Iterate through the patterns and tag the text accordingly
+        for pattern, tag in patterns.items():
+            start_index = "1.0"
+            while True:
+                start_index = self.textbox.search(pattern, start_index, tk.END, regexp=True)
+                if not start_index:
+                    break
+
+                # Compute end_index based on the pattern
+                if pattern == "," or pattern == "[\\[\\]]":
+                    end_index = self.textbox.index(f"{start_index}+1c")
+                else:
+                    end_index = self.textbox.index(f"{start_index} lineend")
+
+                self.textbox.tag_add(tag, start_index, end_index)  # Tags the part we want to colorise
+                start_index = f"{end_index}+1c"                # Goes to next character
 
 
     def get_text_content(self):
@@ -148,7 +212,7 @@ class DebuggerWindow(ctk.CTkFrame):
         self.textbox.configure(state="disabled", text_color="black")
     
 
-    def insert_content(self, content, color="white"):
+    def insert_content(self, content, color="silver"):
         '''Inserts the content in the text box with specified color.'''
         self.textbox.configure(state="normal")
         self.textbox.insert(tk.END, content)
@@ -338,12 +402,16 @@ class MemAndBin(ctk.CTkTabview):
 
     def delete_bin(self):
         '''Deletes the content of the text box.'''
+        self.bin_textbox.configure(state="normal")
         self.bin_textbox.delete("1.0", tk.END)
+        self.bin_textbox.configure(state="disabled")
     
 
     def insert_bin(self, content):
         '''Inserts the content in the text box.'''
+        self.bin_textbox.configure(state="normal")
         self.bin_textbox.insert(tk.END, content)
+        self.bin_textbox.configure(state="disabled")
   
 
 
@@ -417,11 +485,17 @@ class Toolbar(ctk.CTkFrame):
             '''Resets the values in registers, pipeline, binary, and memory arrays.\n
                 Also reduces the lag by killing and re-initialising frames.'''
 
+            # Updates button states
+            master.toolbar.assemble_button.configure(self, fg_color="forestgreen", state="normal")
+            master.toolbar.run_button.configure(self, fg_color="gray", state="disabled", text="Run")
+            master.toolbar.runsbs_button.configure(self, fg_color="gray", state="disabled", text="Run Step By Step", hover_color="darkgreen")
+            master.toolbar.step_button.configure(self, fg_color="gray", state="disabled")
+
+            # Empties debugger
             master.debugger_window.delete_content()
 
-            # Updates button states
-
             # Empties registers
+            mem_and_bin.delete_bin()
 
             # Empties memories and bit window
 
@@ -429,22 +503,49 @@ class Toolbar(ctk.CTkFrame):
 
 
         def step():
-            ''''''
+            '''Executes a step of the code.'''
+
+            # Updates button states
 
 
         def run_step_by_step():
-            ''''''
+            '''Launches the step y step execution of the code.'''
+
+            # Updates button states
+            master.toolbar.run_button.configure(self, text="Resume")
+            master.toolbar.step_button.configure(self, fg_color="forestgreen", state="normal")
+
+            if self.state == 0:
+                master.toolbar.runsbs_button.configure(self, fg_color="firebrick", text="STOP", hover_color="maroon")
+                self.state = 1
+            else:
+                master.toolbar.run_button.configure(self, fg_color="gray", state="disabled", text="Run")
+                master.toolbar.runsbs_button.configure(self, fg_color="gray", text="Run Step By Step", state="disabled", hover_color="darkgreen")
+                master.toolbar.step_button.configure(self, fg_color="gray", state="disabled")
+                master.toolbar.assemble_button.configure(self, fg_color="forestgreen", state="normal")
+                self.state = 0
 
 
         def run():
-            ''''''
+            '''Runs the code in one go.\n
+                Also allows to resume after a runsbs.'''
+            
+            # Updates button states
+            master.toolbar.run_button.configure(self, fg_color="gray", state="disabled", text="Run")
+            master.toolbar.runsbs_button.configure(self, fg_color="gray", state="disabled", text="Run Step By Step", hover_color="darkgreen")
+            master.toolbar.step_button.configure(self, fg_color="gray", state="disabled")
+            master.toolbar.assemble_button.configure(self, fg_color="forestgreen", state="normal")
+            self.state = 0
 
 
         def assemble():
             '''Assembles the code.'''
 
+            # Cleaning
             reset()
             master.toolbar.assemble_button.configure(self, fg_color="gray", state="disabled")
+
+            # Fetching the code
             code = asm_window.get_text_content()
             master.toolbar.split_instructions, _, master.toolbar.bitstream, _, master.toolbar.line_update, _, master.toolbar.error = instruction_translation(code)
 
@@ -463,16 +564,24 @@ class Toolbar(ctk.CTkFrame):
             elif master.toolbar.error != []:
                 master.toolbar.assemble_button.configure(self, fg_color="forestgreen", state="normal")
 
-                # display error in debugger
+                # Display error in debugger
+                for i in range(len(master.toolbar.error)//2):
+                    debugger_window.insert_content("%s at line %d" % (master.toolbar.error[2*i], master.toolbar.error[2*i+1]), "red")
 
             else:
                 # Fills the Code RAM array and the bitstream frame
                 for l in range(len(master.toolbar.line_update)-2):
                     if len(master.toolbar.bitstream) != 0:
                         if master.toolbar.bitstream[master.toolbar.line_update[l]] != "":
+
+                            # Display the instruction in the Code Memory
                             mem_and_bin.code_mem_set(master.toolbar.line_update[l], master.toolbar.bitstream[master.toolbar.line_update[l]], master.toolbar.split_instructions[master.toolbar.line_update[l]])
-                    if len(master.toolbar.error) != 0:
-                        mem_and_bin.insert_bin(master.toolbar.line_update[l], master.toolbar.error[master.toolbar.line_update[l]])
+                            
+                            # Display the instruction in the binary window
+                            mem_and_bin.insert_bin(master.toolbar.bitstream[master.toolbar.line_update[l]])
+
+                            # Display success message in debugger
+                            debugger_window.insert_content("Assembly complete", "lime")
                 
                 # Enables buttons Run and RSBS
                 master.toolbar.run_button.configure(self, fg_color="forestgreen", state="normal")
@@ -508,6 +617,8 @@ class Toolbar(ctk.CTkFrame):
 
         self.help_menu = HelpMenu(self)
         self.help_menu.pack(side="left")
+
+        self.state = 0
 
         self.split_instruction, self.line_instruction, self.bitstream, self.register_update, self.line_update, self.memory_update, self.error = [], [], [], [], [], [], []
 
@@ -609,6 +720,7 @@ class FileMenu(ctk.CTkFrame):
         self.menu.add_command(label="Save As", command=save_as)
         
 
+
 class SettingsMenu(ctk.CTkFrame):
     def __init__(self, master, theme_toggle_dark, theme_toggle_light):
         super().__init__(master)
@@ -624,6 +736,7 @@ class SettingsMenu(ctk.CTkFrame):
         # Add items to the File menu
         self.menu.add_command(label="Dark mode", command=theme_toggle_dark)
         self.menu.add_command(label="Light mode", command=theme_toggle_light)
+
 
 
 class HelpMenu(ctk.CTkFrame):
@@ -648,6 +761,7 @@ class HelpMenu(ctk.CTkFrame):
         self.menu.add_command(label="This Simulator Documentation", command=SimulatorDocumentation)
         self.menu.add_separator()
         self.menu.add_command(label="LCM3 Documentation", command=help_lcm3_docu)
+
 
 
 class SimulatorDocumentation(ctk.CTkToplevel):
