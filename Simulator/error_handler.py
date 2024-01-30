@@ -72,6 +72,7 @@ def error_handler_add(instruction):
         register_indice=R_indices(instruction)
         error.append(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
         error.append(comma_identifier(instruction,register_indice[1]+1,register_indice[2]))
+        error.append(check_end(instruction,register_indice[2]+1))
     else:
         error.append("The number of register doesn't match for this instruction")
     return error
@@ -85,6 +86,7 @@ def error_handler_and (instruction):
         error.extend(register_error_handler(instruction))
         register_indice=R_indices(instruction)
         error.append(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
+        error.append(check_end(instruction,register_indice[1]+1))
     else:
         error.append("The number of operand doesn't match for this instruction")
     return error
@@ -113,6 +115,7 @@ def error_handler_eor (instruction):
         error.extend(register_error_handler(instruction))
         register_indice=R_indices(instruction)
         error.append(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
+        error.append(check_end(instruction,register_indice[1]+1))
     else:
         error.append("The number of operand doesn't match for this instruction")
         
@@ -133,8 +136,13 @@ def error_handler_ldr (instruction):
         indice2=instruction.find("]")
         if indice1 ==-1 or indice2 ==-1:
             error.append("missing [ or ]")
-        error.append(spaceidentifier(instruction,indice1,register_indice[1]))
-        error.append(spaceidentifier(instruction,register_indice[1]+1,indice2))
+        else:
+            if indice1<register_indice[1] and register_indice[1]<indice2:
+                error.append("Brackets at the wrong place")
+            else:
+                error.append(spaceidentifier(instruction,indice1,register_indice[1]))
+                error.append(spaceidentifier(instruction,register_indice[1]+1,indice2))
+                error.append(check_end(instruction,indice2))
     else:
         error.append("The number of operande doesn't match for this instruction")
     return error
@@ -168,7 +176,7 @@ def error_handler_mov (instruction):
         error.extend(register_error_handler(instruction))
         register_indice=R_indices(instruction)
         error.append(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
-        error.append(comma_identifier(instruction,register_indice[1]+1,instruction.find('#')))
+        error.append(check_end(instruction,register_indice[1]+1))        
     else:
         error.append("The number of register doesn't match for this instruction")
     return error
@@ -189,8 +197,13 @@ def error_handler_str (instruction):
         indice2=instruction.find("]")
         if indice1 ==-1 or indice2 ==-1:
             error.append("missing [ or ]")
-        error.append(spaceidentifier(instruction,indice1,register_indice[1]))
-        error.append(spaceidentifier(instruction,register_indice[1]+1,indice2))
+        else:
+            if indice1<register_indice[1] and register_indice[1]<indice2:
+                error.append("Brackets at the wrong place")
+            else:
+                error.append(spaceidentifier(instruction,indice1,register_indice[1]))
+                error.append(spaceidentifier(instruction,register_indice[1]+1,indice2))
+                error.append(check_end(instruction,indice2))
     else:
         error.append("The number of operande doesn't match for this instruction")
     return error
@@ -216,6 +229,7 @@ def error_handler_sub (instruction):
         register_indice=R_indices(instruction)
         error.append(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
         error.append(comma_identifier(instruction,register_indice[1]+1,register_indice[2]))
+        error.append(check_end(instruction,register_indice[2]+1)) 
     else:
         error.append("The number of operand doesn't match for this instruction")
     return error
@@ -249,52 +263,13 @@ def register_error_handler(instruction):
         instruction=instruction[instruction.find('R')+2::]
     return error
 
-# def imm_error_handler(instruction,size):
-    
-#     error=[]
-#     hexa=['0','1','2','3','4','5','6','7','8','9','A','a','B','b','C','c','D','d','E','e','F','f']
-#     n=len(instruction)
-#     instruction.upper()
-#     if instruction.find('#')!=-1:
-#         if instruction.find('0X')!=-1:
-#             m=0
-#             number_hexa=''
-#             while(instruction.find('0X')+2+m<n)and(instruction[instruction.find('0X')+2+m] in hexa):
-#                 number_hexa+=instruction[instruction.find('0X')+2+m]
-#                 m+=1
-#             if len(number_hexa)==0:
-#                 error.append("No number") 
-#             if int(number_hexa,16)>2**size:
-#                 error.append("This number is too big for this instruction")
-
-#         elif instruction.find('0B')!=-1:
-#             m=0
-#             number_binary=''
-#             while (instruction.find('0B')+m<n)and(instruction[instruction.find('0B')+m] in hexa[0:2]):
-#                 number_binary+=instruction[instruction.find('0B')+m]
-#                 m+=1
-#             if len(number_binary)==0:
-#                 error.append("No number") 
-#             if int(number_binary,2)>2**size:
-#                 error.append("This number is too big for this instruction")
-#         else :
-#             m=0
-#             number_integer=''
-#             while (instruction.find('#')+1+m<n)and(instruction[instruction.find('#')+1+m] in hexa[0:10]):
-#                 number_integer+=instruction[instruction.find('#')+m]
-#                 m+=1
-#             if len(number_integer)==0:
-#                 error.append("No number") 
-#             if int(number_integer)>2**size:
-#                 error.append("This number is too big for this instruction")
-#     return error
-
 def imm_error_handler(instruction,size):
     
     error=[]
     hexa=['0','1','2','3','4','5','6','7','8','9','A','a','B','b','C','c','D','d','E','e','F','f']
     n=len(instruction)
     instruction.upper()
+    end_imm=0
     if instruction.count('#')==1:
         imm_to_end = instruction[instruction.find('#'):]
         while imm_to_end[-1]==' ':
@@ -326,7 +301,7 @@ def imm_error_handler(instruction,size):
     else: 
         error.append("There's no immediate number or too many #")
 
-    return error
+    return error,end_imm
 
 def comma_identifier(instruction,end_arg1,star_arg2):
     error=[]
@@ -353,6 +328,7 @@ def R_indices(instruction):
             register_indice.append(i)
     return register_indice
 
+
 def spaceidentifier(instruction,end_arg1,start_arg2):
     error=[]
     separator=instruction[end_arg1+1:start_arg2]
@@ -364,3 +340,13 @@ def spaceidentifier(instruction,end_arg1,start_arg2):
                 error.append("Unexpected character between two brakets")
                 break
         return error
+
+def check_end_register(instruction, last_operand_indice):
+    """This function works only when the last operand is NOT an immediate number"""
+    error=[]
+    if last_operand_indice!=-1:
+        for string in instruction[last_operand_indice+1:]:
+            if string!=' ':
+                error.append("Unexpected character after last operand")
+                break
+    return error
