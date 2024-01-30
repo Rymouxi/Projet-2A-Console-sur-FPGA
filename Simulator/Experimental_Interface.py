@@ -21,6 +21,7 @@ import webbrowser
 from instruction_translation import *
 
 # change the color of the title of the debugger window when error
+# Bug with switch between hex and dec in regs when assemble
 
 
 
@@ -81,7 +82,7 @@ class EnseaSimulator(ctk.CTk):
         self.pipeline_window = PipelineWindow(self)                                      # Pipeline window at the bottom
         self.main_frame.add(self.pipeline_window, weight=1)
 
-        self.toolbar = Toolbar(self, self.asm_window, self.debugger_window, self.mem_and_bin, theme_toggle_dark, theme_toggle_light)  # Toolbar at the top
+        self.toolbar = Toolbar(self, self.asm_window, self.debugger_window, self.register_window, self.mem_and_bin, theme_toggle_dark, theme_toggle_light)  # Toolbar at the top
         self.toolbar.pack(fill="x")
 
 
@@ -101,18 +102,18 @@ class ASMWindow(ctk.CTkFrame):
         self.title = ctk.CTkLabel(self.frame, text="ASM Code Window", bg_color="transparent")
         self.title.pack(side="top", fill="x")
 
-        self.textbox = ctk.CTkTextbox(self.frame, width=700, text_color="blue")
+        self.textbox = ctk.CTkTextbox(self.frame, width=700, text_color="#1020FF")
         self.textbox.pack(side="top", fill="both", expand=True)
 
         # Configure tags for syntax highlighting
-        self.textbox.tag_config("label", foreground="red")
-        self.textbox.tag_config("register", foreground="forestgreen")
-        self.textbox.tag_config("comma", foreground="magenta")
-        self.textbox.tag_config("bracket", foreground="limegreen")
-        self.textbox.tag_config("hash", foreground="darkorange")
-        self.textbox.tag_config("hexa", foreground="gold")
-        self.textbox.tag_config("binary", foreground="gold")
-        self.textbox.tag_config("comment", foreground="gray")
+        self.textbox.tag_config("label", foreground="#FF0000")
+        self.textbox.tag_config("Register", foreground="#00FF00")
+        self.textbox.tag_config("register", foreground="#00FF00")
+        self.textbox.tag_config("comma", foreground="fuchsia")
+        self.textbox.tag_config("bracket", foreground="#00A000")
+        self.textbox.tag_config("hash", foreground="#FF8000")
+        self.textbox.tag_config("number", foreground="#FFB000")
+        self.textbox.tag_config("comment", foreground="#888888")
 
         # Bind events to update syntax highlighting
         self.textbox.bind("<KeyRelease>", self.highlight_syntax)
@@ -139,12 +140,11 @@ class ASMWindow(ctk.CTkFrame):
 
         # Define patterns and corresponding tags
         patterns = {
-            " R": "register",
+            " R": "Register",
+            " r": "register",
             "[\\[\\]]": "bracket",
             ",": "comma",
             "#": "hash",
-            "0X": "hexa",
-            "0B": "binary",
             ";": "comment"}
 
         # Remove existing tags
@@ -160,13 +160,21 @@ class ASMWindow(ctk.CTkFrame):
                     break
 
                 # Compute end_index based on the pattern
-                if pattern == "," or pattern == "[\\[\\]]":
+                if pattern == "," or pattern == "[\\[\\]]" or pattern == '#':
                     end_index = self.textbox.index(f"{start_index}+1c")
                 else:
                     end_index = self.textbox.index(f"{start_index} lineend")
 
-                self.textbox.tag_add(tag, start_index, end_index)  # Tags the part we want to colorise
-                start_index = f"{end_index}+1c"                # Goes to next character
+                # Tag and jump to next character
+                self.textbox.tag_add(tag, start_index, end_index)
+                start_index = f"{end_index}+1c"
+
+                # Handles numbers after hash (including hex and bin)
+                if pattern == "#":
+                    start_index = self.textbox.index(f"{start_index}-1c")
+                    end_index = self.textbox.index(f"{start_index} lineend")
+                    self.textbox.tag_add("number", start_index, end_index)
+                    start_index = f"{end_index}+1c"
 
 
     def get_text_content(self):
@@ -212,7 +220,7 @@ class DebuggerWindow(ctk.CTkFrame):
         self.textbox.configure(state="disabled", text_color="black")
     
 
-    def insert_content(self, content, color="silver"):
+    def insert_content(self, content:str, color="silver"):
         '''Inserts the content in the text box with specified color.'''
         self.textbox.configure(state="normal")
         self.textbox.insert(tk.END, content)
@@ -269,12 +277,7 @@ class RegisterWindow(ctk.CTkFrame):
         self.button.pack(side="top")
 
 
-    def get_register_values(self, index: int):
-        '''Return a list of register values.'''
-        return [self.value_labels[index].cget("text")]
-
-
-    def set_register_values(self, index: int, value: str):
+    def set_register_values(self, index:int, value:str):
         '''Set register values using a list.'''
         self.value_labels[index].configure(text=value)
 
@@ -407,7 +410,7 @@ class MemAndBin(ctk.CTkTabview):
         self.bin_textbox.configure(state="disabled")
     
 
-    def insert_bin(self, content):
+    def insert_bin(self, content:str):
         '''Inserts the content in the text box.'''
         self.bin_textbox.configure(state="normal")
         self.bin_textbox.insert(tk.END, content)
@@ -446,14 +449,14 @@ class PipelineWindow(ctk.CTkFrame):
             self.grid_columnconfigure(j, weight=1)
 
 
-    def get_cell(self, row, col):
+    def get_cell(self, row:int, col:int):
         '''Get the value in the specified cell.'''
 
         if 0 <= row <= 3 and 1 <= col <= 21:
             return self.entry_widgets[row][col - 1].get()
 
 
-    def set_cell(self, row, col, value):
+    def set_cell(self, row:int, col:int, value:str):
         '''Set the value in the specified cell.'''
         
         if 0 <= row <= 3 and 1 <= col <= 21:
@@ -463,6 +466,46 @@ class PipelineWindow(ctk.CTkFrame):
             self.entry_widgets[row][col - 1].configure(state="readonly")  # Make readonly again
 
 
+    def iter_pip(self, value:str):
+        '''Shifts the whole pipeline on the right and creates a new FDE column on the left.'''
+
+        # Shift on the right
+        for i in range(3):
+            for j in range(19):
+                self.prev = self.get_cell(i, 20-j)
+                self.set_cell(i, 21-j, self.prev)
+
+        # Add the two old instr in the new column
+        self.prev = self.get_cell(1, 1)
+        self.set_cell(2, 1, self.prev)
+        self.prev = self.get_cell(0, 1)
+        self.set_cell(1, 1, self.prev)
+
+        # Add the new instr in the new column
+        self.set_cell(0, 1, value)
+
+
+    def full_pip(self, array):
+        '''Creates a full pipeline from a list of instructions.'''
+
+        if len(array) == 22:
+
+            # Top left corner
+            self.set_cell(0, 1, array[21])
+            self.set_cell(0, 2, array[20])
+            self.set_cell(1, 1, array[20])
+
+            # Center pipeline
+            for i in range(18):
+                self.set_cell(0, 3+i, array[19-i])
+                self.set_cell(1, 2+i, array[19-i])
+                self.set_cell(2, 1+i, array[19-i])
+
+            # Bottom right corner
+            self.set_cell(1, 20, array[1])
+            self.set_cell(2, 19, array[1])
+            self.set_cell(2, 20, array[0])
+
 
 
 
@@ -470,7 +513,7 @@ class PipelineWindow(ctk.CTkFrame):
 # ---------- Toolbar ---------- #
 
 class Toolbar(ctk.CTkFrame):
-    def __init__(self, master, asm_window, debugger_window, mem_and_bin, theme_toggle_dark, theme_toggle_light):
+    def __init__(self, master, asm_window, debugger_window, register_window, mem_and_bin, theme_toggle_dark, theme_toggle_light):
         super().__init__(master)
 
         def download_code():
@@ -482,8 +525,7 @@ class Toolbar(ctk.CTkFrame):
 
 
         def reset():
-            '''Resets the values in registers, pipeline, binary, and memory arrays.\n
-                Also reduces the lag by killing and re-initialising frames.'''
+            '''Resets the values in registers, pipeline, binary, and memory arrays.'''
 
             # Updates button states
             master.toolbar.assemble_button.configure(self, fg_color="forestgreen", state="normal")
@@ -495,9 +537,11 @@ class Toolbar(ctk.CTkFrame):
             master.debugger_window.delete_content()
 
             # Empties registers
-            mem_and_bin.delete_bin()
+            for i in range(8):
+                register_window.set_register_values(i, 0)
 
             # Empties memories and bit window
+            mem_and_bin.delete_bin()
 
             # Empties the pipeline
 
@@ -537,6 +581,15 @@ class Toolbar(ctk.CTkFrame):
             master.toolbar.assemble_button.configure(self, fg_color="forestgreen", state="normal")
             self.state = 0
 
+            # Updates register values
+            for i in range(8):
+                register_window.set_register_values(i, virtual_register[i])
+
+            # Updates de User RAM values
+            for i in range(0, len(virtual_memory), 2):
+                mem_and_bin.user_mem_set(i, virtual_memory[i], virtual_memory[i+1])
+
+
 
         def assemble():
             '''Assembles the code.'''
@@ -547,7 +600,7 @@ class Toolbar(ctk.CTkFrame):
 
             # Fetching the code
             code = asm_window.get_text_content()
-            master.toolbar.split_instructions, _, master.toolbar.bitstream, _, master.toolbar.line_update, _, master.toolbar.error = instruction_translation(code)
+            master.toolbar.split_instructions, _, master.toolbar.bitstream, master.toolbar.register_update, master.toolbar.line_update, master.toolbar.memory_update, master.toolbar.error = instruction_translation(code)
 
             # Funny text variations for when user tries to assemble empty code
             variations = ["sipping a coconut", "catching some rays", "in a hammock", "on a beach", "snorkeling", "in a tropical paradise", "surfing the clouds",
