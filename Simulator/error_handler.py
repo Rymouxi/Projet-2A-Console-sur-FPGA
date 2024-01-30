@@ -48,7 +48,7 @@ def error_table_extension(error_handler_table,line):
     error_table=[]
     for error in error_handler_table:
         if error!=[]:
-            error_table.extend([error,line])
+            error_table.extend((error,line))
     return error_table
 
 def error_handler_add(instruction):
@@ -59,23 +59,25 @@ def error_handler_add(instruction):
     error=[]
     R_count=instruction.count('R')
     if R_count==1 and instruction.count('#')==1:
-        error.extend((register_error_handler(instruction),imm_error_handler(instruction,8)))
+        error.extend(register_error_handler(instruction))
+        error.extend(imm_error_handler(instruction,8))
         register_indice=R_indices(instruction)
-        error.append(space_identifier(instruction,0,register_indice[0]))
-        error.append(comma_identifier(instruction,register_indice[0]+1,instruction.find('#')))
+        error.extend(space_identifier(instruction,0,register_indice[0]))
+        error.extend(comma_identifier(instruction,register_indice[0]+1,instruction.find('#')))
     elif R_count==2 and instruction.count('#')==1:
-        error.extend((register_error_handler(instruction),imm_error_handler(instruction,3)))       
+        error.extend(register_error_handler(instruction))
+        error.extend(imm_error_handler(instruction,3))       
         register_indice=R_indices(instruction)
-        error.append(space_identifier(instruction,0,register_indice[0]))
-        error.append(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
-        error.append(comma_identifier(instruction,register_indice[1]+1,instruction.find('#')))
+        error.extend(space_identifier(instruction,0,register_indice[0]))
+        error.extend(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
+        error.extend(comma_identifier(instruction,register_indice[1]+1,instruction.find('#')))
     elif R_count==3 and instruction.count('#')==0:
         error.extend(register_error_handler(instruction))
         register_indice=R_indices(instruction)
-        error.append(space_identifier(instruction,0,register_indice[0]))
-        error.append(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
-        error.append(comma_identifier(instruction,register_indice[1]+1,register_indice[2]))
-        error.append(check_end(instruction,register_indice[2]+1))
+        error.extend(space_identifier(instruction,0,register_indice[0]))
+        error.extend(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
+        error.extend(comma_identifier(instruction,register_indice[1]+1,register_indice[2]))
+        error.extend(check_end_register(instruction,register_indice[2]+1))
     else:
         error.append("The number of register doesn't match for this instruction")
     return error
@@ -88,9 +90,9 @@ def error_handler_and (instruction):
     if R_count==2 and instruction.count('#'):
         error.extend(register_error_handler(instruction))
         register_indice=R_indices(instruction)
-        error.append(space_identifier(instruction,0,register_indice[0]))
-        error.append(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
-        error.append(check_end(instruction,register_indice[1]+1))
+        error.extend(space_identifier(instruction,0,register_indice[0]))
+        error.extend(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
+        error.extend(check_end_register(instruction,register_indice[1]+1))
     else:
         error.append("The number of operand doesn't match for this instruction")
     return error
@@ -102,10 +104,11 @@ def error_handler_cmp (instruction):
     error=[]
     R_count=instruction.count('R')
     if R_count==1 and instruction.count('#')==1:
-        error.extend((register_error_handler(instruction),imm_error_handler(instruction,8)))
+        error.extend(register_error_handler(instruction))
+        error.extend(imm_error_handler(instruction,8))
         register_indice=R_indices(instruction)
-        error.append(space_identifier(instruction,0,register_indice[0]))
-        error.append(comma_identifier(instruction,register_indice[0]+1,instruction.find('#')))
+        error.extend(space_identifier(instruction,0,register_indice[0]))
+        error.extend(comma_identifier(instruction,register_indice[0]+1,instruction.find('#')))
     else:
         error.append("The number of operand doesn't match for this instruction")
         
@@ -119,9 +122,9 @@ def error_handler_eor (instruction):
     if R_count==2 and instruction.count('#')==0:
         error.extend(register_error_handler(instruction))
         register_indice=R_indices(instruction)
-        error.append(space_identifier(instruction,0,register_indice[0]))
-        error.append(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
-        error.append(check_end(instruction,register_indice[1]+1))
+        error.extend(space_identifier(instruction,0,register_indice[0]))
+        error.extend(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
+        error.extend(check_end_register(instruction,register_indice[1]+1))
     else:
         error.append("The number of operand doesn't match for this instruction")
         
@@ -135,8 +138,8 @@ def error_handler_ldr (instruction):
     if R_count==2 and instruction.count('#'):
         error.extend(register_error_handler(instruction))
         register_indice=R_indices(instruction)
-        error.append(space_identifier(instruction,0,register_indice[0]))
-        error.append(comma_identifier(instruction,register_indice[0]+1,instruction.find('[')))
+        error.extend(space_identifier(instruction,0,register_indice[0]))
+        error.extend(comma_identifier(instruction,register_indice[0]+1,instruction.find('[')))
         indice1=instruction.find("[")
         indice2=instruction.find("]")
         if indice1 ==-1 or indice2 ==-1:
@@ -145,9 +148,9 @@ def error_handler_ldr (instruction):
             if indice1<register_indice[1] and register_indice[1]<indice2:
                 error.append("Brackets at the wrong place")
             else:
-                error.append(space_identifier(instruction,indice1,register_indice[1]))
-                error.append(space_identifier(instruction,register_indice[1]+1,indice2))
-                error.append(check_end(instruction,indice2))
+                error.extend(space_identifier(instruction,indice1,register_indice[1]))
+                error.extend(space_identifier(instruction,register_indice[1]+1,indice2))
+                error.extend(check_end_register(instruction,indice2))
     else:
         error.append("The number of operand doesn't match for this instruction")
     return error
@@ -158,11 +161,12 @@ def error_handler_lsl (instruction):
     error=[]
     R_count=instruction.count('R')
     if R_count==2 and instruction.count('#')==1:
-        error.extend((register_error_handler(instruction),imm_error_handler(instruction,5)))
+        error.extend(register_error_handler(instruction))
+        error.extend(imm_error_handler(instruction,5))
         register_indice=R_indices(instruction)
-        error.append(space_identifier(instruction,0,register_indice[0]))
-        error.append(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
-        error.append(comma_identifier(instruction,register_indice[1]+1,instruction.find('#')))
+        error.extend(space_identifier(instruction,0,register_indice[0]))
+        error.extend(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
+        error.extend(comma_identifier(instruction,register_indice[1]+1,instruction.find('#')))
     else:
         error.append("The number of operand doesn't match for this instruction")
     return error
@@ -175,16 +179,17 @@ def error_handler_mov (instruction):
     R_count=instruction.count('R')
     register_indice=[]
     if R_count==1 and instruction.count('#')==1:
-        error.extend((register_error_handler(instruction),imm_error_handler(instruction,8)))
+        error.extend(register_error_handler(instruction))
+        error.extend(imm_error_handler(instruction,8))
         register_indice=R_indices(instruction)
-        error.append(space_identifier(instruction,0,register_indice[0]))
-        error.append(comma_identifier(instruction,register_indice[0]+1,instruction.find('#')))
+        error.extend(space_identifier(instruction,0,register_indice[0]))
+        error.extend(comma_identifier(instruction,register_indice[0]+1,instruction.find('#')))
     elif R_count==2 and instruction.count('#')==0:
         error.extend(register_error_handler(instruction))
         register_indice=R_indices(instruction)
-        error.append(space_identifier(instruction,0,register_indice[0]))
-        error.append(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
-        error.append(check_end(instruction,register_indice[1]+1))        
+        error.extend(space_identifier(instruction,0,register_indice[0]))
+        error.extend(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
+        error.extend(check_end_register(instruction,register_indice[1]+1))        
     else:
         error.append("The number of register doesn't match for this instruction")
     return error
@@ -198,8 +203,8 @@ def error_handler_str (instruction):
     if R_count==2 and instruction.count('#')==0:
         error.extend(register_error_handler(instruction))
         register_indice=R_indices(instruction)
-        error.append(space_identifier(instruction,0,register_indice[0]))
-        error.append(comma_identifier(instruction,register_indice[0]+1,instruction.find('[')))
+        error.extend(space_identifier(instruction,0,register_indice[0]))
+        error.extend(comma_identifier(instruction,register_indice[0]+1,instruction.find('[')))
         indice1=instruction.find("[")
         indice2=instruction.find("]")
         if indice1 ==-1 or indice2 ==-1:
@@ -208,9 +213,9 @@ def error_handler_str (instruction):
             if indice1<register_indice[1] and register_indice[1]<indice2:
                 error.append("Brackets at the wrong place")
             else:
-                error.append(space_identifier(instruction,indice1,register_indice[1]))
-                error.append(space_identifier(instruction,register_indice[1]+1,indice2))
-                error.append(check_end(instruction,indice2))
+                error.extend(space_identifier(instruction,indice1,register_indice[1]))
+                error.extend(space_identifier(instruction,register_indice[1]+1,indice2))
+                error.extend(check_end_register(instruction,indice2))
     else:
         error.append("The number of operand doesn't match for this instruction")
     return error
@@ -223,23 +228,25 @@ def error_handler_sub (instruction):
     error=[]
     R_count=instruction.count('R')
     if R_count==1 and instruction.count('#')==1:
-        error.extend((register_error_handler(instruction),imm_error_handler(instruction,8)))
+        error.extend(register_error_handler(instruction))
+        error.extend(imm_error_handler(instruction,8))
         register_indice=R_indices(instruction)
-        error.append(space_identifier(instruction,0,register_indice[0]))
-        error.append(comma_identifier(instruction,register_indice[0]+1,instruction.find('#')))
+        error.extend(space_identifier(instruction,0,register_indice[0]))
+        error.extend(comma_identifier(instruction,register_indice[0]+1,instruction.find('#')))
     elif R_count==2 and instruction.count('#')==1:
-        error.extend((register_error_handler(instruction),imm_error_handler(instruction,3)))       
+        error.extend(register_error_handler(instruction))
+        error.extend(imm_error_handler(instruction,3))      
         register_indice=R_indices(instruction)
-        error.append(space_identifier(instruction,0,register_indice[0]))
-        error.append(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
-        error.append(comma_identifier(instruction,register_indice[1]+1,instruction.find('#')))
+        error.extend(space_identifier(instruction,0,register_indice[0]))
+        error.extend(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
+        error.extend(comma_identifier(instruction,register_indice[1]+1,instruction.find('#')))
     elif R_count==3 and instruction.count('#')==0:
         error.extend(register_error_handler(instruction))
         register_indice=R_indices(instruction)
-        error.append(space_identifier(instruction,0,register_indice[0]))
-        error.append(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
-        error.append(comma_identifier(instruction,register_indice[1]+1,register_indice[2]))
-        error.append(check_end(instruction,register_indice[2]+1)) 
+        error.extend(space_identifier(instruction,0,register_indice[0]))
+        error.extend(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
+        error.extend(comma_identifier(instruction,register_indice[1]+1,register_indice[2]))
+        error.extend(check_end_register(instruction,register_indice[2]+1)) 
     else:
         error.append("The number of operand doesn't match for this instruction")
     return error
@@ -279,7 +286,6 @@ def imm_error_handler(instruction,size):
     hexa=['0','1','2','3','4','5','6','7','8','9','A','a','B','b','C','c','D','d','E','e','F','f']
     n=len(instruction)
     instruction.upper()
-    end_imm=0
     if instruction.count('#')==1:
         imm_to_end = instruction[instruction.find('#'):]
         while imm_to_end[-1]==' ':
@@ -301,17 +307,17 @@ def imm_error_handler(instruction,size):
                     if int(imm_to_end[3:],2)>=2**size:
                         error.append("This number is too big for this instruction")
         else:
-            for i in range(2,len(imm_to_end)):
-                if imm_to_end[i] not in hexa[0,10]:
+            for i in range(1,len(imm_to_end)):
+                if imm_to_end[i] not in hexa[0:10]:
                     error.append("Expected a number in decimal")
                     break
                 if i==(len(imm_to_end)-1):
-                    if int(imm_to_end)>=2**size:
+                    if int(imm_to_end[1:])>=2**size:
                         error.append("This number is too big for this instruction")
     else: 
         error.append("There's no immediate number or too many #")
 
-    return error,end_imm
+    return error
 
 def comma_identifier(instruction,end_arg1,star_arg2):
     error=[]
@@ -347,7 +353,7 @@ def space_identifier(instruction,end_arg1,start_arg2):
     else :
         for string in separator:
             if string!=" ":
-                error.append("Unexpected character between two brakets")
+                error.append("Unexpected character")
                 break
         return error
 
