@@ -117,8 +117,18 @@ def error_handler_ldr (instruction):
     R_count=instruction.count('R')
     if R_count!=2:
         error.append("The number of register doesn't match for this instruction")
-    elif R_count==2:
+    elif R_count==2 :
         error.extend(register_error_handler(instruction))
+        register_indice=R_indices(instruction)
+        error.append(comma_identifier(instruction,register_indice[0]+1,instruction.find('[')))
+        indice1=instruction.find("[")
+        indice2=instruction.find("]")
+        if indice1 ==-1 or indice2 ==-1:
+            error.append("missing [ or ]")
+        error.append(spaceidentifier(instruction,indice1,register_indice[1]))
+        error.append(spaceidentifier(instruction,register_indice[1]+1,indice2))
+    else:
+        error.append("The number of operande doesn't match for this instruction")
     return error
 
 def error_handler_lsl (instruction):
@@ -160,8 +170,18 @@ def error_handler_str (instruction):
     R_count=instruction.count('R')
     if R_count!=2:
         error.append("The number of register doesn't match for this instruction")
-    elif R_count==2:
+    elif R_count==2 :
         error.extend(register_error_handler(instruction))
+        register_indice=R_indices(instruction)
+        error.append(comma_identifier(instruction,register_indice[0]+1,instruction.find('[')))
+        indice1=instruction.find("[")
+        indice2=instruction.find("]")
+        if indice1 ==-1 or indice2 ==-1:
+            error.append("missing [ or ]")
+        error.append(spaceidentifier(instruction,indice1,register_indice[1]))
+        error.append(spaceidentifier(instruction,register_indice[1]+1,indice2))
+    else:
+        error.append("The number of operande doesn't match for this instruction")
     return error
 
 def error_handler_sub (instruction):
@@ -308,3 +328,15 @@ def R_indices(instruction):
         if string=='R':
             register_indice.append(i)
     return register_indice
+
+def spaceidentifier(instruction,end_arg1,start_arg2):
+    error=[]
+    separator=instruction[end_arg1+1:start_arg2]
+    if end_arg1 ==-1 or start_arg2 ==-1:
+        return
+    else :
+        for string in separator:
+          if string!=" ":
+                error.append("Unexpected character between two brakets")
+                break
+        return error
