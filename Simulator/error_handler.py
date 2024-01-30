@@ -249,7 +249,7 @@ def error_handler_b_instruct(instruction):
     error=[]
     n=len(instruction)
     label=''
-    for (string,i) in enumerate(instruction):
+    for (i,string) in enumerate(instruction):
         if string!=' ':
             label+=string
         if string==' ' and label!='':
@@ -333,7 +333,7 @@ def comma_identifier(instruction,end_arg1,star_arg2):
 def R_indices(instruction):
     #Knowing the instruction doesn't include the 
     register_indice=[]
-    for (string,i) in enumerate(instruction):
+    for (i,string) in enumerate(instruction):
         if string=='R':
             register_indice.append(i)
     return register_indice
