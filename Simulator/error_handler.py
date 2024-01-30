@@ -58,12 +58,20 @@ def error_handler_add(instruction):
     ADD Rd,Rn,Rm"""
     error=[]
     R_count=instruction.count('R')
-    if R_count==1:
+    if R_count==1 and instruction.count('#')==1:
         error.extend((register_error_handler(instruction),imm_error_handler(instruction,8)))
-    elif R_count==2:
+        register_indice=R_indices(instruction)
+        error.append(comma_identifier(instruction,register_indice[0]+1,instruction.find('#')))
+    elif R_count==2 and instruction.count('#')==1:
         error.extend((register_error_handler(instruction),imm_error_handler(instruction,3)))       
-    elif R_count==3:
+        register_indice=R_indices(instruction)
+        error.append(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
+        error.append(comma_identifier(instruction,register_indice[1]+1,instruction.find('#')))
+    elif R_count==3 and instruction.count('#')==0:
         error.extend(register_error_handler(instruction))
+        register_indice=R_indices(instruction)
+        error.append(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
+        error.append(comma_identifier(instruction,register_indice[1]+1,register_indice[2]))
     else:
         error.append("The number of register doesn't match for this instruction")
     return error
@@ -294,6 +302,7 @@ def comma_identifier(instruction,end_arg1,star_arg2):
     return error
 
 def R_indices(instruction):
+    #Knowing the instruction doesn't include the 
     register_indice=[]
     for (string,i) in enumerate(instruction):
         if string=='R':
