@@ -81,10 +81,12 @@ def error_handler_and (instruction):
     AND Rd,Rn\n"""
     error=[]
     R_count=instruction.count('R')
-    if R_count!=2:
-        error.append("The number of register doesn't match for this instruction")
-    elif R_count==2:
+    if R_count==2 and instruction.count('#'):
         error.extend(register_error_handler(instruction))
+        register_indice=R_indices(instruction)
+        error.append(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
+    else:
+        error.append("The number of operand doesn't match for this instruction")
     return error
 
 
@@ -93,10 +95,13 @@ def error_handler_cmp (instruction):
     CMP Rd,#imm8\n"""
     error=[]
     R_count=instruction.count('R')
-    if R_count!=1:
-        error.append("The number of register doesn't match for this instruction")
-    elif R_count==1:
+    if R_count==1 and instruction.count('#')==1:
         error.extend((register_error_handler(instruction),imm_error_handler(instruction,8)))
+        register_indice=R_indices(instruction)
+        error.append(comma_identifier(instruction,register_indice[0]+1,instruction.find('#')))
+    else:
+        error.append("The number of operand doesn't match for this instruction")
+        
     return error
 
 def error_handler_eor (instruction):
@@ -104,10 +109,13 @@ def error_handler_eor (instruction):
     EOR Rd,Rm\n"""
     error=[]
     R_count=instruction.count('R')
-    if R_count!=2:
-        error.append("The number of register doesn't match for this instruction")
-    elif R_count==2:
+    if R_count==2 and instruction.count('#')==0:
         error.extend(register_error_handler(instruction))
+        register_indice=R_indices(instruction)
+        error.append(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
+    else:
+        error.append("The number of operand doesn't match for this instruction")
+        
     return error
 
 def error_handler_ldr (instruction):
@@ -136,10 +144,13 @@ def error_handler_lsl (instruction):
     LSL Rd,Rm,#imm8\n"""
     error=[]
     R_count=instruction.count('R')
-    if R_count!=2:
-        error.append("The number of register doesn't match for this instruction")
-    elif R_count==2:
+    if R_count==2 and instruction.count('#')==1:
         error.extend((register_error_handler(instruction),imm_error_handler(instruction,5)))
+        register_indice=R_indices(instruction)
+        error.append(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
+        error.append(comma_identifier(instruction,register_indice[1]+1,instruction.find('#')))
+    else:
+        error.append("The number of operand doesn't match for this instruction")
     return error
 
 def error_handler_mov (instruction):
@@ -191,14 +202,22 @@ def error_handler_sub (instruction):
     SUB Rd,Rn,Rm"""
     error=[]
     R_count=instruction.count('R')
-    if R_count==1:
+    if R_count==1 and instruction.count('#')==1:
         error.extend((register_error_handler(instruction),imm_error_handler(instruction,8)))
-    elif R_count==2:
+        register_indice=R_indices(instruction)
+        error.append(comma_identifier(instruction,register_indice[0]+1,instruction.find('#')))
+    elif R_count==2 and instruction.count('#')==1:
         error.extend((register_error_handler(instruction),imm_error_handler(instruction,3)))       
-    elif R_count==3:
+        register_indice=R_indices(instruction)
+        error.append(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
+        error.append(comma_identifier(instruction,register_indice[1]+1,instruction.find('#')))
+    elif R_count==3 and instruction.count('#')==0:
         error.extend(register_error_handler(instruction))
+        register_indice=R_indices(instruction)
+        error.append(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
+        error.append(comma_identifier(instruction,register_indice[1]+1,register_indice[2]))
     else:
-        error.append("The number of register doesn't match for this instruction")
+        error.append("The number of operand doesn't match for this instruction")
     return error
 
 def error_handler_b_instruct(instruction):
@@ -206,9 +225,14 @@ def error_handler_b_instruct(instruction):
     error=[]
     n=len(instruction)
     label=''
-    for i in range(n):
-        if instruction[i].isalpha():
-            label+=instruction[i]
+    for (string,i) in enumerate(instruction):
+        if string!=' ':
+            label+=string
+        if string==' ' and label!='':
+            break
+    if label=='':
+        error.append("There is no label")
+        return error
     if label not in label_table:
         error.append("This label doesn't exist")    
     return error
