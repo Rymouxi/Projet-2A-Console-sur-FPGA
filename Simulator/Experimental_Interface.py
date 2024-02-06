@@ -82,7 +82,7 @@ class EnseaSimulator(ctk.CTk):
         self.pipeline_window = PipelineWindow(self)                                      # Pipeline window at the bottom
         self.main_frame.add(self.pipeline_window, weight=1)
 
-        self.toolbar = Toolbar(self, self.asm_window, self.debugger_window, self.register_window, self.mem_and_bin, theme_toggle_dark, theme_toggle_light)  # Toolbar at the top
+        self.toolbar = Toolbar(self, self.asm_window, self.debugger_window, self.register_window, self.mem_and_bin, self.pipeline_window, theme_toggle_dark, theme_toggle_light)  # Toolbar at the top
         self.toolbar.pack(fill="x")
 
 
@@ -431,15 +431,15 @@ class PipelineWindow(ctk.CTkFrame):
 
         # Create header labels on the left
         for i, header in enumerate(headers):
-            header_label = ctk.CTkLabel(self, text=header, padx=5, pady=2, anchor="w")
-            header_label.grid(row=i, column=0, sticky="nsew")
+            self.header_label = ctk.CTkLabel(self, text=header, padx=5, pady=2, anchor="w")
+            self.header_label.grid(row=i, column=0, sticky="nsew")
 
         # Create data entry widgets on the right
         for i in range(3):
             for j in range(20):
-                entry = ctk.CTkEntry(self, state="readonly", width=4)
-                entry.insert(0, "")
-                entry.grid(row=i, column=j + 1, sticky="nsew")
+                self.entry = ctk.CTkEntry(self, state="readonly", width=4)
+                self.entry.insert(0, "")
+                self.entry.grid(row=i, column=j + 1, sticky="nsew")
 
         # Configure grid weights for resizing
         for i in range(3):
@@ -453,17 +453,31 @@ class PipelineWindow(ctk.CTkFrame):
         '''Get the value in the specified cell.'''
 
         if 0 <= row <= 3 and 1 <= col <= 21:
-            return self.entry_widgets[row][col - 1].get()
+            entry_widget = self.grid_slaves(row=row, column=col)[0]
+            return entry_widget.get()
+        
+        else:
+            return None
 
 
     def set_cell(self, row:int, col:int, value:str):
         '''Set the value in the specified cell.'''
         
         if 0 <= row <= 3 and 1 <= col <= 21:
-            self.entry_widgets[row][col - 1].configure(state="normal")  # Make editable temporarily
-            self.entry_widgets[row][col - 1].delete(0, tk.END)
-            self.entry_widgets[row][col - 1].insert(0, value)
-            self.entry_widgets[row][col - 1].configure(state="readonly")  # Make readonly again
+            # Fetch the list of widgets at the specified row and column
+            slaves = self.grid_slaves(row=row, column=col)
+            if slaves:
+                entry_widget = slaves[0]
+                entry_widget.configure(state="normal")  # Make editable temporarily
+                entry_widget.delete(0, tk.END)
+                entry_widget.insert(0, value)
+                entry_widget.configure(state="readonly")  # Make readonly again
+            else:
+                print(f"No widget found at row {row} and column {col}")
+
+        else:
+            print("Row or column index out of range")
+            return None
 
 
     def iter_pip(self, value:str):
@@ -472,8 +486,8 @@ class PipelineWindow(ctk.CTkFrame):
         # Shift on the right
         for i in range(3):
             for j in range(19):
-                self.prev = self.get_cell(i, 20-j)
-                self.set_cell(i, 21-j, self.prev)
+                self.prev = self.get_cell(i, 19-j)
+                self.set_cell(i, 20-j, self.prev)
 
         # Add the two old instr in the new column
         self.prev = self.get_cell(1, 1)
@@ -485,27 +499,6 @@ class PipelineWindow(ctk.CTkFrame):
         self.set_cell(0, 1, value)
 
 
-    def full_pip(self, array):
-        '''Creates a full pipeline from a list of instructions.'''
-
-        if len(array) == 22:
-
-            # Top left corner
-            self.set_cell(0, 1, array[21])
-            self.set_cell(0, 2, array[20])
-            self.set_cell(1, 1, array[20])
-
-            # Center pipeline
-            for i in range(18):
-                self.set_cell(0, 3+i, array[19-i])
-                self.set_cell(1, 2+i, array[19-i])
-                self.set_cell(2, 1+i, array[19-i])
-
-            # Bottom right corner
-            self.set_cell(1, 20, array[1])
-            self.set_cell(2, 19, array[1])
-            self.set_cell(2, 20, array[0])
-
 
 
 
@@ -513,7 +506,7 @@ class PipelineWindow(ctk.CTkFrame):
 # ---------- Toolbar ---------- #
 
 class Toolbar(ctk.CTkFrame):
-    def __init__(self, master, asm_window, debugger_window, register_window, mem_and_bin, theme_toggle_dark, theme_toggle_light):
+    def __init__(self, master, asm_window, debugger_window, register_window, mem_and_bin, pipeline_window, theme_toggle_dark, theme_toggle_light):
         super().__init__(master)
 
         def download_code():
@@ -544,12 +537,35 @@ class Toolbar(ctk.CTkFrame):
             mem_and_bin.delete_bin()
 
             # Empties the pipeline
+            for i in range(22):
+                pipeline_window.iter_pip("")
 
 
         def step():
             '''Executes a step of the code.'''
 
-            # Updates button states
+            if self.state != len(master.toolbar.line_update) - 1:
+                # Update the Register
+                if master.toolbar.register_update[self.state - 1] != []:
+                    register_window.set_register_values(master.toolbar.register_update[self.state - 1][0], master.toolbar.register_update[self.state - 1][1])
+
+                # Update the User Mem
+                if master.toolbar.memory_update[self.state - 1] != []:
+                    mem_and_bin.user_mem_set(self.state - 1, master.toolbar.memory_update[self.state - 1][0], master.toolbar.memory_update[self.state - 1][1])
+
+                # Update the Pipeline
+                if master.toolbar.split_instructions[self.state - 1] != "":
+                    pipeline_window.iter_pip(master.toolbar.split_instructions[self.state - 1][:3])
+
+                # Update the state
+                self.state += 1
+
+            else:
+                master.toolbar.step_button.configure(self, fg_color="gray", state="disabled")
+                master.toolbar.run_button.configure(self, fg_color="gray", state="disabled", text="Run")
+                master.toolbar.runsbs_button.configure(self, fg_color="gray", state="disabled", text="Run Step By Step", hover_color="darkgreen")
+                master.toolbar.assemble_button.configure(self, fg_color="forestgreen", state="normal")
+                self.state = 0
 
 
         def run_step_by_step():
@@ -574,21 +590,25 @@ class Toolbar(ctk.CTkFrame):
             '''Runs the code in one go.\n
                 Also allows to resume after a runsbs.'''
             
-            # Updates button states
+            # Update button states
             master.toolbar.run_button.configure(self, fg_color="gray", state="disabled", text="Run")
             master.toolbar.runsbs_button.configure(self, fg_color="gray", state="disabled", text="Run Step By Step", hover_color="darkgreen")
             master.toolbar.step_button.configure(self, fg_color="gray", state="disabled")
             master.toolbar.assemble_button.configure(self, fg_color="forestgreen", state="normal")
             self.state = 0
 
-            # Updates register values
+            # Update register values
             for i in range(8):
                 register_window.set_register_values(i, virtual_register[i])
 
-            # Updates de User RAM values
+            # Update User RAM values
             for i in range(0, len(virtual_memory), 2):
                 mem_and_bin.user_mem_set(i, virtual_memory[i], virtual_memory[i+1])
 
+            # Updates the Pipeline
+            for e in master.toolbar.split_instructions[-24:]:
+                if e != "":
+                    pipeline_window.iter_pip(e[:3])
 
 
         def assemble():
@@ -619,7 +639,7 @@ class Toolbar(ctk.CTkFrame):
 
                 # Display error in debugger
                 for i in range(len(master.toolbar.error)//2):
-                    debugger_window.insert_content("%s at line %d" % (master.toolbar.error[2*i], master.toolbar.error[2*i+1]), "red")
+                    debugger_window.insert_content("%s at line %d\n" % (master.toolbar.error[2*i], master.toolbar.error[2*i+1]+1), "red")
 
             else:
                 # Fills the Code RAM array and the bitstream frame
@@ -633,8 +653,8 @@ class Toolbar(ctk.CTkFrame):
                             # Display the instruction in the binary window
                             mem_and_bin.insert_bin(master.toolbar.bitstream[master.toolbar.line_update[l]])
 
-                            # Display success message in debugger
-                            debugger_window.insert_content("Assembly complete", "lime")
+                # Display success message in debugger
+                debugger_window.insert_content("Assembly complete", "lime")
                 
                 # Enables buttons Run and RSBS
                 master.toolbar.run_button.configure(self, fg_color="forestgreen", state="normal")
