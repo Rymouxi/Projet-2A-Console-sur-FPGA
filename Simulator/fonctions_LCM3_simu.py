@@ -336,7 +336,7 @@ def MOV_simu(instruction:str,line:int):
     #MOV Rd,Rm
     if count_R==2:
         #Rd et Rn sont les numéros (en binaire) des registres dans MOV
-        Rd,Rm=register_recognition(instruction)[0]
+        Rd,Rm=register_recognition(instruction)
 
         #La valeur de Rm en decimale
         Rm_value=virtual_register[int(Rm,2)]

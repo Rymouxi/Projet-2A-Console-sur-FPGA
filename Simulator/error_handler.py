@@ -74,10 +74,9 @@ def error_handler_add(instruction):
     elif R_count==3 and instruction.count('#')==0:
         error.extend(register_error_handler(instruction))
         register_indice=R_indices(instruction)
-        error.extend(space_identifier(instruction,0,register_indice[0]))
-        error.extend(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
-        error.extend(comma_identifier(instruction,register_indice[1]+1,register_indice[2]))
-        error.extend(check_end_register(instruction,register_indice[2]+1))
+        error.append(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
+        error.append(comma_identifier(instruction,register_indice[1]+1,register_indice[2]))
+        error.append(check_end(instruction,register_indice[2]+1))
     else:
         error.append("The number of register doesn't match for this instruction")
     return error
@@ -87,7 +86,7 @@ def error_handler_and (instruction):
     AND Rd,Rn\n"""
     error=[]
     R_count=instruction.count('R')
-    if R_count==2 and instruction.count('#'):
+    if R_count==2 and instruction.count('#')==0:
         error.extend(register_error_handler(instruction))
         register_indice=R_indices(instruction)
         error.extend(space_identifier(instruction,0,register_indice[0]))
@@ -135,7 +134,7 @@ def error_handler_ldr (instruction):
     LDR Rt,[Rn]\n"""
     error=[]
     R_count=instruction.count('R')
-    if R_count==2 and instruction.count('#'):
+    if R_count==2 and instruction.count('#')==0:
         error.extend(register_error_handler(instruction))
         register_indice=R_indices(instruction)
         error.extend(space_identifier(instruction,0,register_indice[0]))
@@ -145,7 +144,7 @@ def error_handler_ldr (instruction):
         if indice1 ==-1 or indice2 ==-1:
             error.append("missing [ or ]")
         else:
-            if indice1<register_indice[1] and register_indice[1]<indice2:
+            if indice1>register_indice[1] or register_indice[1]>indice2:
                 error.append("Brackets at the wrong place")
             else:
                 error.extend(space_identifier(instruction,indice1,register_indice[1]))
@@ -210,7 +209,7 @@ def error_handler_str (instruction):
         if indice1 ==-1 or indice2 ==-1:
             error.append("missing [ or ]")
         else:
-            if indice1<register_indice[1] and register_indice[1]<indice2:
+            if indice1>register_indice[1] or register_indice[1]>indice2:
                 error.append("Brackets at the wrong place")
             else:
                 error.extend(space_identifier(instruction,indice1,register_indice[1]))
@@ -286,6 +285,7 @@ def imm_error_handler(instruction,size):
     hexa=['0','1','2','3','4','5','6','7','8','9','A','a','B','b','C','c','D','d','E','e','F','f']
     n=len(instruction)
     instruction.upper()
+    end_imm=0
     if instruction.count('#')==1:
         imm_to_end = instruction[instruction.find('#'):]
         while imm_to_end[-1]==' ':
@@ -317,7 +317,7 @@ def imm_error_handler(instruction,size):
     else: 
         error.append("There's no immediate number or too many #")
 
-    return error
+    return error,end_imm
 
 def comma_identifier(instruction,end_arg1,star_arg2):
     error=[]
@@ -345,7 +345,7 @@ def R_indices(instruction):
     return register_indice
 
 
-def space_identifier(instruction,end_arg1,start_arg2):
+def spaceidentifier(instruction,end_arg1,start_arg2):
     error=[]
     separator=instruction[end_arg1+1:start_arg2]
     if end_arg1 ==-1 or start_arg2 ==-1:
@@ -366,3 +366,4 @@ def check_end_register(instruction, last_operand_indice):
                 error.append("Unexpected character after last operand")
                 break
     return error
+
