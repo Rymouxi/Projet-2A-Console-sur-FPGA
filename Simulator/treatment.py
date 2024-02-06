@@ -24,7 +24,11 @@ def saut_ligne(code_text:str):
             code_loop=code_loop[0:code_loop.find("\t")]+code_loop[code_loop.find("\t")+1:n]
     code_asm.append(code_loop[0:len(code_loop)])
 
-    #Reconnaissance des commentaires ;
+    for j in range(len(code_asm)):
+        i=0
+        while code_asm[j][i]==' ':
+            code_asm[j]=code_asm[j][1:]
+            i+=1
 
     return code_asm
 
