@@ -321,7 +321,7 @@ def imm_error_handler(instruction,size):
 
 def comma_identifier(instruction,end_arg1,star_arg2):
     error=[]
-    separator=instruction[end_arg1:star_arg2]
+    separator=instruction[end_arg1+1:star_arg2]
     comma_count=0
     for string in separator:
         if string==',':
