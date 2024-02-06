@@ -74,7 +74,7 @@ def imm_recognition(instruction:str,size:int):
         while (m<n) and(instruction_imm[m] in hexa[0:10]):
             imm+=instruction_imm[m]
             m+=1
-        imm_bin=imm
+        imm_bin=DecToBin(int(imm))
 
 
     #Complétion des numéros binaires de imm par des 0, si nécessaires
