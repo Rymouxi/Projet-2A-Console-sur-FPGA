@@ -7,6 +7,7 @@ def error_handler_main(split_instruction):
     error_table=[]
     possible_instructions=['ADD ','AND ','BNE ','BEQ ','BGE ','BLT ','BGT ','BLE ','CMP ','EOR ','LDR ','LSL ','MOV ','STR ','SUB ']
     for i,instruction in enumerate(split_instruction):
+        instruction=instruction.upper()
         if (instruction[0:4] in possible_instructions)or(instruction[0:2]=='B ')or(instruction.count(':')==1)or(instruction==''):
             if instruction[0:4]==possible_instructions[0]:
                 error_table.extend(error_table_extension(error_handler_add(instruction[4::]),i))
@@ -317,7 +318,7 @@ def imm_error_handler(instruction,size):
     else: 
         error.append("There's no immediate number or too many #")
 
-    return error,end_imm
+    return error
 
 def comma_identifier(instruction,end_arg1,star_arg2):
     error=[]
@@ -345,7 +346,7 @@ def R_indices(instruction):
     return register_indice
 
 
-def spaceidentifier(instruction,end_arg1,start_arg2):
+def space_identifier(instruction,end_arg1,start_arg2):
     error=[]
     separator=instruction[end_arg1+1:start_arg2]
     if end_arg1 ==-1 or start_arg2 ==-1:

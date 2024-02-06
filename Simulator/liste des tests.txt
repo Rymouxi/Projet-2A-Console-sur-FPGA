@@ -1,0 +1,1 @@
+mov r1,#2\n MOV R4,#5\n LSL r1,r1,#28\nSTR r4,g[r1]

@@ -31,7 +31,7 @@ def instruction_translation(ASM:str):
         split_instructions_with_END=split_instruction+["END"]
         j=0
         while split_instructions_with_END[line_pointer]!="END":
-            instruction=capitalize(split_instructions_with_END[line_pointer])
+            instruction=split_instructions_with_END[line_pointer].upper()
             register_update_instruction,line_pointer,memory_update_instruction,error_simu=instruction_recognition(instruction,line_pointer,simu='ON')
             register_update.append(register_update_instruction)
             line_update.append(line_pointer)
@@ -46,6 +46,7 @@ def instruction_translation(ASM:str):
     if len(error)==0:
         i=0
         for instruction in split_instruction:
+            instruction=instruction.upper()
             bitstream.append(instruction_recognition(instruction,i,simu='OFF'))
             i+=1
     return split_instruction,line_instruction,bitstream,register_update,line_update,memory_update,error
