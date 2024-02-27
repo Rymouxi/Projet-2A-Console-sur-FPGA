@@ -100,6 +100,16 @@ class ASMWindow(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
 
+        def update_btns_on_modif(self, event=None):
+            '''Updates the buttons'''
+
+            master.master.master.master.toolbar.step_button.configure(self, fg_color="gray", state="disabled")
+            master.master.master.master.toolbar.run_button.configure(self, fg_color="gray", state="disabled", text="Run")
+            master.master.master.master.toolbar.runsbs_button.configure(self, fg_color="gray", state="disabled", text="Run Step By Step", hover_color="darkgreen")
+            master.master.master.master.toolbar.assemble_button.configure(self, fg_color="forestgreen", state="normal")
+            master.master.master.master.toolbar.state = 0
+
+
         self.frame = ctk.CTkFrame(self, corner_radius=0)
         self.frame.pack(side="top", fill="both", expand=True)
 
@@ -119,8 +129,9 @@ class ASMWindow(ctk.CTkFrame):
         self.textbox.tag_config("number", foreground="#FFB000")
         self.textbox.tag_config("comment", foreground="#888888")
 
-        # Bind events to update syntax highlighting
+        # Bind events to update syntax highlighting & buttons update
         self.textbox.bind("<KeyRelease>", self.highlight_syntax)
+        self.textbox.bind("<KeyRelease>", update_btns_on_modif)
 
 
     def highlight_syntax(self, event=None):
@@ -301,7 +312,7 @@ class RegisterWindow(ctk.CTkFrame):
                 hex_value = hex_value[2:]
                 decimal_value = int(hex_value, 16)
                 label.configure(text=str(decimal_value))
-                self.state = 0
+                self.display = 0
                 self.button.configure(text="Switch to dec")
 
 
@@ -431,10 +442,10 @@ class PipelineWindow(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
 
-        headers = ["Fetch", "Decode", "Execute"]
+        pip_headers = ["Fetch", "Decode", "Execute"]
 
         # Create header labels on the left
-        for i, header in enumerate(headers):
+        for i, header in enumerate(pip_headers):
             self.header_label = ctk.CTkLabel(self, text=header, padx=5, pady=2, anchor="w")
             self.header_label.grid(row=i, column=0, sticky="nsew")
 
@@ -647,7 +658,7 @@ class Toolbar(ctk.CTkFrame):
 
             else:
                 # Fills the Code RAM array and the bitstream frame
-                for l in range(len(master.toolbar.line_update)-2):
+                for l in range(len(master.toolbar.line_update)-1):
                     if len(master.toolbar.bitstream) != 0:
                         if master.toolbar.bitstream[master.toolbar.line_update[l]] != "":
 
