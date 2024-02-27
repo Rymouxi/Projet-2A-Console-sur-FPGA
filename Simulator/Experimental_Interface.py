@@ -21,7 +21,11 @@ import webbrowser
 from instruction_translation import *
 
 # change the color of the title of the debugger window when error
+
 # Bug with switch between hex and dec in regs when assemble
+# -> Fair un register update avec un stockage interne pour pouvoir enlever ce bug
+
+# Executer 2 tours après pour être fidèle au pipeline
 
 
 
@@ -272,7 +276,7 @@ class RegisterWindow(ctk.CTkFrame):
         for j in range(2):
             self.grid_columnconfigure(j, weight=1)
 
-        self.state = 0
+        self.display = 0
         self.button = ctk.CTkButton(self.frame, text="Switch to hex", command=self.change_format)
         self.button.pack(side="top")
 
@@ -284,12 +288,12 @@ class RegisterWindow(ctk.CTkFrame):
 
     def change_format(self):
         '''Change the format of values to hexadecimal.'''
-        if self.state == 0:
+        if self.display == 0:
             for i, label in enumerate(self.value_labels):
                 decimal_value = int(label.cget("text"))
                 hex_value = "0x"+format(decimal_value, "08x") if i<7 else "0b"+format(decimal_value, "04b")
                 label.configure(text=hex_value)
-                self.state = 1
+                self.display = 1
                 self.button.configure(text="Switch to dec")
         else:
             for label in self.value_labels:
@@ -332,7 +336,7 @@ class MemAndBin(ctk.CTkTabview):
 
         # Filling the code treeview
         for i in range(256):
-            address = "0x"+format(i*2+134217728, "08x")
+            address = "0x"+format(i*2+134217736, "08x")
             hex_value = "0x0000"
             instruction = ""
             tags = ("even_row", "odd_row")[i % 2 == 1]
@@ -394,7 +398,7 @@ class MemAndBin(ctk.CTkTabview):
     def code_mem_set(self, index:str, value:str, instruction:str):
         '''Set values for a chosen line in the treeview.'''
         self.item_id = self.code_tree.get_children()[int(index)]  # Get the item ID based on the index
-        self.code_tree.item(self.item_id, values=("0x"+format(index*2+134217728, "08x"), "0x"+format(int(value, 2), "04x"), instruction))
+        self.code_tree.item(self.item_id, values=("0x"+format(index*2+134217736, "08x"), "0x"+format(int(value, 2), "04x"), instruction))
 
     
     def user_mem_set(self, index:str, value:str):
@@ -544,7 +548,7 @@ class Toolbar(ctk.CTkFrame):
         def step():
             '''Executes a step of the code.'''
 
-            if self.state != len(master.toolbar.line_update) - 1:
+            if self.state != len(master.toolbar.line_update):
                 # Update the Register
                 if master.toolbar.register_update[self.state - 1] != []:
                     register_window.set_register_values(master.toolbar.register_update[self.state - 1][0], master.toolbar.register_update[self.state - 1][1])
