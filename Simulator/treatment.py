@@ -1,36 +1,72 @@
 
-def saut_ligne(code_text:str): 
+# def saut_ligne(code_text:str): 
+#     """Cette fonction prend le code ASM en entier et le convertit en liste d'instructions où le séparateur est le retour à la ligne.\n
+#     Il enlève également les éventuelles indentations
+#     """
+#     index=code_text.find('\n')
+#     n=len(code_text)
+#     code_asm=[]
+#     code_loop=code_text
+#     while code_loop.find('\n')!=-1:
+#         indent_count=code_loop[0:code_loop.find("\n")].count("\t")
+#         if indent_count!=0:
+#             for indent in range(indent_count):
+#                 code_loop=code_loop[0:code_loop.find("\t")]+code_loop[code_loop.find("\t")+1:n]
+#         if code_loop[0:code_loop.find("\n")].count(";")!=0:
+#             code_loop=code_loop[0:code_loop.find(';')]+code_loop[code_loop.find("\n"):n]
+#         code_asm.append(code_loop[0:code_loop.find('\n')])
+#         code_loop=code_loop[code_loop.find('\n')+1:n]
+#         n=len(code_loop)
+
+#     indent_count=code_loop[0:code_loop.find("\n")].count("\t")
+#     if indent_count!=0:
+#         for indent in range(indent_count):
+#             code_loop=code_loop[0:code_loop.find("\t")]+code_loop[code_loop.find("\t")+1:n]
+#     code_asm.append(code_loop[0:len(code_loop)])
+
+#     for j in range(len(code_asm)):
+#         i=0
+#         while code_asm[j][i]==' ':
+#             code_asm[j]=code_asm[j][1:]
+#             i+=1
+
+#     return code_asm
+
+def saut_ligne(ASM:str):
     """Cette fonction prend le code ASM en entier et le convertit en liste d'instructions où le séparateur est le retour à la ligne.\n
     Il enlève également les éventuelles indentations
     """
-    index=code_text.find('\n')
-    n=len(code_text)
-    code_asm=[]
-    code_loop=code_text
-    while code_loop.find('\n')!=-1:
-        indent_count=code_loop[0:code_loop.find("\n")].count("\t")
-        if indent_count!=0:
-            for indent in range(indent_count):
-                code_loop=code_loop[0:code_loop.find("\t")]+code_loop[code_loop.find("\t")+1:n]
-        if code_loop[0:code_loop.find("\n")].count(";")!=0:
-            code_loop=code_loop[0:code_loop.find(';')]+code_loop[code_loop.find("\n"):n]
-        code_asm.append(code_loop[0:code_loop.find('\n')])
-        code_loop=code_loop[code_loop.find('\n')+1:n]
-        n=len(code_loop)
+    code_ASM=[]
+    break_line_count=ASM.count("\n")
+    for i in range(break_line_count):
+        line=ASM[:ASM.find("\n")]
 
-    indent_count=code_loop[0:code_loop.find("\n")].count("\t")
-    if indent_count!=0:
-        for indent in range(indent_count):
-            code_loop=code_loop[0:code_loop.find("\t")]+code_loop[code_loop.find("\t")+1:n]
-    code_asm.append(code_loop[0:len(code_loop)])
-
-    for j in range(len(code_asm)):
-        i=0
-        while code_asm[j][i]==' ':
-            code_asm[j]=code_asm[j][1:]
-            i+=1
-
-    return code_asm
+        #indentation
+        while line.find("\t")!=-1:
+            indent_index=line.find("\t")
+            line=line[:indent_index]+line[indent_index+1:]
+        
+        #commentaires
+        if line.find(";")!=-1:
+            line=line[:line.find(";")]
+        
+        if line!='':
+            copy_line=line
+            for character in copy_line:
+                if character==' ':
+                    line=line[1:]
+                if character!=' ':
+                    break
+            for character in copy_line[::-1]:
+                if character==' ':
+                    line=line[:-1]
+                if character!=' ':
+                    break
+        
+        if line!='':
+            code_ASM.append(line)
+        ASM=ASM[ASM.find("\n")+1:]
+    return code_ASM
 
 def DecToBin(Number:int):
     """Number doit être un int \n
