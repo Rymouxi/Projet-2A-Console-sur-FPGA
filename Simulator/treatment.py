@@ -1,37 +1,4 @@
 
-# def saut_ligne(code_text:str): 
-#     """Cette fonction prend le code ASM en entier et le convertit en liste d'instructions où le séparateur est le retour à la ligne.\n
-#     Il enlève également les éventuelles indentations
-#     """
-#     index=code_text.find('\n')
-#     n=len(code_text)
-#     code_asm=[]
-#     code_loop=code_text
-#     while code_loop.find('\n')!=-1:
-#         indent_count=code_loop[0:code_loop.find("\n")].count("\t")
-#         if indent_count!=0:
-#             for indent in range(indent_count):
-#                 code_loop=code_loop[0:code_loop.find("\t")]+code_loop[code_loop.find("\t")+1:n]
-#         if code_loop[0:code_loop.find("\n")].count(";")!=0:
-#             code_loop=code_loop[0:code_loop.find(';')]+code_loop[code_loop.find("\n"):n]
-#         code_asm.append(code_loop[0:code_loop.find('\n')])
-#         code_loop=code_loop[code_loop.find('\n')+1:n]
-#         n=len(code_loop)
-
-#     indent_count=code_loop[0:code_loop.find("\n")].count("\t")
-#     if indent_count!=0:
-#         for indent in range(indent_count):
-#             code_loop=code_loop[0:code_loop.find("\t")]+code_loop[code_loop.find("\t")+1:n]
-#     code_asm.append(code_loop[0:len(code_loop)])
-
-#     for j in range(len(code_asm)):
-#         i=0
-#         while code_asm[j][i]==' ':
-#             code_asm[j]=code_asm[j][1:]
-#             i+=1
-
-#     return code_asm
-
 def saut_ligne(ASM:str):
     """Cette fonction prend le code ASM en entier et le convertit en liste d'instructions où le séparateur est le retour à la ligne.\n
     Il enlève également les éventuelles indentations
