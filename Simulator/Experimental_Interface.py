@@ -266,7 +266,7 @@ class RegisterWindow(ctk.CTkFrame):
         self.value_labels = []
 
         # Create data entry widgets
-        for i in range(7):
+        for i in range(8):
             self.register_label = ctk.CTkLabel(self.sub_frame, text=f"R{i}:", padx=5, pady=2, anchor="w")
             self.register_label.grid(row=i, column=0, sticky="nsew")
 
@@ -275,14 +275,14 @@ class RegisterWindow(ctk.CTkFrame):
             self.value_labels.append(self.value_label)
 
         self.register_label = ctk.CTkLabel(self.sub_frame, text="NZVC", padx=5, pady=2, anchor="w")
-        self.register_label.grid(row=7, column=0, sticky="nsew")
+        self.register_label.grid(row=8, column=0, sticky="nsew")
 
         self.value_label = ctk.CTkLabel(self.sub_frame, text="0", padx=5, pady=2, anchor="w")
-        self.value_label.grid(row=7, column=1, sticky="nsew")
+        self.value_label.grid(row=8, column=1, sticky="nsew")
         self.value_labels.append(self.value_label)
 
         # Configure grid weights for resizing
-        for i in range(8):
+        for i in range(9):
             self.grid_rowconfigure(i, weight=1)
         for j in range(2):
             self.grid_columnconfigure(j, weight=1)
@@ -302,7 +302,7 @@ class RegisterWindow(ctk.CTkFrame):
         if self.display == 0:
             for i, label in enumerate(self.value_labels):
                 decimal_value = int(label.cget("text"))
-                hex_value = "0x"+format(decimal_value, "08x") if i<7 else "0b"+format(decimal_value, "04b")
+                hex_value = "0x"+format(decimal_value, "08x") if i<8 else "0b"+format(decimal_value, "04b")
                 label.configure(text=hex_value)
                 self.display = 1
                 self.button.configure(text="Switch to dec")
