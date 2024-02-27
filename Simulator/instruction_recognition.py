@@ -21,7 +21,11 @@ def instruction_recognition(instruction:str,line:int,simu='OFF'):
     line_update=line+1
     error_simu=[]
 
-
+    if  instruction[0]!='b'and instruction[0]!='B' :
+        if instruction.find(':')==-1:
+            instruction=instruction.upper()
+    else:
+        instruction=instruction[:instruction.find(' ')].upper()+instruction[instruction.find(' '):]
     if simu=='OFF':
         if n>0:
             if instruction.count(':')==1:
