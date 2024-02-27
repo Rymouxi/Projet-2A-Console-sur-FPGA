@@ -7,7 +7,11 @@ def error_handler_main(split_instruction):
     error_table=[]
     possible_instructions=['ADD ','AND ','BNE ','BEQ ','BGE ','BLT ','BGT ','BLE ','CMP ','EOR ','LDR ','LSL ','MOV ','STR ','SUB ']
     for i,instruction in enumerate(split_instruction):
-        instruction=instruction.upper()
+        if  instruction[0]!='b'and instruction[0]!='B' :
+            if instruction.find(':')==-1:
+                instruction=instruction.upper()
+        else:
+            instruction=instruction[:instruction.find(' ')].upper()+instruction[instruction.find(' '):]
         if (instruction[0:4] in possible_instructions)or(instruction[0:2]=='B ')or(instruction.count(':')==1)or(instruction==''):
             if instruction[0:4]==possible_instructions[0]:
                 error_table.extend(error_table_extension(error_handler_add(instruction[4::]),i))
