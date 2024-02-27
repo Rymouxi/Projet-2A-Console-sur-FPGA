@@ -2,6 +2,9 @@
 
 ; We read the 4 bits which indicate the case number
 
+MOV R5, #1                      
+LSL R5, R5, #31
+MOV
 MOV R5, #0x80000104             ; memory adress of the game 
 LDR R1, [R5]                    ; read the value stocked at this adress and stock this value in R1
 MOV R0, #28                     ; we are going to make a shift of 28 bits (because we want to read the first 4 bits)
