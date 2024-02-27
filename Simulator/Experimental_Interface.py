@@ -561,16 +561,16 @@ class Toolbar(ctk.CTkFrame):
 
             if self.state != len(master.toolbar.line_update):
                 # Update the Register
-                if master.toolbar.register_update[self.state - 1] != []:
-                    register_window.set_register_values(master.toolbar.register_update[self.state - 1][0], master.toolbar.register_update[self.state - 1][1])
+                if master.toolbar.register_update[master.toolbar.line_update[self.state - 1]] != []:
+                    register_window.set_register_values(master.toolbar.register_update[master.toolbar.line_update[self.state - 1]][0], master.toolbar.register_update[master.toolbar.line_update[self.state - 1]][1])
 
                 # Update the User Mem
-                if master.toolbar.memory_update[self.state - 1] != []:
-                    mem_and_bin.user_mem_set(self.state - 1, master.toolbar.memory_update[self.state - 1][0], master.toolbar.memory_update[self.state - 1][1])
+                if master.toolbar.memory_update[master.toolbar.line_update[self.state - 1]] != []:
+                    mem_and_bin.user_mem_set(master.toolbar.line_update[self.state - 1], master.toolbar.memory_update[master.toolbar.line_update[self.state - 1]][0], master.toolbar.memory_update[master.toolbar.line_update[self.state - 1]][1])
 
                 # Update the Pipeline
-                if master.toolbar.split_instructions[self.state - 1] != "":
-                    pipeline_window.iter_pip(master.toolbar.split_instructions[self.state - 1][:3])
+                if master.toolbar.split_instructions[master.toolbar.line_update[self.state - 1]] != "":
+                    pipeline_window.iter_pip(master.toolbar.split_instructions[master.toolbar.line_update[self.state - 1]][:3])
 
                 # Update the state
                 self.state += 1
