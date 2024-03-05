@@ -36,7 +36,9 @@ def instruction_translation(ASM:str):
             register_update.append(register_update_instruction)
             line_update.append(line_pointer)
             memory_update.append(memory_update_instruction)
-            error.extend(error_simu)
+            if error_simu!=[]:
+                error.extend(error_simu)
+                error.append(j)
             j+=1
             if j>1000:
                 error.extend(["There's an infinite loop" ,line_pointer])

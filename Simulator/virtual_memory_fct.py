@@ -78,7 +78,7 @@ def virtual_memory_address_check(address):
     if type(address)==str and address[0:2]=='0b':
         address=hex(int(address,2))
     if type(address)==str and address[0:2]=='0x':
-        if int('20000000',16)<int(address,16)<int('80000000',16):
+        if int('20000000',16)<=int(address,16)<=int('80000000',16):
             return False
         else:
             return True
