@@ -56,7 +56,7 @@ def BNE_label_bitstream(instruction:str,line:int):
 
     return bitstream
 
-def BEQ_label_bitstream(instruction:str,code_ASM,line:int):
+def BEQ_label_bitstream(instruction:str,line:int):
     """Traduction de l'instruction BEQ label
     """
 
