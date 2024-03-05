@@ -2,19 +2,18 @@
 ## 1. Introduction
 Welcome to our project! 
 
-Programmers often know very well how to code in high-level languages, but sometimes lack the understanding of what's happening at a lower level.
+Many programmers are proficient in high-level languages but may lack understanding of lower-level programming concepts.
 Our goal was to understand this lower level by trying to recreate a computer from scratch.
 
-We've programmed the basic instructions of the LCM3 Assembly code on an FPGA Board in VHDL, intending to execute the Assembly code on it.
-For this, we needed an IDE to write and debug Assembly code and download it on a board, so we coded our own in Python!
+We've implemented the basic instructions of the LCM3 Assembly code on an FPGA Board using VHDL. Our objective is to execute Assembly code directly on the FPGA. To facilitate this, we developed an IDE in Python for writing, testing, and debugging Assembly code, and downloading it onto the FPGA board.
 
-This project thus have 3 parts
+This project comprises three main components:
 
-**The Simulator:** The IDE running in Python on your computer, in which you can write, test, and debug your ASM code.
+**The Simulator:** A Python-based IDE installed on your computer, enabling you to write, test, and debug ASM code.
 
-**The Board Programmation:** The VHDL code describes the functioning of the processor.
+**The Board Programmation:** VHDL code that defines the functionality of the processor embedded within the FPGA.
 
-**The ASM Code:** This is where the magic happens! You write your instructions in ASM. These instructions tell the computer chip what to do like adding numbers, storing information, or even playing games like Snake or Tic Tac Toe.
+**The ASM Code:** This is where the magic happens! You write instructions in ASM to direct the computer chip, such as arithmetic operations, data storage, or even game logic like Snake or Tic Tac Toe.
 
 ## 2. Software
 ### 2.1 Simulator
