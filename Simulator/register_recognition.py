@@ -7,6 +7,7 @@ def register_recognition(instruction:str):
 
     n=len(instruction)
 
+
     #Suppression de l'action de l'instruction: si l'instruction est 'ADD R5,R6' alors la chaîne de caractère devient ' R5,R6'
     #Tout cela pour éviter les problèmes avec les instructions contenant des R dans leur action telles que EOR ou LDR
     instruction=instruction[3:n]
