@@ -16,3 +16,29 @@ def line_jump(codeASM):
         split_instructions.append(codeASM[0: codeASM.find('\n')])
         codeASM = codeASM[codeASM.find('\n') + 2::]
     return split_instructions
+```
+
+#### 2.1.3 Instruction Recognition
+Since we're dealing with LCM3 instructions, we have a predefined set of instructions to recognize. We identify instructions by comparing the first few characters and categorize them accordingly.
+
+#### 2.1.4 Resgister Recognition
+Recognizing registers is important for the simulator's functionality. We extract information from instructions to identify which registers are being used.
+
+#### 2.1.5 Numer-type Argument Recognition
+This simulator also recognizes numerical arguments within instructions for further processing.
+
+#### 2.1.6 Internal Register Simulation
+Simulation of internal registers is performed to emulate the behaviour of registers during instruction execution.
+
+#### 2.1.7 Internal Memory Simulation
+Similarly, internal memory is carried out to simulate memory operations during execution.
+
+#### 2.1.8 Handling Branching
+We handle branching instructions by label recognition and manage jumps to specific lines in the code.
+
+#### 2.1.9 Error Handling
+This simulator has mechanisms to handle errors that lay occur during execution.
+
+#### 2.2.0 Bitstream Generation
+To facilitate further processing, the simulator generates a bitstream representing the processed ASM code.
+
