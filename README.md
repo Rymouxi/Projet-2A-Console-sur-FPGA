@@ -137,3 +137,47 @@ The disconnection process is handled by the disconnect board function:
 
 The user’s choice ("Yes" or "No") determines whether the serial connection should be closed. If closed, resources are released, and the system returns to a clean state; if not, the connection remains active for further communication.
 
+# 3. FPGA
+
+## 3.1 Preamble
+
+### 3.1.1 Arty A7 FPGA
+
+The Arty A7 FPGA board is distinguished by its notable attributes, featuring the Xilinx Artix-100T FPGA. With onboard programming capability, it maintains an unconfigured state, allowing tailored configurations as per project requirements. This flexibility accommodates diverse applications and adapts to evolving project needs.
+
+One of its key strengths lies in the expansive resources of the FPGA, ensuring no limitations on the intricacy and scale of designs. This scalability is crucial for pushing boundaries and making it an optimal choice for projects requiring versatility and computational power.
+
+The adaptability of the Arty A7 enhances its appeal for various development endeavors, providing a reliable platform for innovation. In essence, it emerges as a versatile and powerful tool, well-suited for projects demanding customization and computational prowess.
+
+### 3.1.2 ASM LCM3 Instruction Set
+
+The adoption of the LCM3 instruction set offers advantages while presenting specific constraints. LCM3 adheres to a Reduced Instruction Set Computer (RISC) architecture, characterized by simple and understandable instructions, facilitating both programming and code comprehension.
+
+LCM3's conciseness is a strength, allowing for effective and functional programs without unnecessary complexity. The compact size of LCM3-generated code, with each instruction encoded on 16 bits, is crucial in memory-limited environments.
+
+However, certain constraints associated with LCM3 need consideration, such as the limitation to only 8 available registers, and limited precision in representing numbers in certain situations.
+
+### 3.1.3 Getting Started with Vivado
+
+Xilinx Vivado Design Suite is a set of software tools developed for advanced design of programmable logic circuits on FPGAs. It provides a user-friendly environment for developing complex digital systems and offers advanced debugging features. Vivado streamlines the FPGA design process, ensuring optimal integration with Xilinx devices.
+
+### 3.1.4 Introduction to ModelSim
+
+ModelSim is a digital hardware simulator used in digital circuit design and hardware verification. It provides advanced debugging features and supports multiple hardware description languages such as VHDL and Verilog. While not replacing all functionalities of Vivado, ModelSim is valuable for conducting simulations and debugging.
+
+### 3.1.5 Nomenclature and Selection of Variables
+
+## 3.2 Coding of Arty A7 Board
+
+### 3.2.1 Fetch
+
+The FETCH block retrieves the instruction to be executed from the main memory based on the Program Counter (PC). It then loads this instruction into an internal register of the processor and increments the instruction counter to point to the next instruction.
+
+### 3.2.2 Decode
+
+The DECODE block decodes the instruction to be executed in the EXECUTE block. It separates the information into flags, register numbers, and values and transmits them to both the DECODE block and the memory block.
+
+### 3.2.3 UAL
+
+The UAL (Arithmetic Logic Unit) handles the 4-bit NZVC number obtained from the FPU output, storing negative, zero, overflow, and carry exceptions.
+
