@@ -1,5 +1,15 @@
 # ASM IDE in Python for our VHDL - Programmed FPGA
 ## 1. Introduction
+Welcome to our project! We've built a tool that helps people create and test digital systems using a language called Assembly (ASM). Think of it like building something on a computer, but instead of using regular programming languages, we're using ASM.
+
+So, how does it work? We've got three main parts:
+
+**Simulator:** This is like a virtual lab where you can write and test your ASM code. It's built using Python. You write your ASM code here, and the simulator helps you see how it works without needing real hardware.
+
+**VHDL:** This part programs the card so it can understand ASM. We are making the instructions that the processor will understand.
+
+**ASM Programming:** This is where the magic happens! You write your instructions in ASM. These instructions tell the computer chip what to do, like add numbers, store information, or even play games like Snake or Tic Tac Toe.
+
 ## 2. Software
 ### 2.1 Simulator
 The simulator processes ASM code received from the UI as a string. Here's an overview of its functionalities:
