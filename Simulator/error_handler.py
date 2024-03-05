@@ -195,7 +195,7 @@ def error_handler_mov (instruction):
         error.extend(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
         error.extend(check_end_register(instruction,register_indice[1]+1))        
     else:
-        error.append("The number of register doesn't match for this instruction")
+        error.append("The number of operand doesn't match for this instruction")
     return error
 
 
@@ -296,7 +296,7 @@ def imm_error_handler(instruction,size):
         while imm_to_end[-1]==' ':
             imm_to_end=imm_to_end[:len(imm_to_end)-1]
         if imm_to_end.find('#0X')!=-1:
-            for i in range(2,len(imm_to_end)):
+            for i in range(3,len(imm_to_end)):
                 if imm_to_end[i] not in hexa:
                     error.append("Expected a number in hexadecimal")
                     break
@@ -304,7 +304,7 @@ def imm_error_handler(instruction,size):
                     if int(imm_to_end[3:],16)>=2**size:
                         error.append("This number is too big for this instruction")
         elif imm_to_end.find('#0B')!=-1:
-            for i in range(2,len(imm_to_end)):
+            for i in range(3,len(imm_to_end)):
                 if imm_to_end[i] not in ['0','1']:
                     error.append("Expected a number in binary")
                     break
@@ -328,6 +328,8 @@ def comma_identifier(instruction,end_arg1,star_arg2):
     error=[]
     separator=instruction[end_arg1+1:star_arg2]
     comma_count=0
+    if separator=='':
+        error.append("No comma between operands")
     for string in separator:
         if string==',':
             comma_count+=1

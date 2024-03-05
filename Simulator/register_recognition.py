@@ -53,7 +53,7 @@ def imm_recognition(instruction:str,size:int):
     instruction_imm=instruction[instruction.find("#")+1:]
     n=len(instruction_imm)
     
-    if instruction_imm[0:2]=="0x":
+    if instruction_imm[0:2]=="0X":
         m=0
         imm=''
         while (2+m<n) and ((instruction_imm[2+m] in hexa)==True):
@@ -61,7 +61,7 @@ def imm_recognition(instruction:str,size:int):
             m+=1
         imm_bin=DecToBin(int(imm,16))
         
-    elif instruction_imm[0:2]=="0b":
+    elif instruction_imm[0:2]=="0B":
         m=0
         imm=''
         while (2+m<n)and(instruction_imm[2+m] in ['0','1']):
