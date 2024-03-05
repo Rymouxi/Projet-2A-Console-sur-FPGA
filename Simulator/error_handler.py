@@ -339,8 +339,8 @@ def comma_identifier(instruction,end_arg1,star_arg2):
         if comma_count>1:
             error.append("Too many comma between two operands")
             break
-        if comma_count==0:
-            error.append("No separator between two operands")
+    if comma_count==0:
+        error.append("No separator between two operands")
     return error
 
 def R_indices(instruction):
