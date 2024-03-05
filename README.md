@@ -42,3 +42,54 @@ This simulator has mechanisms to handle errors that lay occur during execution.
 #### 2.2.0 Bitstream Generation
 To facilitate further processing, the simulator generates a bitstream representing the processed ASM code.
 
+### 2.2 Interface
+
+#### 2.2.1 Introduction
+
+The interface of the simulator provides an ergonomic platform to code in ASM. The goals are creating a visually appealing user interface, providing accurate syntax and error highlighting, and establishing an environment where users can learn the fundamental concepts of assembly language. The user can also save or import code, connect a board, and download code on it.
+
+Primary objectives of the interface are:
+- Create an ASM window in which we can read and write code.
+- Create a debugger to display all potential errors.
+- Create a register window to display register values.
+- Create memory windows to display where the code is stored and where the user can edit the RAM.
+- Create a pipeline in which we can see the instructions going through Fetch, Decode, and Execute.
+- Create a binary window in which we can read the binary corresponding to our code.
+- Create buttons to save, import, assemble, run, run step by step, reset, connect a board, and download code.
+- Provide documentation about the LCM3 and the simulator itself.
+- Have re-sizable frames, light and dark themes, syntax highlighting, and a bit of color.
+
+#### 2.2.2 Modules Used
+
+To code the interface, we used several modules:
+- Tkinter: The graphical user interface is built using Tkinter, a popular GUI toolkit used in Python.
+- CustomTkinter: An extension of Tkinter with a more modern look.
+- Random: The classic random library to pick random numbers or elements.
+- Webbrowser: Useful to open an online documentation of the ASM LCM3.
+
+#### 2.2.3 Interface Architecture and Features
+
+The interface contains different frames in which we can write code or read information. They are:
+
+- **ASM Zone:** This is the text frame in which the user will code. It provides syntax color highlighting and error highlighting. The text is also locked in the upper-case to ease coding of the instructions such as ’MOV’ or ’B’.
+- **Debugger:** The debugger frame displays errors or information about the assembly of the code. The color of the text also varies depending on if it’s an error or not.
+- **Register frame:** This frame displays the values of all registers. It works with the run and the run step-by-step. There also is an option to switch between decimal and hexadecimal displays.
+- **Code memory array:** This array shows the memory where the code is stored. It displays the instruction in text format and their corresponding binary code in hexadecimal.
+- **User memory array:** This array, on the other hand, shows the part of the memory that is accessible by the user. It’s the readable and editable RAM.
+- **Binary frame:** This frame displays the binary translation of the code that will be sent to the board if one is connected.
+- **Pipeline array:** This array displays the path of instructions in the Fetch, Decode, and Execute.
+
+Three menus are accessible in the top left corner:
+- **File Menu:** This menu allows creating a new file, importing code from an external file, and saving the current code. These actions ensure efficient code management within the simulator.
+- **Settings Menu:** So far this menu allows you to switch between dark and light themes. This feature enhances the user experience by accommodating different preferences for visual appearance.
+- **Help Menu:** This menu provides quick access to documentation, including both simulator-specific help and external LCM3 documentation, facilitating learning and troubleshooting.
+
+You can also access several simulation buttons in the top right corner:
+- **Assemble Button:** Allows to assemble the code. Displays the result, including potential errors, in the debugger window. Also calls the simulation function to prepare a run or step-by-step.
+- **Run Button:** Simulates the code in one go. Also Enables you to resume simulation if in mode step-by-step.
+- **Run Step-by-step Button:** Simulates the code incrementally. This facilitates debugging by enabling a detailed inspection of each instruction execution.
+- **Step Button:** Button to execute one step when in step-by-step mode.
+- **Reset Button:** Resets the values in the User memory, the Code memory, the pipeline, the registers, the binary window, and the debugger. It also reduces the lag by re-initializing some of the frames.
+- **Connect Board Button:** Allows to connect a board to the computer running the simulator. Opens a pop-up to configure the port, the baud rate, and other connection parameters.
+- **Download Code Button:** Once a board is connected, this button allows you to download the bit stream of the ASM code onto the board. And triggers the running of the code on the board.
+
