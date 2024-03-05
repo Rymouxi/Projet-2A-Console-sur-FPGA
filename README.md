@@ -181,3 +181,37 @@ The DECODE block decodes the instruction to be executed in the EXECUTE block. It
 
 The UAL (Arithmetic Logic Unit) handles the 4-bit NZVC number obtained from the FPU output, storing negative, zero, overflow, and carry exceptions.
 
+# 4. ASM Coding
+
+## 4.1 Introduction
+
+In this section, the goal was to develop the classic Snake game using ASM assembly language while adhering to the strict constraints of LCM3 instructions. To address these constraints, foundational functions such as division, multiplication, and modulo were pre-developed to simplify the game development.
+
+## 4.2 Constraints and Preparation
+
+Anticipating essential arithmetic operations, basic functions like division, multiplication, and modulo were created in advance. These functions are crucial for managing positions, movement, and collisions in the Snake game.
+
+### 4.2.1 Constraints of LCM3 Instructions
+
+Using LCM3 instructions comes with constraints, notably the need to manually write all functions. Unlike higher-level languages, ASM lacks built-in functions for common operations, necessitating explicit coding even for basic functionalities like multiplication.
+
+### 4.2.2 Example: Division Function
+
+The division function was implemented using an iterative subtraction approach (Euclidean division). This method involves repetitively subtracting the divisor from the dividend until the dividend becomes 0, keeping track of the quotient as a counter to ensure integer division.
+
+```assembly
+; Division function excerpt
+DIVIDE_LOOP:
+    CMP R3, #0
+    BEQ DIVIDE_DONE
+    CMP R3, R2
+    BNE DIVIDE_INCREMENT
+    SUB R3, R3, R2
+    ADD R0, R0, #1
+    B DIVIDE_LOOP
+DIVIDE_INCREMENT:
+    ADD R0, R0, #1
+    B DIVIDE_DONE
+DIVIDE_DONE:
+DIVIDE_ERROR:
+```
