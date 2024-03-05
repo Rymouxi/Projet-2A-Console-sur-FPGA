@@ -215,3 +215,28 @@ DIVIDE_INCREMENT:
 DIVIDE_DONE:
 DIVIDE_ERROR:
 ```
+
+#### Initialization:
+
+- **DIVIDE_LOOP** is the entry point for the division function.
+- **CMP R3, #0:** Compares the dividend (R3) with zero.
+- **BEQ DIVIDE_DONE:** Branches to DIVIDE_DONE if the dividend is zero, indicating division is complete.
+- **CMP R3, R2:** Compares dividend (R3) with divisor (R2).
+- **BNE DIVIDE_INCREMENT:** Branches to DIVIDE_INCREMENT if dividend is not equal to divisor.
+
+#### Subtraction Loop:
+
+- **SUB R3, R3, R2:** Subtracts divisor from dividend.
+- **ADD R0, R0, #1:** Increments quotient (R0) to track number of subtractions.
+- **B DIVIDE_LOOP:** Branches back to beginning of loop to repeat subtraction process.
+- 
+#### Increment Loop:
+
+- **DIVIDE_INCREMENT:** Branches here if dividend is not equal to divisor.
+- **ADD R0, R0, #1:** Increments quotient to account for remaining portion of dividend.
+- **B DIVIDE_DONE:** Branches to DIVIDE_DONE to complete division.
+  
+#### Completion and Error Handling:
+
+- **DIVIDE_DONE:** Marks end of division function.
+- **DIVIDE_ERROR:** Placeholder for error handling.
