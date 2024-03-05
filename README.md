@@ -1,14 +1,20 @@
-# ASM IDE in Python for our VHDL - Programmed FPGA
+# ASM IDE in Python for our VHDL-Programmed FPGA
 ## 1. Introduction
-Welcome to our project! We've built a tool that helps people create and test digital systems using a language called Assembly (ASM). Think of it like building something on a computer, but instead of using regular programming languages, we're using ASM.
+Welcome to our project! 
 
-So, how does it work? We've got three main parts:
+Programmers often know very well how to code in high-level languages, but sometimes lack the understanding of what's happening at a lower level.
+Our goal was to understand this lower level by trying to recreate a computer from scratch.
 
-**Simulator:** This is like a virtual lab where you can write and test your ASM code. It's built using Python. You write your ASM code here, and the simulator helps you see how it works without needing real hardware.
+We've programmed the basic instructions of the LCM3 Assembly code on an FPGA Board in VHDL, intending to execute the Assembly code on it.
+For this, we needed an IDE to write and debug Assembly code and download it on a board, so we coded our own in Python!
 
-**VHDL:** This part programs the card so it can understand ASM. We are making the instructions that the processor will understand.
+This project thus have 3 parts
 
-**ASM Programming:** This is where the magic happens! You write your instructions in ASM. These instructions tell the computer chip what to do, like add numbers, store information, or even play games like Snake or Tic Tac Toe.
+**The Simulator:** The IDE running in Python on your computer, in which you can write, test, and debug your ASM code.
+
+**The Board Programmation:** The VHDL code describes the functioning of the processor.
+
+**The ASM Code:** This is where the magic happens! You write your instructions in ASM. These instructions tell the computer chip what to do like adding numbers, storing information, or even playing games like Snake or Tic Tac Toe.
 
 ## 2. Software
 ### 2.1 Simulator
