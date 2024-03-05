@@ -685,7 +685,7 @@ class Toolbar(ctk.CTkFrame):
         self.reset_button = ctk.CTkButton(self, text="Reset", width=100, height=10, font = ("Arial", 11), corner_radius=25, fg_color="forestgreen", hover_color="darkgreen", command=reset)
         self.reset_button.pack(side="right", padx=5)
 
-        self.step_button = ctk.CTkButton(self, text="Setp->", width=100, height=10, font = ("Arial", 11), corner_radius=25, fg_color="gray", hover_color="darkgreen", state="disabled", command=step)
+        self.step_button = ctk.CTkButton(self, text="Step->", width=100, height=10, font = ("Arial", 11), corner_radius=25, fg_color="gray", hover_color="darkgreen", state="disabled", command=step)
         self.step_button.pack(side="right")
 
         self.runsbs_button = ctk.CTkButton(self, text="Run Step By Step", width=100, height=10, font = ("Arial", 11), corner_radius=25, fg_color="gray", hover_color="darkgreen", state="disabled", command=run_step_by_step)
