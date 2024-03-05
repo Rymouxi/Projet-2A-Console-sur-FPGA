@@ -25,7 +25,7 @@ from instruction_translation import *
 # Bug with switch between hex and dec in regs when assemble
 # -> Fair un register update avec un stockage interne pour pouvoir enlever ce bug
 
-# Executer 2 tours après pour être fidèle au pipeline
+# Actualiser highlighting sur enter
 
 
 
@@ -101,13 +101,14 @@ class ASMWindow(ctk.CTkFrame):
         super().__init__(master)
 
         def update_btns_on_modif(self, event=None):
-            '''Updates the buttons'''
+            '''Reenables the assembly button and turns off the others on code modification by the user.'''
 
-            master.master.master.master.toolbar.step_button.configure(self, fg_color="gray", state="disabled")
-            master.master.master.master.toolbar.run_button.configure(self, fg_color="gray", state="disabled", text="Run")
-            master.master.master.master.toolbar.runsbs_button.configure(self, fg_color="gray", state="disabled", text="Run Step By Step", hover_color="darkgreen")
-            master.master.master.master.toolbar.assemble_button.configure(self, fg_color="forestgreen", state="normal")
-            master.master.master.master.toolbar.state = 0
+            if master.master.master.master.toolbar.state != 0:
+                master.master.master.master.toolbar.step_button.configure(self, fg_color="gray", state="disabled", text="Step->")
+                master.master.master.master.toolbar.run_button.configure(self, fg_color="gray", state="disabled", text="Run")
+                master.master.master.master.toolbar.runsbs_button.configure(self, fg_color="gray", state="disabled", text="Run Step By Step", hover_color="darkgreen")
+                master.master.master.master.toolbar.assemble_button.configure(self, fg_color="forestgreen", state="normal", text="Assemble")
+                master.master.master.master.toolbar.state = 0
 
 
         self.frame = ctk.CTkFrame(self, corner_radius=0)
@@ -189,7 +190,17 @@ class ASMWindow(ctk.CTkFrame):
                     start_index = self.textbox.index(f"{start_index}-1c")
                     end_index = self.textbox.index(f"{start_index} lineend")
                     self.textbox.tag_add("number", start_index, end_index)
-                    start_index = f"{end_index}+1c"
+                    start_index = f"{end_index}"
+
+        # Remove "number" tag from text after hashtag when moved to a new line
+        lines = self.textbox.get("1.0", tk.END).split("\n")
+        for line in lines:
+            if "#" in line:
+                hashtag_index = line.index("#")
+                if len(line) > hashtag_index + 1:  # Check if there's text after the hashtag
+                    start_index = f"{self.textbox.index('insert linestart')}+{hashtag_index + 2}c"  # Start from text after hashtag
+                    end_index = f"{self.textbox.index('insert lineend')}"
+                    self.textbox.tag_remove("number", start_index, end_index)
 
 
     def get_text_content(self):
@@ -540,6 +551,7 @@ class Toolbar(ctk.CTkFrame):
             master.toolbar.run_button.configure(self, fg_color="gray", state="disabled", text="Run")
             master.toolbar.runsbs_button.configure(self, fg_color="gray", state="disabled", text="Run Step By Step", hover_color="darkgreen")
             master.toolbar.step_button.configure(self, fg_color="gray", state="disabled")
+            self.state = 0
 
             # Empties debugger
             master.debugger_window.delete_content()
@@ -559,18 +571,20 @@ class Toolbar(ctk.CTkFrame):
         def step():
             '''Executes a step of the code.'''
 
-            if self.state != len(master.toolbar.line_update):
-                # Update the Register
-                if master.toolbar.register_update[master.toolbar.line_update[self.state - 1]] != []:
-                    register_window.set_register_values(master.toolbar.register_update[master.toolbar.line_update[self.state - 1]][0], master.toolbar.register_update[master.toolbar.line_update[self.state - 1]][1])
-
-                # Update the User Mem
-                if master.toolbar.memory_update[master.toolbar.line_update[self.state - 1]] != []:
-                    mem_and_bin.user_mem_set(master.toolbar.line_update[self.state - 1], master.toolbar.memory_update[master.toolbar.line_update[self.state - 1]][0], master.toolbar.memory_update[master.toolbar.line_update[self.state - 1]][1])
-
+            if self.state != len(master.toolbar.line_update) + 3:
                 # Update the Pipeline
-                if master.toolbar.split_instructions[master.toolbar.line_update[self.state - 1]] != "":
-                    pipeline_window.iter_pip(master.toolbar.split_instructions[master.toolbar.line_update[self.state - 1]][:3])
+                if self.state < len(master.toolbar.line_update) + 1 and master.toolbar.split_instructions[master.toolbar.line_update[self.state - 2]] != "":
+                    pipeline_window.iter_pip(master.toolbar.split_instructions[master.toolbar.line_update[self.state - 2]][:3])
+                
+                # Wait 2 more steps because instructions must go through the pipeline before being executed
+                if self.state > 3:
+                    # Update the Register
+                    if master.toolbar.register_update[master.toolbar.line_update[self.state - 4]] != []:
+                        register_window.set_register_values(master.toolbar.register_update[master.toolbar.line_update[self.state - 4]][0], master.toolbar.register_update[master.toolbar.line_update[self.state - 4]][1])
+
+                    # Update the User Mem
+                    if master.toolbar.memory_update[master.toolbar.line_update[self.state - 4]] != []:
+                        mem_and_bin.user_mem_set(master.toolbar.line_update[self.state - 4], master.toolbar.memory_update[master.toolbar.line_update[self.state - 4]][0], master.toolbar.memory_update[master.toolbar.line_update[self.state - 4]][1])
 
                 # Update the state
                 self.state += 1
@@ -590,15 +604,15 @@ class Toolbar(ctk.CTkFrame):
             master.toolbar.run_button.configure(self, text="Resume")
             master.toolbar.step_button.configure(self, fg_color="forestgreen", state="normal")
 
-            if self.state == 0:
+            if self.state == 1:
                 master.toolbar.runsbs_button.configure(self, fg_color="firebrick", text="STOP", hover_color="maroon")
-                self.state = 1
+                self.state = 2
             else:
                 master.toolbar.run_button.configure(self, fg_color="gray", state="disabled", text="Run")
                 master.toolbar.runsbs_button.configure(self, fg_color="gray", text="Run Step By Step", state="disabled", hover_color="darkgreen")
                 master.toolbar.step_button.configure(self, fg_color="gray", state="disabled")
                 master.toolbar.assemble_button.configure(self, fg_color="forestgreen", state="normal")
-                self.state = 0
+                self.state = 1
 
 
         def run():
@@ -610,7 +624,8 @@ class Toolbar(ctk.CTkFrame):
             master.toolbar.runsbs_button.configure(self, fg_color="gray", state="disabled", text="Run Step By Step", hover_color="darkgreen")
             master.toolbar.step_button.configure(self, fg_color="gray", state="disabled")
             master.toolbar.assemble_button.configure(self, fg_color="forestgreen", state="normal")
-            self.state = 0
+            if self.state < 2:
+                self.state = 2  # Corresponds to 0 executions
 
             # Update register values
             for i in range(8):
@@ -621,9 +636,10 @@ class Toolbar(ctk.CTkFrame):
                 mem_and_bin.user_mem_set(i, virtual_memory[i], virtual_memory[i+1])
 
             # Updates the Pipeline
-            for e in master.toolbar.split_instructions[-24:]:
+            for e in master.toolbar.line_update[max(-24, self.state - len(master.toolbar.line_update) - 1):]:
                 if e != "":
-                    pipeline_window.iter_pip(e[:3])
+                    pipeline_window.iter_pip(master.toolbar.split_instructions[e-1][:3])
+            self.state = 0
 
 
         def assemble():
@@ -632,6 +648,7 @@ class Toolbar(ctk.CTkFrame):
             # Cleaning
             reset()
             master.toolbar.assemble_button.configure(self, fg_color="gray", state="disabled")
+            self.state = 1
 
             # Fetching the code
             code = asm_window.get_text_content()
@@ -647,10 +664,12 @@ class Toolbar(ctk.CTkFrame):
             if code == "\n":
                 debugger_window.insert_content("Assembling air? Your code's "+random_variation+".", "blue")
                 master.toolbar.assemble_button.configure(self, fg_color="forestgreen", state="normal")
+                self.state = 0
 
             # Check if there are errors
             elif master.toolbar.error != []:
                 master.toolbar.assemble_button.configure(self, fg_color="forestgreen", state="normal")
+                self.state = 0
 
                 # Display error in debugger
                 for i in range(len(master.toolbar.error)//2):
