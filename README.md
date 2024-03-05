@@ -6,7 +6,7 @@ So, how does it work? We've got three main parts:
 
 **Simulator:** This is like a virtual lab where you can write and test your ASM code. It's built using Python. You write your ASM code here, and the simulator helps you see how it works without needing real hardware.
 
-**VHDL:** This part programs the card so it can understand ASM. We are making the instructions that the process will understand.
+**VHDL:** This part programs the card so it can understand ASM. We are making the instructions that the processor will understand.
 
 **ASM Programming:** This is where the magic happens! You write your instructions in ASM. These instructions tell the computer chip what to do, like add numbers, store information, or even play games like Snake or Tic Tac Toe.
 
