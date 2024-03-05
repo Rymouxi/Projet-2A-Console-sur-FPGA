@@ -25,7 +25,13 @@ from instruction_translation import *
 # Bug with switch between hex and dec in regs when assemble
 # -> Fair un register update avec un stockage interne pour pouvoir enlever ce bug
 
-# Actualiser highlighting sur enter
+# faire NZVC
+
+# rajouter la boucle de fin
+
+# Reset la code ram
+
+# Check les boucles B
 
 
 
@@ -389,7 +395,7 @@ class MemAndBin(ctk.CTkTabview):
         # Filling the user treeview
         for i in range(256):
             address = "0x"+format(i*4+536870912, "08x")
-            hex_value = "0x0000000"
+            hex_value = "0x00000000"
             tags = ("even_row", "odd_row")[i % 2 == 1]
             self.user_tree.insert("", "end", values=(address, hex_value), tags=(tags,))
 
@@ -423,10 +429,10 @@ class MemAndBin(ctk.CTkTabview):
         self.code_tree.item(self.item_id, values=("0x"+format(index*2+134217736, "08x"), "0x"+format(int(value, 2), "04x"), instruction))
 
     
-    def user_mem_set(self, index:str, value:str):
+    def user_mem_set(self, index:str, value:int):
         '''Set values for a chosen line in the treeview.'''
-        self.item_id = self.user_tree.get_children()[int(index)]  # Get the item ID based on the index
-        self.user_tree.item(self.item_id, values=("0x"+format(index*4+536870912, "08x"), "0x"+format(int(value, 2), "04x")))
+        self.item_id = self.user_tree.get_children()[int(index[2:], 16)//4-134217728]  # Get the item ID based on the index
+        self.user_tree.item(self.item_id, values=("0x"+format((int(index[2:], 16)-536870912)+536870912, "08x"), "0x"+format(value, "08x")))
 
 
     def delete_bin(self):
@@ -498,12 +504,6 @@ class PipelineWindow(ctk.CTkFrame):
                 entry_widget.delete(0, tk.END)
                 entry_widget.insert(0, value)
                 entry_widget.configure(state="readonly")  # Make readonly again
-            else:
-                print(f"No widget found at row {row} and column {col}")
-
-        else:
-            print("Row or column index out of range")
-            return None
 
 
     def iter_pip(self, value:str):
@@ -560,7 +560,11 @@ class Toolbar(ctk.CTkFrame):
             for i in range(8):
                 register_window.set_register_values(i, 0)
 
-            # Empties memories and bit window
+            # Empties User Memory
+            for i in range(256):
+                mem_and_bin.user_mem_set("0x"+format(4*i+536870912, "08x"), 0)
+
+            # Empties Bit window
             mem_and_bin.delete_bin()
 
             # Empties the pipeline
@@ -584,7 +588,7 @@ class Toolbar(ctk.CTkFrame):
 
                     # Update the User Mem
                     if master.toolbar.memory_update[master.toolbar.line_update[self.state - 4]] != []:
-                        mem_and_bin.user_mem_set(master.toolbar.line_update[self.state - 4], master.toolbar.memory_update[master.toolbar.line_update[self.state - 4]][0], master.toolbar.memory_update[master.toolbar.line_update[self.state - 4]][1])
+                        mem_and_bin.user_mem_set("0x"+format(master.toolbar.memory_update[master.toolbar.line_update[self.state - 4]][0], "08x"), master.toolbar.memory_update[master.toolbar.line_update[self.state - 4]][1])
 
                 # Update the state
                 self.state += 1
@@ -633,7 +637,7 @@ class Toolbar(ctk.CTkFrame):
 
             # Update User RAM values
             for i in range(0, len(virtual_memory), 2):
-                mem_and_bin.user_mem_set(i, virtual_memory[i], virtual_memory[i+1])
+                mem_and_bin.user_mem_set(virtual_memory[i], virtual_memory[i+1])
 
             # Updates the Pipeline
             for e in master.toolbar.line_update[max(-24, self.state - len(master.toolbar.line_update) - 1):]:
