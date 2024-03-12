@@ -53,16 +53,48 @@ MOV Ra, R0                  ; Ra contains the 4 bits indicating the case number
 
 ; We read the bit which indicates the action to take (X/O)
 
-MOV R6, #0x00040000             ; This is the filter 
+MOV R6, #0x00040000             ; This is the filter (0100)
 AND R6, R1                      ; We apply the filter
-MOV R7, #18                     ; We are going to make a division 
+MOV R0, #18                     ; We are going to redo a division
 B POWER_OF_TWO
-    ...
-    2^18 = R2
-B DIVISION 
-    ...
-    R6/2^18 = R0
-MOV Rb, R0                      ; Rb contains the bit indicating the action X/of
+    MOV R2, #1
+
+    shift_loop:
+        CMP R0, #0          ; Check if the exponent is zero
+        BEQ shift_done      ; If so, exit the loop
+        LSL R2, R2, #1      ; Left shift R2 by one position (equivalent to multiplying by 2)
+        SUB R0, R0, #1      ; Decrement the exponent
+        B shift_loop        ; Repeat the process until the exponent is zero
+
+    shift_done:
+        BX LR               ; Return R2 = 2^18
+
+B DIVISION                  ; R6/R2
+    DIV:
+        CMP R2, #0          ; check if R2 is zero
+        BEQ DIV_ERROR       ; If so, error
+
+    MOV R0, #0         		; Initilize the output R0 at zero
+
+    DIV_LOOP:
+        CMP R6, #0         	; check if R1 is zero
+        BEQ DIV_DONE        ; if so, get out of the loop and show R0 = 0
+
+        CMP R6, R2          ; check if R1 smaller than R2
+        BLT DIV_ERROR       ; if so, error
+
+        SUB R6, R6, R2      ; R6 - R2
+        ADD R0, R0, #1      ; R0 + 1
+
+        B DIV_LOOP          ; Repeat the loop
+
+    DIV_DONE:
+    ; the result is in R0
+        BX LR               
+
+    DIV_ERROR:
+        BX LR               
+MOV Rb, R0                      ; Rb contains the bit indicating the action X/O
 
 CMP Rb, #0
 BEQ CIRCLE
