@@ -1,5 +1,5 @@
 
-def saut_ligne(ASM:str):
+def treatment(ASM:str):
     """Cette fonction prend le code ASM en entier et le convertit en liste d'instructions où le séparateur est le retour à la ligne.\n
     Il enlève également les éventuelles indentations
     """

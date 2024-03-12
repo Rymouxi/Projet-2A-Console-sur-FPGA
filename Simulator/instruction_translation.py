@@ -10,7 +10,7 @@ def instruction_translation(ASM:str):
     code_ASM correspond au code brut tel qu'il est mis dans le terminal
     code-machine renvoie une liste instruction par instruction du code transcrit en code machine selon la convention LCM3
     """
-    split_instruction=saut_ligne(ASM)
+    split_instruction=treatment(ASM)
     #Les lignes des instructions sont numérotées à partir de 1
     line_instruction=[i+1 for i in range(len(split_instruction))]
     bitstream=[]
