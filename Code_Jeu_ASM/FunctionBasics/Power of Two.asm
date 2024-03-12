@@ -8,7 +8,7 @@ shift_loop:
     CMP R0, #0          ; Check if the exponent is zero
     BEQ shift_done      ; If so, exit the loop
     LSL R2, R2, #1      ; Left shift R2 by one position (equivalent to multiplying by 2)
-    SUB R3, R3, #1      ; Decrement the exponent
+    SUB R0, R0, #1      ; Decrement the exponent
     B shift_loop        ; Repeat the process until the exponent is zero
 
 shift_done:
