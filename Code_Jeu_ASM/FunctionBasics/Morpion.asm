@@ -11,8 +11,18 @@ EOR R5, R6                      ; memory adress of the game 0X80000104 in R5
 LDR R1, [R5]                    ; read the value stocked at this adress and stock this value in R1
 MOV R0, #28                     ; we are going to make a shift of 28 bits (because we want to read the first 4 bits)
 B POWER_OF_TWO
-    ...
-    2^28 = R2
+    MOV R2, #1
+
+    shift_loop:
+        CMP R0, #0          ; Check if the exponent is zero
+        BEQ shift_done      ; If so, exit the loop
+        LSL R2, R2, #1      ; Left shift R2 by one position (equivalent to multiplying by 2)
+        SUB R0, R0, #1      ; Decrement the exponent
+        B shift_loop        ; Repeat the process until the exponent is zero
+
+    shift_done:
+        BX LR               ; Return R2 = 2^28
+
 B DIVISION 
     ...
     R1/2^28 = R0
@@ -40,3 +50,4 @@ BNE CROSS
 
 
 ; CROSS (01)
+
