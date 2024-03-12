@@ -1,6 +1,6 @@
 ; Fonction de multiplication
 ; Résultat = R1 * R2
-MUL:
+MULTIPLICATION:
 MOV R0, #0      		; Initialiser le résultat à zéro
 
     	MUL_LOOP:
