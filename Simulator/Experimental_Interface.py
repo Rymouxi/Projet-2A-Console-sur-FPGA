@@ -29,9 +29,6 @@ from instruction_translation import *
 
 # rajouter la boucle de fin
 
-# Reset la code ram
-
-# Check les boucles B
 
 
 
@@ -311,7 +308,12 @@ class RegisterWindow(ctk.CTkFrame):
 
     def set_register_values(self, index:int, value:str):
         '''Set register values using a list.'''
-        self.value_labels[index].configure(text=value)
+        if self.display == 0: # in dec
+            self.value_labels[index].configure(text=value)
+        else:                 # in hex
+            self.change_format()
+            self.value_labels[index].configure(text=value)
+            self.change_format()
 
 
     def change_format(self):
@@ -363,7 +365,7 @@ class MemAndBin(ctk.CTkTabview):
             self.code_tree.column(header, anchor="center", width=100)
 
         # Filling the code treeview
-        for i in range(256):
+        for i in range(2048):
             address = "0x"+format(i*2+134217736, "08x")
             hex_value = "0x0000"
             instruction = ""
@@ -393,7 +395,7 @@ class MemAndBin(ctk.CTkTabview):
             self.user_tree.column(header, anchor="center", width=100)
 
         # Filling the user treeview
-        for i in range(256):
+        for i in range(2048):
             address = "0x"+format(i*4+536870912, "08x")
             hex_value = "0x00000000"
             tags = ("even_row", "odd_row")[i % 2 == 1]
@@ -423,13 +425,13 @@ class MemAndBin(ctk.CTkTabview):
         self.bin_textbox.configure(state="disabled")
 
 
-    def code_mem_set(self, index:str, value:str, instruction:str):
+    def code_mem_set(self, index:str, value:str="0", instruction:str=""):
         '''Set values for a chosen line in the treeview.'''
         self.item_id = self.code_tree.get_children()[int(index)]  # Get the item ID based on the index
         self.code_tree.item(self.item_id, values=("0x"+format(index*2+134217736, "08x"), "0x"+format(int(value, 2), "04x"), instruction))
 
     
-    def user_mem_set(self, index:str, value:int):
+    def user_mem_set(self, index:str, value:int=0):
         '''Set values for a chosen line in the treeview.'''
         self.item_id = self.user_tree.get_children()[int(index[2:], 16)//4-134217728]  # Get the item ID based on the index
         self.user_tree.item(self.item_id, values=("0x"+format((int(index[2:], 16)-536870912)+536870912, "08x"), "0x"+format(value, "08x")))
@@ -547,10 +549,11 @@ class Toolbar(ctk.CTkFrame):
             '''Resets the values in registers, pipeline, binary, and memory arrays.'''
 
             # Updates button states
-            master.toolbar.assemble_button.configure(self, fg_color="forestgreen", state="normal")
+            master.toolbar.assemble_button.configure(self, fg_color="gray", state="disabled", text="Assemble")
             master.toolbar.run_button.configure(self, fg_color="gray", state="disabled", text="Run")
             master.toolbar.runsbs_button.configure(self, fg_color="gray", state="disabled", text="Run Step By Step", hover_color="darkgreen")
             master.toolbar.step_button.configure(self, fg_color="gray", state="disabled")
+            master.toolbar.reset_button.configure(self, fg_color="gray", state="disabled")
             self.state = 0
 
             # Empties debugger
@@ -561,8 +564,12 @@ class Toolbar(ctk.CTkFrame):
                 register_window.set_register_values(i, 0)
 
             # Empties User Memory
-            for i in range(256):
-                mem_and_bin.user_mem_set("0x"+format(4*i+536870912, "08x"), 0)
+            for i in range(2048):
+                mem_and_bin.user_mem_set("0x"+format(4*i+536870912, "08x"))
+
+            # Empties Code Memory
+            for i in range(2048):
+                mem_and_bin.code_mem_set(i)
 
             # Empties Bit window
             mem_and_bin.delete_bin()
@@ -570,6 +577,14 @@ class Toolbar(ctk.CTkFrame):
             # Empties the pipeline
             for i in range(22):
                 pipeline_window.iter_pip("")
+
+            # Updates button states
+            master.toolbar.assemble_button.configure(self, fg_color="forestgreen", state="normal", text="Assemble")
+            master.toolbar.run_button.configure(self, fg_color="gray", state="disabled", text="Run")
+            master.toolbar.runsbs_button.configure(self, fg_color="gray", state="disabled", text="Run Step By Step", hover_color="darkgreen")
+            master.toolbar.step_button.configure(self, fg_color="gray", state="disabled")
+            master.toolbar.reset_button.configure(self, fg_color="forestgreen", state="normal")
+            self.state = 0
 
 
         def step():
@@ -584,11 +599,11 @@ class Toolbar(ctk.CTkFrame):
                 if self.state > 3:
                     # Update the Register
                     if master.toolbar.register_update[master.toolbar.line_update[self.state - 4]] != []:
-                        register_window.set_register_values(master.toolbar.register_update[master.toolbar.line_update[self.state - 4]][0], master.toolbar.register_update[master.toolbar.line_update[self.state - 4]][1])
+                        register_window.set_register_values(master.toolbar.register_update[self.state - 4][0], master.toolbar.register_update[self.state - 4][1])
 
                     # Update the User Mem
                     if master.toolbar.memory_update[master.toolbar.line_update[self.state - 4]] != []:
-                        mem_and_bin.user_mem_set("0x"+format(master.toolbar.memory_update[master.toolbar.line_update[self.state - 4]][0], "08x"), master.toolbar.memory_update[master.toolbar.line_update[self.state - 4]][1])
+                        mem_and_bin.user_mem_set("0x"+format(master.toolbar.memory_update[self.state - 4][0], "08x"), master.toolbar.memory_update[self.state - 4][1])
 
                 # Update the state
                 self.state += 1
@@ -657,6 +672,7 @@ class Toolbar(ctk.CTkFrame):
             # Fetching the code
             code = asm_window.get_text_content()
             master.toolbar.split_instructions, _, master.toolbar.bitstream, master.toolbar.register_update, master.toolbar.line_update, master.toolbar.memory_update, master.toolbar.error = instruction_translation(code)
+            print(instruction_translation(code))
 
             # Funny text variations for when user tries to assemble empty code
             variations = ["sipping a coconut", "catching some rays", "in a hammock", "on a beach", "snorkeling", "in a tropical paradise", "surfing the clouds",
