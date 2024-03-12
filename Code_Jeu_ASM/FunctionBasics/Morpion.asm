@@ -155,4 +155,59 @@ BEQ CIRCLE
     ADD R1, R1, R0
 
 BNE CROSS
+    MOV Rc, #1                  ; 1 in binary is 01 (we are goint to change the case value from 00 to 01)
+    SUB Ra, #1                  ; because we want a value as 100..00
+
+    MOV R2, #2
+    B MULTIPLICATION            ; R0 = Ra*2
+        MOV R0, #0      		; Initialize the result R0 as 0
+
+    	MUL_LOOP:
+       		CMP Ra, #0         ; check if Ra is 0
+       		BEQ MUL_DONE       ; if so return R0 = 0
+
+            CMP R2, #0         	; check if Ra is 0
+       		BEQ MUL_DONE        ; if so return R0 = 0
+
+            ADD R0, R0, R2      ; R0 = R0 + R2 = R0 + 2
+       		SUB Ra, Ra, #1     	; Ra = Ra - 1
+            CMP Ra, #0      
+            BGE MUL_LOOP        ; Repeat the loop until Ra is zero
+
+    	MUL_DONE:
+        	; the result is in R0
+        	BX LR  
+
+    B POWER_OF_TWO
+        MOV R2, #1
+
+        shift_loop:
+            CMP R0, #0          ; Check if the exponent is zero
+            BEQ shift_done      ; If so, exit the loop
+            LSL R2, R2, #1      ; Left shift R2 by one position (equivalent to multiplying by 2)
+            SUB R0, R0, #1      ; Decrement the exponent
+            B shift_loop        ; Repeat the process until the exponent is zero
+
+        shift_done:
+            BX LR               ; Return the bit of position where wu put a 1, the result is in R2
+    
+    B MULTIPLICATION            ; R0 = R2*Rc = 11*Rc
+        MOV R0, #0      		; Initialize the result R0 as 0
+
+    	MUL_LOOP:
+       		CMP R2, #0         ; check if R2 is 0
+       		BEQ MUL_DONE       ; if so return R0 = 0
+
+            CMP Rc, #0         	; check if Ra is 0
+       		BEQ MUL_DONE        ; if so return R0 = 0
+
+            ADD R0, R0, R2      ; R0 = R0 + R2 = R0 + 2
+       		SUB Rc, Rc, #1     	; Rc = Rc - 1
+            CMP Rc, #0      
+            BGE MUL_LOOP        ; Repeat the loop until Ra is zero
+
+    	MUL_DONE:
+        	; the result is in R0, we have now 0100..00, so can change the value at the position we want by adding this value
+        	BX LR
+    ADD R1, R1, R0
 
