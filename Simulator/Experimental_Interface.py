@@ -22,12 +22,12 @@ from instruction_translation import *
 
 # change the color of the title of the debugger window when error
 
-# Bug with switch between hex and dec in regs when assemble
-# -> Fair un register update avec un stockage interne pour pouvoir enlever ce bug
-
 # faire NZVC
 
-# rajouter la boucle de fin
+# Breakpoints
+
+# Line numbers
+
 
 
 
@@ -132,6 +132,7 @@ class ASMWindow(ctk.CTkFrame):
         self.textbox.tag_config("hash", foreground="#FF8000")
         self.textbox.tag_config("number", foreground="#FFB000")
         self.textbox.tag_config("comment", foreground="#888888")
+        self.textbox.tag_config("ERROR", background="#882222")
 
         # Bind events to update syntax highlighting & buttons update
         self.textbox.bind("<KeyRelease>", self.highlight_syntax)
@@ -179,7 +180,7 @@ class ASMWindow(ctk.CTkFrame):
                     break
 
                 # Compute end_index based on the pattern
-                if pattern == "," or pattern == "[\\[\\]]" or pattern == '#':
+                if pattern == "," or pattern == "[\\[\\]]":
                     end_index = self.textbox.index(f"{start_index}+1c")
                 else:
                     end_index = self.textbox.index(f"{start_index} lineend")
@@ -187,23 +188,6 @@ class ASMWindow(ctk.CTkFrame):
                 # Tag and jump to next character
                 self.textbox.tag_add(tag, start_index, end_index)
                 start_index = f"{end_index}+1c"
-
-                # Handles numbers after hash (including hex and bin)
-                if pattern == "#":
-                    start_index = self.textbox.index(f"{start_index}-1c")
-                    end_index = self.textbox.index(f"{start_index} lineend")
-                    self.textbox.tag_add("number", start_index, end_index)
-                    start_index = f"{end_index}"
-
-        # Remove "number" tag from text after hashtag when moved to a new line
-        lines = self.textbox.get("1.0", tk.END).split("\n")
-        for line in lines:
-            if "#" in line:
-                hashtag_index = line.index("#")
-                if len(line) > hashtag_index + 1:  # Check if there's text after the hashtag
-                    start_index = f"{self.textbox.index('insert linestart')}+{hashtag_index + 2}c"  # Start from text after hashtag
-                    end_index = f"{self.textbox.index('insert lineend')}"
-                    self.textbox.tag_remove("number", start_index, end_index)
 
 
     def get_text_content(self):
@@ -586,11 +570,14 @@ class Toolbar(ctk.CTkFrame):
             master.toolbar.reset_button.configure(self, fg_color="forestgreen", state="normal")
             self.state = 0
 
+            # Highlight update
+            asm_window.highlight_syntax()
+
 
         def step():
             '''Executes a step of the code.'''
 
-            if self.state != len(master.toolbar.line_update) + 3:
+            if self.state != len(master.toolbar.line_update) + 1:
                 # Update the Pipeline
                 if self.state < len(master.toolbar.line_update) + 1 and master.toolbar.split_instructions[master.toolbar.line_update[self.state - 2]] != "":
                     pipeline_window.iter_pip(master.toolbar.split_instructions[master.toolbar.line_update[self.state - 2]][:3])
@@ -672,7 +659,6 @@ class Toolbar(ctk.CTkFrame):
             # Fetching the code
             code = asm_window.get_text_content()
             master.toolbar.split_instructions, _, master.toolbar.bitstream, master.toolbar.register_update, master.toolbar.line_update, master.toolbar.memory_update, master.toolbar.error = instruction_translation(code)
-            print(instruction_translation(code))
 
             # Funny text variations for when user tries to assemble empty code
             variations = ["sipping a coconut", "catching some rays", "in a hammock", "on a beach", "snorkeling", "in a tropical paradise", "surfing the clouds",
@@ -771,6 +757,7 @@ class FileMenu(ctk.CTkFrame):
                 with open(file_path, "w") as file:
                     saved_code = asm_window.get_text_content()  # Gets the code from the text area
                     file.write(saved_code)
+                    asm_window.highlight_syntax()
 
 
         def new_file():
@@ -813,6 +800,7 @@ class FileMenu(ctk.CTkFrame):
                     # Pastes imported code into the text area
                     asm_window.delete_content()               # Clears the text area content
                     asm_window.insert_content(imported_code)  # Pastes the code
+                    asm_window.highlight_syntax()
 
 
         def save():
@@ -829,6 +817,7 @@ class FileMenu(ctk.CTkFrame):
                 with open(file_path, "w") as file:
                     saved_code = asm_window.get_text_content()  # Gets the code from the text area
                     file.write(saved_code)
+                    asm_window.highlight_syntax()
 
 
         # File menu button

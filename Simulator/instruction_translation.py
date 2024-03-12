@@ -51,10 +51,10 @@ def instruction_translation(ASM:str):
             bitstream.append(instruction_recognition(instruction,i,simu='OFF'))
             i+=1
 #je rajoute le code pour la fin du programme c'est peut être foireux 
-        split_instruction.append("LabelINTERDIT")
-        split_instruction.append("M0V R0,R0")
-        split_instruction.append("M0V R0,R0")
-        split_instruction.append("BNE LabelINTERDIT")
+        split_instruction.append("ENDENDEND")
+        split_instruction.append("MOV R0,R0")
+        split_instruction.append("MOV R0,R0")
+        split_instruction.append("BNE ENDENDEND")
         bitstream.append("0000000000000000")
         bitstream.append('0000000000000000')
         bitstream.append('1101000111111110')
