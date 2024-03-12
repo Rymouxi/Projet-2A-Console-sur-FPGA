@@ -50,6 +50,24 @@ def instruction_translation(ASM:str):
         for instruction in split_instruction:
             bitstream.append(instruction_recognition(instruction,i,simu='OFF'))
             i+=1
+#je rajoute le code pour la fin du programme c'est peut être foireux 
+        split_instruction.append("LabelINTERDIT")
+        split_instruction.append("M0V R0,R0")
+        split_instruction.append("M0V R0,R0")
+        split_instruction.append("BNE LabelINTERDIT")
+        bitstream.append("0000000000000000")
+        bitstream.append('0000000000000000')
+        bitstream.append('1101000111111110')
+        register_update.append([])
+        register_update.append([])
+        register_update.append([])
+        line_update.append(line_update[len(line_update)-1]+1)
+        line_update.append(line_update[len(line_update)-1]+1)
+        line_update.append(line_update[len(line_update)-1]+1)
+        memory_update.append([])
+        memory_update.append([])
+        memory_update.append([])
+
     return split_instruction,line_instruction,bitstream,register_update,line_update,memory_update,error
 
 
