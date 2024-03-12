@@ -28,6 +28,7 @@ from instruction_translation import *
 
 # Line numbers
 
+# Couleurs pipeline
 
 
 
@@ -46,18 +47,6 @@ file_path = None
 class EnseaSimulator(ctk.CTk):
     def __init__(self):        
         super().__init__()
-
-        def theme_toggle_dark():
-            '''Toggles dark theme.'''
-
-            ctk.set_appearance_mode("dark")
-
-
-        def theme_toggle_light():
-            '''Toggles light theme.'''
-
-            ctk.set_appearance_mode("light")
-
 
         self.title("ENSEA's Python LCM3 ASM Simulator")                                  # Simulator title
         self.geometry("980x720")
@@ -89,8 +78,20 @@ class EnseaSimulator(ctk.CTk):
         self.pipeline_window = PipelineWindow(self)                                      # Pipeline window at the bottom
         self.main_frame.add(self.pipeline_window, weight=1)
 
-        self.toolbar = Toolbar(self, self.asm_window, self.debugger_window, self.register_window, self.mem_and_bin, self.pipeline_window, theme_toggle_dark, theme_toggle_light)  # Toolbar at the top
+        self.toolbar = Toolbar(self, self.asm_window, self.debugger_window, self.register_window, self.mem_and_bin, self.pipeline_window)  # Toolbar at the top
         self.toolbar.pack(fill="x")
+
+
+    def theme_toggle_dark(event=None):
+        '''Toggles dark theme.'''
+
+        ctk.set_appearance_mode("dark")
+
+
+    def theme_toggle_light(event=None):
+        '''Toggles light theme.'''
+
+        ctk.set_appearance_mode("light")
 
 
 
@@ -107,7 +108,7 @@ class ASMWindow(ctk.CTkFrame):
             '''Reenables the assembly button and turns off the others on code modification by the user.'''
 
             if master.master.master.master.toolbar.state != 0:
-                master.master.master.master.toolbar.step_button.configure(self, fg_color="gray", state="disabled", text="Step->")
+                master.master.master.master.toolbar.stop_button.configure(self, fg_color="gray", state="disabled")
                 master.master.master.master.toolbar.run_button.configure(self, fg_color="gray", state="disabled", text="Run")
                 master.master.master.master.toolbar.runsbs_button.configure(self, fg_color="gray", state="disabled", text="Run Step By Step", hover_color="darkgreen")
                 master.master.master.master.toolbar.assemble_button.configure(self, fg_color="forestgreen", state="normal", text="Assemble")
@@ -120,26 +121,27 @@ class ASMWindow(ctk.CTkFrame):
         self.title = ctk.CTkLabel(self.frame, text="ASM Code Window", bg_color="transparent")
         self.title.pack(side="top", fill="x")
 
-        self.textbox = ctk.CTkTextbox(self.frame, width=700, text_color="#1020FF")
+        self.textbox = ctk.CTkTextbox(self.frame, width=700, text_color="#0050FF")
         self.textbox.pack(side="top", fill="both", expand=True)
 
         # Configure tags for syntax highlighting
         self.textbox.tag_config("label", foreground="#FF0000")
-        self.textbox.tag_config("Register", foreground="#00FF00")
-        self.textbox.tag_config("register", foreground="#00FF00")
-        self.textbox.tag_config("comma", foreground="fuchsia")
+        self.textbox.tag_config("Register", foreground="#00B000")
+        self.textbox.tag_config("register", foreground="#00B000")
+        self.textbox.tag_config("comma", foreground="#B00090")
         self.textbox.tag_config("bracket", foreground="#00A000")
         self.textbox.tag_config("hash", foreground="#FF8000")
         self.textbox.tag_config("number", foreground="#FFB000")
         self.textbox.tag_config("comment", foreground="#888888")
-        self.textbox.tag_config("ERROR", background="#882222")
+        self.textbox.tag_config("ERROR", background="#702020")
+        self.textbox.tag_config("next_line", background="#304030")
 
         # Bind events to update syntax highlighting & buttons update
         self.textbox.bind("<KeyRelease>", self.highlight_syntax)
         self.textbox.bind("<KeyRelease>", update_btns_on_modif)
 
 
-    def highlight_syntax(self, event=None):
+    def highlight_syntax(self, event=None, errors=[], next_line:int=-1):
         '''Update syntax highlighting.'''
         
         # Color for labels
@@ -156,7 +158,7 @@ class ASMWindow(ctk.CTkFrame):
             self.textbox.tag_add("label", start_index, end_index)
             index = f"{index}+1c"
 
-        # Other colors
+        # Color for the rest of the syntax
 
         # Define patterns and corresponding tags
         patterns = {
@@ -188,6 +190,20 @@ class ASMWindow(ctk.CTkFrame):
                 # Tag and jump to next character
                 self.textbox.tag_add(tag, start_index, end_index)
                 start_index = f"{end_index}+1c"
+
+        # Error highlight
+        self.textbox.tag_remove("ERROR", "1.0", tk.END)
+        for e in errors:
+            start_index = f"{e}.0"
+            end_index = f"{e}.end"
+            self.textbox.tag_add("ERROR", start_index, end_index)
+
+        # Highlighting the next line to execute in step-by-step
+        self.textbox.tag_remove("next_line", "1.0", tk.END)
+        if next_line > 0:
+            start_index = f"{next_line}.0"
+            end_index = f"{next_line}.end"
+            self.textbox.tag_add("next_line", start_index, end_index)
 
 
     def get_text_content(self):
@@ -228,6 +244,7 @@ class DebuggerWindow(ctk.CTkFrame):
 
     def delete_content(self):
         '''Deletes the content of the text box.'''
+
         self.textbox.configure(state="normal")
         self.textbox.delete("1.0", tk.END)
         self.textbox.configure(state="disabled", text_color="black")
@@ -235,6 +252,7 @@ class DebuggerWindow(ctk.CTkFrame):
 
     def insert_content(self, content:str, color="silver"):
         '''Inserts the content in the text box with specified color.'''
+
         self.textbox.configure(state="normal")
         self.textbox.insert(tk.END, content)
         self.textbox.configure(state="disabled", text_color=color)
@@ -250,11 +268,9 @@ class RegisterWindow(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
 
-        # Frame
         self.frame = ctk.CTkFrame(self, corner_radius=0)
         self.frame.pack(side="top", fill="both", expand=True)
 
-        # Title
         self.title = ctk.CTkLabel(self.frame, text="Registers", bg_color="transparent")
         self.title.pack(side="top", fill="x")
 
@@ -263,7 +279,7 @@ class RegisterWindow(ctk.CTkFrame):
 
         self.value_labels = []
 
-        # Create data entry widgets
+        # Create data entry widgets for Register 0 to 7
         for i in range(8):
             self.register_label = ctk.CTkLabel(self.sub_frame, text=f"R{i}:", padx=5, pady=2, anchor="w")
             self.register_label.grid(row=i, column=0, sticky="nsew")
@@ -272,9 +288,11 @@ class RegisterWindow(ctk.CTkFrame):
             self.value_label.grid(row=i, column=1, sticky="nsew")
             self.value_labels.append(self.value_label)
 
+        # For NZVC
         self.register_label = ctk.CTkLabel(self.sub_frame, text="NZVC", padx=5, pady=2, anchor="w")
         self.register_label.grid(row=8, column=0, sticky="nsew")
 
+        # Value labels
         self.value_label = ctk.CTkLabel(self.sub_frame, text="0", padx=5, pady=2, anchor="w")
         self.value_label.grid(row=8, column=1, sticky="nsew")
         self.value_labels.append(self.value_label)
@@ -285,16 +303,19 @@ class RegisterWindow(ctk.CTkFrame):
         for j in range(2):
             self.grid_columnconfigure(j, weight=1)
 
-        self.display = 0
+        # Hex-Dec button
         self.button = ctk.CTkButton(self.frame, text="Switch to hex", command=self.change_format)
         self.button.pack(side="top")
+        self.display = 0  # Variable to keep track of the mode
 
 
     def set_register_values(self, index:int, value:str):
         '''Set register values using a list.'''
-        if self.display == 0: # in dec
+
+        if self.display == 0:  # in dec
             self.value_labels[index].configure(text=value)
-        else:                 # in hex
+
+        else:  # in hex
             self.change_format()
             self.value_labels[index].configure(text=value)
             self.change_format()
@@ -302,14 +323,16 @@ class RegisterWindow(ctk.CTkFrame):
 
     def change_format(self):
         '''Change the format of values to hexadecimal.'''
-        if self.display == 0:
+
+        if self.display == 0:  # in dec
             for i, label in enumerate(self.value_labels):
                 decimal_value = int(label.cget("text"))
                 hex_value = "0x"+format(decimal_value, "08x") if i<8 else "0b"+format(decimal_value, "04b")
                 label.configure(text=hex_value)
                 self.display = 1
                 self.button.configure(text="Switch to dec")
-        else:
+
+        else:  # in hex
             for label in self.value_labels:
                 hex_value = label.cget("text")
                 hex_value = hex_value[2:]
@@ -411,18 +434,21 @@ class MemAndBin(ctk.CTkTabview):
 
     def code_mem_set(self, index:str, value:str="0", instruction:str=""):
         '''Set values for a chosen line in the treeview.'''
+
         self.item_id = self.code_tree.get_children()[int(index)]  # Get the item ID based on the index
         self.code_tree.item(self.item_id, values=("0x"+format(index*2+134217736, "08x"), "0x"+format(int(value, 2), "04x"), instruction))
 
     
     def user_mem_set(self, index:str, value:int=0):
         '''Set values for a chosen line in the treeview.'''
+
         self.item_id = self.user_tree.get_children()[int(index[2:], 16)//4-134217728]  # Get the item ID based on the index
         self.user_tree.item(self.item_id, values=("0x"+format((int(index[2:], 16)-536870912)+536870912, "08x"), "0x"+format(value, "08x")))
 
 
     def delete_bin(self):
         '''Deletes the content of the text box.'''
+
         self.bin_textbox.configure(state="normal")
         self.bin_textbox.delete("1.0", tk.END)
         self.bin_textbox.configure(state="disabled")
@@ -430,6 +456,7 @@ class MemAndBin(ctk.CTkTabview):
 
     def insert_bin(self, content:str):
         '''Inserts the content in the text box.'''
+        
         self.bin_textbox.configure(state="normal")
         self.bin_textbox.insert(tk.END, content)
         self.bin_textbox.configure(state="disabled")
@@ -518,7 +545,7 @@ class PipelineWindow(ctk.CTkFrame):
 # ---------- Toolbar ---------- #
 
 class Toolbar(ctk.CTkFrame):
-    def __init__(self, master, asm_window, debugger_window, register_window, mem_and_bin, pipeline_window, theme_toggle_dark, theme_toggle_light):
+    def __init__(self, master, asm_window, debugger_window, register_window, mem_and_bin, pipeline_window):
         super().__init__(master)
 
         def download_code():
@@ -536,7 +563,7 @@ class Toolbar(ctk.CTkFrame):
             master.toolbar.assemble_button.configure(self, fg_color="gray", state="disabled", text="Assemble")
             master.toolbar.run_button.configure(self, fg_color="gray", state="disabled", text="Run")
             master.toolbar.runsbs_button.configure(self, fg_color="gray", state="disabled", text="Run Step By Step", hover_color="darkgreen")
-            master.toolbar.step_button.configure(self, fg_color="gray", state="disabled")
+            master.toolbar.stop_button.configure(self, fg_color="gray", state="disabled")
             master.toolbar.reset_button.configure(self, fg_color="gray", state="disabled")
             self.state = 0
 
@@ -566,7 +593,7 @@ class Toolbar(ctk.CTkFrame):
             master.toolbar.assemble_button.configure(self, fg_color="forestgreen", state="normal", text="Assemble")
             master.toolbar.run_button.configure(self, fg_color="gray", state="disabled", text="Run")
             master.toolbar.runsbs_button.configure(self, fg_color="gray", state="disabled", text="Run Step By Step", hover_color="darkgreen")
-            master.toolbar.step_button.configure(self, fg_color="gray", state="disabled")
+            master.toolbar.stop_button.configure(self, fg_color="gray", state="disabled")
             master.toolbar.reset_button.configure(self, fg_color="forestgreen", state="normal")
             self.state = 0
 
@@ -574,33 +601,15 @@ class Toolbar(ctk.CTkFrame):
             asm_window.highlight_syntax()
 
 
-        def step():
-            '''Executes a step of the code.'''
+        def stop():
+            '''Stops the Step-by-step execution.'''
 
-            if self.state != len(master.toolbar.line_update) + 1:
-                # Update the Pipeline
-                if self.state < len(master.toolbar.line_update) + 1 and master.toolbar.split_instructions[master.toolbar.line_update[self.state - 2]] != "":
-                    pipeline_window.iter_pip(master.toolbar.split_instructions[master.toolbar.line_update[self.state - 2]][:3])
-                
-                # Wait 2 more steps because instructions must go through the pipeline before being executed
-                if self.state > 3:
-                    # Update the Register
-                    if master.toolbar.register_update[master.toolbar.line_update[self.state - 4]] != []:
-                        register_window.set_register_values(master.toolbar.register_update[self.state - 4][0], master.toolbar.register_update[self.state - 4][1])
-
-                    # Update the User Mem
-                    if master.toolbar.memory_update[master.toolbar.line_update[self.state - 4]] != []:
-                        mem_and_bin.user_mem_set("0x"+format(master.toolbar.memory_update[self.state - 4][0], "08x"), master.toolbar.memory_update[self.state - 4][1])
-
-                # Update the state
-                self.state += 1
-
-            else:
-                master.toolbar.step_button.configure(self, fg_color="gray", state="disabled")
-                master.toolbar.run_button.configure(self, fg_color="gray", state="disabled", text="Run")
-                master.toolbar.runsbs_button.configure(self, fg_color="gray", state="disabled", text="Run Step By Step", hover_color="darkgreen")
-                master.toolbar.assemble_button.configure(self, fg_color="forestgreen", state="normal")
-                self.state = 0
+            # Stop the runsbs
+            master.toolbar.run_button.configure(self, fg_color="gray", state="disabled", text="Run")
+            master.toolbar.runsbs_button.configure(self, fg_color="gray", text="Run Step By Step", state="disabled", hover_color="darkgreen")
+            master.toolbar.stop_button.configure(self, fg_color="gray", state="disabled")
+            master.toolbar.assemble_button.configure(self, fg_color="forestgreen", state="normal")
+            self.state = 0
 
 
         def run_step_by_step():
@@ -608,17 +617,49 @@ class Toolbar(ctk.CTkFrame):
 
             # Updates button states
             master.toolbar.run_button.configure(self, text="Resume")
-            master.toolbar.step_button.configure(self, fg_color="forestgreen", state="normal")
+            master.toolbar.stop_button.configure(self, fg_color="firebrick", state="normal")
 
             if self.state == 1:
-                master.toolbar.runsbs_button.configure(self, fg_color="firebrick", text="STOP", hover_color="maroon")
+                # starts the runsbs
+                master.toolbar.runsbs_button.configure(self, fg_color="forestgreen", text="Step->")
                 self.state = 2
             else:
-                master.toolbar.run_button.configure(self, fg_color="gray", state="disabled", text="Run")
-                master.toolbar.runsbs_button.configure(self, fg_color="gray", text="Run Step By Step", state="disabled", hover_color="darkgreen")
-                master.toolbar.step_button.configure(self, fg_color="gray", state="disabled")
-                master.toolbar.assemble_button.configure(self, fg_color="forestgreen", state="normal")
-                self.state = 1
+
+                # Executes a step
+
+                if self.state != len(master.toolbar.line_update) + 1:
+                    # Update the Pipeline
+                    if self.state < len(master.toolbar.line_update) + 1 and master.toolbar.split_instructions[master.toolbar.line_update[self.state - 2]] != "":
+                        pipeline_window.iter_pip(master.toolbar.split_instructions[master.toolbar.line_update[self.state - 2]][:3])
+                
+                    # Wait 2 more steps because instructions must go through the pipeline before being executed
+                    if self.state > 3:
+                        # Update the Register
+                        if master.toolbar.register_update[self.state - 4] != []:
+                            register_window.set_register_values(master.toolbar.register_update[self.state - 4][0], master.toolbar.register_update[self.state - 4][1])
+
+                        # Update the User Mem
+                        if master.toolbar.memory_update[self.state - 4] != []:
+                            mem_and_bin.user_mem_set("0x"+format(master.toolbar.memory_update[self.state - 4][0], "08x"), master.toolbar.memory_update[self.state - 4][1])
+
+                    # Update the state
+                    self.state += 1
+
+                    # Higlight the next line in ASM window
+                    asm_window.highlight_syntax(None, [], master.toolbar.line_update[self.state - 3])
+
+                # End of the step-by-step
+                
+                else:
+                    # Updates button states
+                    master.toolbar.stop_button.configure(self, fg_color="gray", state="disabled")
+                    master.toolbar.run_button.configure(self, fg_color="gray", state="disabled", text="Run")
+                    master.toolbar.runsbs_button.configure(self, fg_color="gray", state="disabled", text="Run Step By Step", hover_color="darkgreen")
+                    master.toolbar.assemble_button.configure(self, fg_color="forestgreen", state="normal")
+                    self.state = 0
+
+                    # Display success message in debugger
+                    debugger_window.insert_content("Run Finished\n", "lime")
 
 
         def run():
@@ -628,7 +669,7 @@ class Toolbar(ctk.CTkFrame):
             # Update button states
             master.toolbar.run_button.configure(self, fg_color="gray", state="disabled", text="Run")
             master.toolbar.runsbs_button.configure(self, fg_color="gray", state="disabled", text="Run Step By Step", hover_color="darkgreen")
-            master.toolbar.step_button.configure(self, fg_color="gray", state="disabled")
+            master.toolbar.stop_button.configure(self, fg_color="gray", state="disabled")
             master.toolbar.assemble_button.configure(self, fg_color="forestgreen", state="normal")
             if self.state < 2:
                 self.state = 2  # Corresponds to 0 executions
@@ -646,6 +687,9 @@ class Toolbar(ctk.CTkFrame):
                 if e != "":
                     pipeline_window.iter_pip(master.toolbar.split_instructions[e-1][:3])
             self.state = 0
+
+            # Display success message in debugger
+            debugger_window.insert_content("Run Finished\n", "lime")
 
 
         def assemble():
@@ -678,8 +722,13 @@ class Toolbar(ctk.CTkFrame):
                 self.state = 0
 
                 # Display error in debugger
+                lines = []
                 for i in range(len(master.toolbar.error)//2):
                     debugger_window.insert_content("%s at line %d\n" % (master.toolbar.error[2*i], master.toolbar.error[2*i+1]+1), "red")
+                    lines.append(master.toolbar.error[2*i+1]+1)
+
+                # Highlight lines with errors
+                asm_window.highlight_syntax(None, lines)
 
             else:
                 # Fills the Code RAM array and the bitstream frame
@@ -694,7 +743,7 @@ class Toolbar(ctk.CTkFrame):
                             mem_and_bin.insert_bin(master.toolbar.bitstream[master.toolbar.line_update[l]])
 
                 # Display success message in debugger
-                debugger_window.insert_content("Assembly complete", "lime")
+                debugger_window.insert_content("Assembly complete\n\n", "lime")
                 
                 # Enables buttons Run and RSBS
                 master.toolbar.run_button.configure(self, fg_color="forestgreen", state="normal")
@@ -710,8 +759,8 @@ class Toolbar(ctk.CTkFrame):
         self.reset_button = ctk.CTkButton(self, text="Reset", width=100, height=10, font = ("Arial", 11), corner_radius=25, fg_color="forestgreen", hover_color="darkgreen", command=reset)
         self.reset_button.pack(side="right", padx=5)
 
-        self.step_button = ctk.CTkButton(self, text="Step->", width=100, height=10, font = ("Arial", 11), corner_radius=25, fg_color="gray", hover_color="darkgreen", state="disabled", command=step)
-        self.step_button.pack(side="right")
+        self.stop_button = ctk.CTkButton(self, text="STOP", width=100, height=10, font = ("Arial", 11), corner_radius=25, fg_color="gray", hover_color="maroon", state="disabled", command=stop)
+        self.stop_button.pack(side="right")
 
         self.runsbs_button = ctk.CTkButton(self, text="Run Step By Step", width=100, height=10, font = ("Arial", 11), corner_radius=25, fg_color="gray", hover_color="darkgreen", state="disabled", command=run_step_by_step)
         self.runsbs_button.pack(side="right", padx=5)
@@ -725,7 +774,7 @@ class Toolbar(ctk.CTkFrame):
         self.file_menu = FileMenu(self, asm_window)
         self.file_menu.pack(side="left")
 
-        self.settings_menu = SettingsMenu(self, theme_toggle_dark, theme_toggle_light)
+        self.settings_menu = SettingsMenu(self)
         self.settings_menu.pack(side="left")
 
         self.help_menu = HelpMenu(self)
@@ -838,7 +887,7 @@ class FileMenu(ctk.CTkFrame):
 
 
 class SettingsMenu(ctk.CTkFrame):
-    def __init__(self, master, theme_toggle_dark, theme_toggle_light):
+    def __init__(self, master):
         super().__init__(master)
 
         # Settings menu button
@@ -850,8 +899,8 @@ class SettingsMenu(ctk.CTkFrame):
         self["menu"] = self.menu  # Assign the menu to the button
 
         # Add items to the File menu
-        self.menu.add_command(label="Dark mode", command=theme_toggle_dark)
-        self.menu.add_command(label="Light mode", command=theme_toggle_light)
+        self.menu.add_command(label="Dark mode", command=master.master.theme_toggle_dark)
+        self.menu.add_command(label="Light mode", command=master.master.theme_toggle_light)
 
 
 
