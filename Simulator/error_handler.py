@@ -299,32 +299,35 @@ def imm_error_handler(instruction,size):
     end_imm=0
     if instruction.count('#')==1:
         imm_to_end = instruction[instruction.find('#'):]
-        while imm_to_end[-1]==' ':
-            imm_to_end=imm_to_end[:len(imm_to_end)-1]
-        if imm_to_end.find('#0X')!=-1:
-            for i in range(3,len(imm_to_end)):
-                if imm_to_end[i] not in hexa:
-                    error.append("Expected a number in hexadecimal")
-                    break
-                if i==(len(imm_to_end)-1):
-                    if int(imm_to_end[3:],16)>=2**size:
-                        error.append("This number is too big for this instruction")
-        elif imm_to_end.find('#0B')!=-1:
-            for i in range(3,len(imm_to_end)):
-                if imm_to_end[i] not in ['0','1']:
-                    error.append("Expected a number in binary")
-                    break
-                if i==(len(imm_to_end)-1):
-                    if int(imm_to_end[3:],2)>=2**size:
-                        error.append("This number is too big for this instruction")
+        if imm_to_end=='#':
+            error.append("There is no number after #")
         else:
-            for i in range(1,len(imm_to_end)):
-                if imm_to_end[i] not in hexa[0:10]:
-                    error.append("Expected a number in decimal")
-                    break
-                if i==(len(imm_to_end)-1):
-                    if int(imm_to_end[1:])>=2**size:
-                        error.append("This number is too big for this instruction")
+            while imm_to_end[-1]==' ':
+                imm_to_end=imm_to_end[:len(imm_to_end)-1]
+            if imm_to_end.find('#0X')!=-1:
+                for i in range(3,len(imm_to_end)):
+                    if imm_to_end[i] not in hexa:
+                        error.append("Expected a number in hexadecimal")
+                        break
+                    if i==(len(imm_to_end)-1):
+                        if int(imm_to_end[3:],16)>=2**size:
+                            error.append("This number is too big for this instruction")
+            elif imm_to_end.find('#0B')!=-1:
+                for i in range(3,len(imm_to_end)):
+                    if imm_to_end[i] not in ['0','1']:
+                        error.append("Expected a number in binary")
+                        break
+                    if i==(len(imm_to_end)-1):
+                        if int(imm_to_end[3:],2)>=2**size:
+                            error.append("This number is too big for this instruction")
+            else:
+                for i in range(1,len(imm_to_end)):
+                    if imm_to_end[i] not in hexa[0:10]:
+                        error.append("Expected a number in decimal")
+                        break
+                    if i==(len(imm_to_end)-1):
+                        if int(imm_to_end[1:])>=2**size:
+                            error.append("This number is too big for this instruction")
     else: 
         error.append("There's no immediate number or too many #")
 
