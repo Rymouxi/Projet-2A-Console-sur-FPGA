@@ -763,15 +763,22 @@ class Toolbar(ctk.CTkFrame):
 
             else:
                 # Fills the Code RAM array and the bitstream frame
-                for l in range(len(master.toolbar.line_update)-1):
-                    if len(master.toolbar.bitstream) != 0:
-                        if master.toolbar.bitstream[master.toolbar.line_update[l]] != "":
+                if len(master.toolbar.bitstream) != 0:
+                    offset = 0
+                    for l in range(len(master.toolbar.line_update)-1):
+                        if master.toolbar.split_instructions[master.toolbar.line_update[l]] != "" and master.toolbar.split_instructions[master.toolbar.line_update[l]].find(":") == -1:
 
                             # Display the instruction in the Code Memory
-                            mem_and_bin.code_mem_set(master.toolbar.line_update[l], master.toolbar.bitstream[master.toolbar.line_update[l]], master.toolbar.split_instructions[master.toolbar.line_update[l]])
+                            if l > len(master.toolbar.line_update)-3:
+                                mem_and_bin.code_mem_set(master.toolbar.line_update[l] - offset, master.toolbar.bitstream[-3], master.toolbar.split_instructions[master.toolbar.line_update[l]])
+                            else:
+                                mem_and_bin.code_mem_set(master.toolbar.line_update[l] - offset, master.toolbar.bitstream[master.toolbar.line_update[l]], master.toolbar.split_instructions[master.toolbar.line_update[l]])
                             
                             # Display the instruction in the binary window
                             mem_and_bin.insert_bin(master.toolbar.bitstream[master.toolbar.line_update[l]])
+                        else:
+                            offset += 1
+                    mem_and_bin.code_mem_set(master.toolbar.line_update[l] - offset +1, master.toolbar.bitstream[master.toolbar.line_update[l]], 'BNE ENDENDEND')
 
                 # Display success message in debugger
                 debugger_window.insert_content("Assembly complete\n\n", "lime")
