@@ -70,7 +70,7 @@ def instruction_translation(ASM:str):
         register_update.append([])
         register_update.append([])
         register_update.append([])
-        line_update.extend([line_update[len(line_update)-1]+1,line_update[len(line_update)-1]+1,line_update[len(line_update)-1]+1])
+        line_update.extend([line_update[-1]+1,line_update[-1]+2,line_update[-1]+3])
         memory_update.append([])
         memory_update.append([])
         memory_update.append([])
