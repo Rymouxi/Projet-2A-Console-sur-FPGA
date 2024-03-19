@@ -81,7 +81,7 @@ def error_handler_add(instruction):
         register_indice=R_indices(instruction)
         error.append(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
         error.append(comma_identifier(instruction,register_indice[1]+1,register_indice[2]))
-        error.append(check_end(instruction,register_indice[2]+1))
+        error.append(check_end_register(instruction,register_indice[2]+1))
     else:
         error.append("The number of register doesn't match for this instruction")
     return error

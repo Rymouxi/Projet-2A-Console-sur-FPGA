@@ -22,19 +22,17 @@ from instruction_translation import *
 
 # change the color of the title of the debugger window when error
 
-# faire NZVC
-
 # Breakpoints
-
-# ruptures de séquences
-
-# error LSL trop grand
 
 # Line numbers
 
 # Step counter
 
+# Change the text on the switch to hex button
 
+# Skip les intructions vides pour la mem code
+
+# Sauter les labels dans les instructions pipeline
 
 
 
@@ -294,11 +292,11 @@ class RegisterWindow(ctk.CTkFrame):
             self.value_labels.append(self.value_label)
 
         # For NZVC
-        self.register_label = ctk.CTkLabel(self.sub_frame, text="NZVC", padx=5, pady=2, anchor="w")
+        self.register_label = ctk.CTkLabel(self.sub_frame, text="NZVC:", padx=5, pady=2, anchor="w")
         self.register_label.grid(row=8, column=0, sticky="nsew")
 
         # Value labels
-        self.value_label = ctk.CTkLabel(self.sub_frame, text="0", padx=5, pady=2, anchor="w")
+        self.value_label = ctk.CTkLabel(self.sub_frame, text="0000", padx=5, pady=2, anchor="w")
         self.value_label.grid(row=8, column=1, sticky="nsew")
         self.value_labels.append(self.value_label)
 
@@ -332,16 +330,15 @@ class RegisterWindow(ctk.CTkFrame):
         if self.display == 0:  # in dec
             for i, label in enumerate(self.value_labels):
                 decimal_value = int(label.cget("text"))
-                hex_value = "0x"+format(decimal_value, "08x") if i<8 else "0b"+format(decimal_value, "04b")
+                hex_value = "0x"+format(decimal_value, "08x") if i<8 else label.cget("text")
                 label.configure(text=hex_value)
                 self.display = 1
                 self.button.configure(text="Switch to dec")
 
         else:  # in hex
-            for label in self.value_labels:
+            for i, label in enumerate(self.value_labels):
                 hex_value = label.cget("text")
-                hex_value = hex_value[2:]
-                decimal_value = int(hex_value, 16)
+                decimal_value = int(hex_value[2:], 16) if i<8 else label.cget("text")
                 label.configure(text=str(decimal_value))
                 self.display = 0
                 self.button.configure(text="Switch to dec")
@@ -595,6 +592,7 @@ class Toolbar(ctk.CTkFrame):
             # Empties registers
             for i in range(8):
                 register_window.set_register_values(i, 0)
+            register_window.set_register_values(8, "0000")
 
             # Empties User Memory
             for i in range(2048):
@@ -650,9 +648,11 @@ class Toolbar(ctk.CTkFrame):
 
                 # Executes a step
 
-                if self.state != len(master.toolbar.line_update) + 1:
+                if self.state != len(master.toolbar.line_update) + 2:
                     # Update the Pipeline
-                    if self.state < len(master.toolbar.line_update) + 1 and master.toolbar.split_instructions[master.toolbar.line_update[self.state - 2]] != "":
+                    if master.toolbar.line_update[self.state - 2] == -1:
+                        pipeline_window.iter_pip("---")
+                    elif self.state < len(master.toolbar.line_update) + 2 and master.toolbar.split_instructions[master.toolbar.line_update[self.state - 2]] != "":
                         pipeline_window.iter_pip(master.toolbar.split_instructions[master.toolbar.line_update[self.state - 2]][:3])
                 
                     # Wait 2 more steps because instructions must go through the pipeline before being executed
@@ -698,17 +698,24 @@ class Toolbar(ctk.CTkFrame):
                 self.state = 2  # Corresponds to 0 executions
 
             # Update register values
-            for i in range(8):
+            for i in range(9):
                 register_window.set_register_values(i, virtual_register[i])
+            nzvc = '0000'
+            for e in master.toolbar.register_update:
+                if e != [] and e[0] == 8:
+                    nzvc = e[1]
+                register_window.set_register_values(8, nzvc)
 
             # Update User RAM values
             for i in range(0, len(virtual_memory), 2):
                 mem_and_bin.user_mem_set(virtual_memory[i], virtual_memory[i+1])
 
             # Updates the Pipeline
-            for e in master.toolbar.line_update[max(-24, self.state - len(master.toolbar.line_update) - 1):]:
-                if e != "":
-                    pipeline_window.iter_pip(master.toolbar.split_instructions[e-1][:3])
+            for e in master.toolbar.line_update[max(-24, self.state - len(master.toolbar.line_update) - 2):]:
+                if e == -1:
+                    pipeline_window.iter_pip("---")
+                else:
+                    pipeline_window.iter_pip(master.toolbar.split_instructions[e][:3])
             self.state = 0
 
             # Display success message in debugger
@@ -726,6 +733,7 @@ class Toolbar(ctk.CTkFrame):
             # Fetching the code
             code = asm_window.get_text_content()
             master.toolbar.split_instructions, _, master.toolbar.bitstream, master.toolbar.register_update, master.toolbar.line_update, master.toolbar.memory_update, master.toolbar.error = instruction_translation(code)
+            print(instruction_translation(code))
 
             # Funny text variations for when user tries to assemble empty code
             variations = ["sipping a coconut", "catching some rays", "in a hammock", "on a beach", "snorkeling", "in a tropical paradise", "surfing the clouds",
