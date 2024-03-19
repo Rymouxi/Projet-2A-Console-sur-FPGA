@@ -173,11 +173,14 @@ def CMP_simu(instruction:str,line:int):
     #Résultat de la comparaison
     cmp_value=Rn_value-int(imm8,2)
 
+    #NZVC value computation
+    nzvc=nzvc_count(Rn_value,int(imm8,2))
+
     #Simulation interne des registres
     virtual_register_write(8,cmp_value)
 
     #Renvoi des informations nécessaires à la simulation
-    register_update.extend([8,cmp_value])#Le registre 8 correspond au NZVC
+    register_update.extend([8,nzvc])#Le registre 8 correspond au NZVC
         
     return register_update
 
