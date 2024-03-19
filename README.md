@@ -1,7 +1,7 @@
 # ASM IDE in Python for our VHDL-Programmed FPGA
 
-
-##Summary:
+\n
+## Summary:
 
 ### 1. Introduction
 ### 2. Software
