@@ -26,9 +26,15 @@ from instruction_translation import *
 
 # Breakpoints
 
+# ruptures de séquences
+
+# error LSL trop grand
+
 # Line numbers
 
-# Couleurs pipeline
+# Step counter
+
+
 
 
 
@@ -121,17 +127,16 @@ class ASMWindow(ctk.CTkFrame):
         self.title = ctk.CTkLabel(self.frame, text="ASM Code Window", bg_color="transparent")
         self.title.pack(side="top", fill="x")
 
-        self.textbox = ctk.CTkTextbox(self.frame, width=700, text_color="#0050FF")
+        self.textbox = ctk.CTkTextbox(self.frame, width=700, text_color="#4060C0")
         self.textbox.pack(side="top", fill="both", expand=True)
 
         # Configure tags for syntax highlighting
-        self.textbox.tag_config("label", foreground="#FF0000")
-        self.textbox.tag_config("Register", foreground="#00B000")
-        self.textbox.tag_config("register", foreground="#00B000")
-        self.textbox.tag_config("comma", foreground="#B00090")
+        self.textbox.tag_config("label", foreground="#E02020")
+        self.textbox.tag_config("Register", foreground="#309030")
+        self.textbox.tag_config("register", foreground="#309030")
+        self.textbox.tag_config("comma", foreground="#A03080")
         self.textbox.tag_config("bracket", foreground="#00A000")
-        self.textbox.tag_config("hash", foreground="#FF8000")
-        self.textbox.tag_config("number", foreground="#FFB000")
+        self.textbox.tag_config("hash", foreground="#E08030")
         self.textbox.tag_config("comment", foreground="#888888")
         self.textbox.tag_config("ERROR", background="#702020")
         self.textbox.tag_config("next_line", background="#304030")
@@ -472,6 +477,8 @@ class PipelineWindow(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
 
+        self.color_map = {}  # Dictionary to store color for each instruction
+
         pip_headers = ["Fetch", "Decode", "Execute"]
 
         # Create header labels on the left
@@ -497,18 +504,18 @@ class PipelineWindow(ctk.CTkFrame):
     def get_cell(self, row:int, col:int):
         '''Get the value in the specified cell.'''
 
-        if 0 <= row <= 3 and 1 <= col <= 21:
+        if 0 <= row <= 2 and 1 <= col <= 20:
             entry_widget = self.grid_slaves(row=row, column=col)[0]
-            return entry_widget.get()
+            return entry_widget.get(), entry_widget.cget('fg_color')
         
         else:
             return None
 
 
-    def set_cell(self, row:int, col:int, value:str):
+    def set_cell(self, row:int, col:int, value:str, color:str=None):
         '''Set the value in the specified cell.'''
         
-        if 0 <= row <= 3 and 1 <= col <= 21:
+        if 0 <= row <= 2 and 1 <= col <= 20:
             # Fetch the list of widgets at the specified row and column
             slaves = self.grid_slaves(row=row, column=col)
             if slaves:
@@ -516,26 +523,41 @@ class PipelineWindow(ctk.CTkFrame):
                 entry_widget.configure(state="normal")  # Make editable temporarily
                 entry_widget.delete(0, tk.END)
                 entry_widget.insert(0, value)
+                if color:
+                    entry_widget.configure(fg_color=color)
                 entry_widget.configure(state="readonly")  # Make readonly again
 
 
-    def iter_pip(self, value:str):
+    def iter_pip(self, value:str, color:str=None):
         '''Shifts the whole pipeline on the right and creates a new FDE column on the left.'''
 
         # Shift on the right
         for i in range(3):
             for j in range(19):
                 self.prev = self.get_cell(i, 19-j)
-                self.set_cell(i, 20-j, self.prev)
+                self.set_cell(i, 20-j, self.prev[0], self.prev[1])
 
         # Add the two old instr in the new column
         self.prev = self.get_cell(1, 1)
-        self.set_cell(2, 1, self.prev)
+        self.set_cell(2, 1, self.prev[0], self.prev[1])
         self.prev = self.get_cell(0, 1)
-        self.set_cell(1, 1, self.prev)
+        self.set_cell(1, 1, self.prev[0], self.prev[1])
 
         # Add the new instr in the new column
-        self.set_cell(0, 1, value)
+        if value == "":
+            self.set_cell(0, 1, value)
+        else:
+            # Assign a new color for the instruction
+            if color:
+                new_color = color
+            else:
+                new_color = self.generate_random_color()
+                self.set_cell(0, 1, value, new_color)
+
+    
+    def generate_random_color(self):
+        '''Generate a random hexadecimal color code.'''
+        return "#{:02x}".format(random.randint(0x40, 0x80))+"{:02x}".format(random.randint(0x40, 0x80))+"{:02x}".format(random.randint(0x40, 0x80))
 
 
 
@@ -586,10 +608,11 @@ class Toolbar(ctk.CTkFrame):
             mem_and_bin.delete_bin()
 
             # Empties the pipeline
-            for i in range(22):
-                pipeline_window.iter_pip("")
+            for i in range(3):
+                for j in range(20):
+                    pipeline_window.set_cell(i, j+1, "", "#343638")
 
-            # Updates button states
+            # 0Updates button states
             master.toolbar.assemble_button.configure(self, fg_color="forestgreen", state="normal", text="Assemble")
             master.toolbar.run_button.configure(self, fg_color="gray", state="disabled", text="Run")
             master.toolbar.runsbs_button.configure(self, fg_color="gray", state="disabled", text="Run Step By Step", hover_color="darkgreen")
