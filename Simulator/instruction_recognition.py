@@ -63,7 +63,7 @@ def instruction_recognition(instruction:str,line:int,simu='OFF'):
             elif instruction[0]=='B' or instruction[0]=='b':
                 line_update,error=B_instruct_simu(instruction,line)
             elif instruction[0:4]=='CMP ' or instruction[0:4]=='cmp ':
-                register_update=CMP_simu(instruction,line)
+                register_update,error_simu=CMP_simu(instruction,line)
             elif instruction[0:4]=='EOR ' or instruction[0:4]=='eor ':
                 register_update=EOR_simu(instruction,line)
             elif instruction[0:4]=='LDR ' or instruction[0:4]=='ldr ':

@@ -161,25 +161,49 @@ def CMP_simu(instruction:str,line:int):
     Le registre NZVC est le 9ème 
     """
     register_update=[]
+    count_R=instruction.count('R')
+    count_imm=instruction.count('#')
+    error_simu=[]
 
     #CMP Rn,#imm8
     #Rn et imm8 sont les numéros (en binaire) des registres dans CMP
-    Rn=register_recognition(instruction)[0]
-    imm8=imm_recognition(instruction,8)
+    if count_R==1 and count_imm==1:
+        Rn=register_recognition(instruction)[0]
+        imm8=imm_recognition(instruction,8)
 
-    #Valeur de Rn en décimale
-    Rn_value=virtual_register[int(Rn,2)]
+        #Valeur de Rn en décimale
+        Rn_value=virtual_register[int(Rn,2)]
 
-    #Résultat de la comparaison
-    cmp_value=Rn_value-int(imm8,2)
+        #Résultat de la comparaison
+        cmp_value=Rn_value-int(imm8,2)
+
+        #NZVC value computation
+        nzvc=nzvc_count(Rn_value,int(imm8,2))
+
+    elif count_R==2 and count_imm==0:
+        Rn=register_recognition(instruction)[0]
+        Rd=register_recognition(instruction)[1]
+
+        #Valeur de Rn en décimale
+        Rn_value=virtual_register[int(Rn,2)]
+        Rd_value=virtual_register[int(Rd,2)]
+
+        #Résultat de la comparaison
+        cmp_value=Rn_value-Rd_value
+
+        #NZVC value computation
+        nzvc=nzvc_count(Rn_value,Rd_value)
+    else:
+        error_simu.append("There is an error")
+        return register_update,error_simu
 
     #Simulation interne des registres
     virtual_register_write(8,cmp_value)
 
     #Renvoi des informations nécessaires à la simulation
-    register_update.extend([8,cmp_value])#Le registre 8 correspond au NZVC
+    register_update.extend([8,nzvc])#Le registre 8 correspond au NZVC
         
-    return register_update
+    return register_update,error_simu
 
 
 def ADD_simu(instruction:str,line:int):

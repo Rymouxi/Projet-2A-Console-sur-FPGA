@@ -91,11 +91,14 @@ def CMP_bitstream(instruction:str,line:int):
     """ Fonction renvoyant le bitstream pour l'instruction CMP\n 
     """
     bitstream=''
+    R_count=instruction.count('R')
+    count_imm=instruction.count('#')
     #CMP Rn,#imm8
     #Rn et imm8 sont les numéros (en binaire) des registres dans CMP
-    Rn=register_recognition(instruction)[0]
-    imm8=imm_recognition(instruction,8)
-           
+    if R_count==1 and count_imm==1:
+        Rn=register_recognition(instruction)[0]
+        imm8=imm_recognition(instruction,8)
+    
     #Bitstream
     bitstream='00101'+Rn+imm8
            
