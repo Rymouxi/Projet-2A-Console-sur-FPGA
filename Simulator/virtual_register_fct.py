@@ -15,15 +15,23 @@ def nzvc_count(value1,value2):
     """This is the function designed to compute the value of the NZVC
     NZVC = Negative  -  Zero  -  OVerflow  -  Carry"""
     cmp=value1-value2 
-    nzvc=0
+    nzvc=""
     if cmp<0:
-        nzvc+=8
+        nzvc+='1'
+    else:
+        nzvc+='0'
     if cmp==0:
-        nzvc+=4
+        nzvc+='1'
+    else:
+        nzvc+='0'
     if cmp<2**31 and cmp>=-2**31:
-        nzvc+=2
+        nzvc+='1'
+    else:
+        nzvc+='0'
     if cmp<0:
-        nzvc+=1
+        nzvc+='1'
+    else:
+        nzvc+='0'
     return nzvc
     
 def virtual_register_write(reg_number:int,reg_value:int):

@@ -113,6 +113,12 @@ def error_handler_cmp (instruction):
         register_indice=R_indices(instruction)
         error.extend(space_identifier(instruction,0,register_indice[0]))
         error.extend(comma_identifier(instruction,register_indice[0]+1,instruction.find('#')))
+    elif R_count==2 and instruction.count('#')==0:
+        error.extend(register_error_handler(instruction))
+        register_indice=R_indices(instruction)
+        error.extend(space_identifier(instruction,0,register_indice[0]))
+        error.extend(comma_identifier(instruction,register_indice[0]+1,register_indice[1]))
+        error.extend(check_end_register(instruction,register_indice[1]+1))
     else:
         error.append("The number of operand doesn't match for this instruction")
         
