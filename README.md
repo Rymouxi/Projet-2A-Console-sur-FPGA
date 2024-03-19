@@ -14,7 +14,7 @@
 ### 4. ASM Coding
 #### 4.1 Introduction
 #### 4.2 Constraints and Preparation
-
+<br/>
 
 ## 1. Introduction
 Welcome to our project! 
@@ -31,7 +31,7 @@ This project comprises three main components:
 **The Board Programmation:** VHDL code that defines the functionality of the processor embedded within the FPGA.
 
 **The ASM Code:** This is where the magic happens! You write instructions in ASM to direct the computer chip, such as arithmetic operations, data storage, or even game logic like Snake or Tic Tac Toe.
-
+<br/>
 
 ## 2. Software
 ### 2.1 Simulator
@@ -169,7 +169,7 @@ The disconnection process is handled by the disconnect board function:
 5. **Integration with the Interface:** Typically called when the user interacts with the GUI, specifically in response to a button press.
 
 The user’s choice ("Yes" or "No") determines whether the serial connection should be closed. If closed, resources are released, and the system returns to a clean state; if not, the connection remains active for further communication.
-
+<br/>
 
 # 3. FPGA
 
@@ -214,7 +214,7 @@ The DECODE block decodes the instruction to be executed in the EXECUTE block. It
 ### 3.2.3 UAL
 
 The UAL (Arithmetic Logic Unit) handles the 4-bit NZVC number obtained from the FPU output, storing negative, zero, overflow, and carry exceptions.
-
+<br/>
 
 # 4. ASM Coding
 
