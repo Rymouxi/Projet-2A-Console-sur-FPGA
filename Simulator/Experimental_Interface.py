@@ -17,6 +17,7 @@ import tkinter as tk
 import customtkinter as ctk
 import random
 import webbrowser
+import math
 
 from instruction_translation import *
 
@@ -24,13 +25,9 @@ from instruction_translation import *
 
 # Breakpoints
 
-# Line numbers
-
 # Step counter
 
 # Change the text on the switch to hex button
-
-# Skip les intructions vides pour la mem code
 
 # Sauter les labels dans les instructions pipeline
 
@@ -119,14 +116,40 @@ class ASMWindow(ctk.CTkFrame):
                 master.master.master.master.toolbar.state = 0
 
 
+        def update_line_count(event=None):
+            '''Updates the content of the line counter widget with line numbers.'''
+
+            line_count = int(self.textbox.index('end-1c').split('.')[0])  # Get the number of lines in the textbox
+            line_numbers = '\n'.join(str(i) for i in range(1, line_count + 1))  # Generate line numbers
+            self.line_count.configure(state="normal")
+            self.line_count.delete(1.0, tk.END)  # Clear previous content
+            self.line_count.insert(1.0, line_numbers)  # Insert new line numbers
+            self.line_count.configure(state="disabled")
+            self.line_count.configure(width=34+7*math.floor(math.log10(int(line_numbers.splitlines()[-1]))))
+
+
+        def update_line_numbers(event=None):
+            '''Updates the view of the line counter to sync it with the textbox.'''
+
+            textbox_scroll_fraction = self.textbox.yview()[0]  # Get the current vertical scrollbar position of the textbox
+            self.line_count.yview_moveto(textbox_scroll_fraction)  # Set the vertical scrollbar position of the line counter to match the textbox
+            self.after(10, update_line_numbers)  # Schedule the function to run again after 10 milliseconds
+
+
         self.frame = ctk.CTkFrame(self, corner_radius=0)
         self.frame.pack(side="top", fill="both", expand=True)
 
         self.title = ctk.CTkLabel(self.frame, text="ASM Code Window", bg_color="transparent")
         self.title.pack(side="top", fill="x")
 
-        self.textbox = ctk.CTkTextbox(self.frame, width=700, text_color="#4060C0")
-        self.textbox.pack(side="top", fill="both", expand=True)
+        self.textbox_frame = ctk.CTkFrame(self.frame, corner_radius=0)
+        self.textbox_frame.pack(side="top", fill="both", expand=True)
+
+        self.line_count = ctk.CTkTextbox(self.textbox_frame, width=20, text_color="#C0C0C0", fg_color="#404040", scrollbar_button_hover_color="#404040", scrollbar_button_color="#404040")
+        self.line_count.pack(side="left", fill="both", expand=False)
+
+        self.textbox = ctk.CTkTextbox(self.textbox_frame, width=700, text_color="#4060C0")
+        self.textbox.pack(side="right", fill="both", expand=True)
 
         # Configure tags for syntax highlighting
         self.textbox.tag_config("label", foreground="#E02020")
@@ -142,6 +165,15 @@ class ASMWindow(ctk.CTkFrame):
         # Bind events to update syntax highlighting & buttons update
         self.textbox.bind("<KeyRelease>", self.highlight_syntax)
         self.textbox.bind("<KeyRelease>", update_btns_on_modif)
+        self.textbox.bind("<KeyRelease>", update_line_count)
+        self.textbox.bind("<KeyRelease>", update_line_numbers)
+
+        # Bind the update_line_numbers function to the scrollbar movement and text widget configuration
+        self.textbox.bind("<Configure>", update_line_numbers)
+        self.textbox.bind("<MouseWheel>", update_line_numbers)
+
+        # Set the first number on the line counter
+        update_line_count()
 
 
     def highlight_syntax(self, event=None, errors=[], next_line:int=-1):
