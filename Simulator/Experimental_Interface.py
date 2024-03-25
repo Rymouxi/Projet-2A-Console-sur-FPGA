@@ -166,13 +166,9 @@ class ASMWindow(ctk.CTkFrame):
         self.textbox.bind("<KeyRelease>", self.highlight_syntax)
         self.textbox.bind("<KeyRelease>", update_btns_on_modif)
         self.textbox.bind("<KeyRelease>", update_line_count)
-        self.textbox.bind("<KeyRelease>", update_line_numbers)
-
-        # Bind the update_line_numbers function to the scrollbar movement and text widget configuration
-        self.textbox.bind("<Configure>", update_line_numbers)
-        self.textbox.bind("<MouseWheel>", update_line_numbers)
 
         # Set the first number on the line counter
+        update_line_numbers()
         update_line_count()
 
 
