@@ -31,6 +31,8 @@ from instruction_translation import *
 
 # Sauter les labels dans les instructions pipeline
 
+# bug highlight when empty lines
+
 
 
 
@@ -148,15 +150,15 @@ class ASMWindow(ctk.CTkFrame):
         self.line_count = ctk.CTkTextbox(self.textbox_frame, width=20, text_color="#C0C0C0", fg_color="#404040", scrollbar_button_hover_color="#404040", scrollbar_button_color="#404040")
         self.line_count.pack(side="left", fill="both", expand=False)
 
-        self.textbox = ctk.CTkTextbox(self.textbox_frame, width=700, text_color="#4060C0")
+        self.textbox = ctk.CTkTextbox(self.textbox_frame, width=700, text_color="#2060D0")
         self.textbox.pack(side="right", fill="both", expand=True)
 
         # Configure tags for syntax highlighting
         self.textbox.tag_config("label", foreground="#E02020")
         self.textbox.tag_config("Register", foreground="#309030")
         self.textbox.tag_config("register", foreground="#309030")
-        self.textbox.tag_config("comma", foreground="#A03080")
-        self.textbox.tag_config("bracket", foreground="#00A000")
+        self.textbox.tag_config("comma", foreground="#B02080")
+        self.textbox.tag_config("bracket", foreground="#006000")
         self.textbox.tag_config("hash", foreground="#E08030")
         self.textbox.tag_config("comment", foreground="#888888")
         self.textbox.tag_config("ERROR", background="#702020")
@@ -302,10 +304,24 @@ class RegisterWindow(ctk.CTkFrame):
         self.frame = ctk.CTkFrame(self, corner_radius=0)
         self.frame.pack(side="top", fill="both", expand=True)
 
+        # Step Counter
+        self.step_counter_title = ctk.CTkLabel(self.frame, text="Step Counter", bg_color="transparent", padx=50)
+        self.step_counter_title.pack(side="top", fill="x")
+
+        self.step_counter_frame = ctk.CTkFrame(self.frame, corner_radius=0)
+        self.step_counter_frame.pack(side="top", fill="x")
+
+        self.step_counter_label = ctk.CTkLabel(self.step_counter_frame, text="Step:", padx=5, pady=30, anchor="w")
+        self.step_counter_label.pack(side="left")
+
+        self.step_counter_value = ctk.CTkLabel(self.step_counter_frame, text="0", padx=5, pady=30, anchor="w")
+        self.step_counter_value.pack(side="left")
+
+        # Register Frame
         self.title = ctk.CTkLabel(self.frame, text="Registers", bg_color="transparent")
         self.title.pack(side="top", fill="x")
 
-        self.sub_frame = ctk.CTkFrame(self.frame, corner_radius=0)
+        self.sub_frame = ctk.CTkFrame(self.frame, corner_radius=0, width=100)
         self.sub_frame.pack(side="top", fill="both")
 
         self.value_labels = []
@@ -370,6 +386,11 @@ class RegisterWindow(ctk.CTkFrame):
                 label.configure(text=str(decimal_value))
                 self.display = 0
                 self.button.configure(text="Switch to dec")
+
+
+    def set_step(self, value:int):
+        '''Changes the step number displayed.'''
+        self.step_counter_value.configure(text=str(value))
 
 
 
@@ -622,6 +643,9 @@ class Toolbar(ctk.CTkFrame):
                 register_window.set_register_values(i, 0)
             register_window.set_register_values(8, "0000")
 
+            # Resets step sounter
+            register_window.set_step(0)
+
             # Empties User Memory
             for i in range(2048):
                 mem_and_bin.user_mem_set("0x"+format(4*i+536870912, "08x"))
@@ -634,6 +658,7 @@ class Toolbar(ctk.CTkFrame):
             mem_and_bin.delete_bin()
 
             # Empties the pipeline
+            self.pip_offset = 0
             for i in range(3):
                 for j in range(20):
                     pipeline_window.set_cell(i, j+1, "", "#343638")
@@ -673,6 +698,11 @@ class Toolbar(ctk.CTkFrame):
                 master.toolbar.runsbs_button.configure(self, fg_color="forestgreen", text="Step->")
                 self.state = 2
             else:
+
+                register_window.set_step(max(self.state-3, 0))
+
+                if self.state < len(master.toolbar.line_update) + 2 and master.toolbar.split_instructions[master.toolbar.line_update[self.state - 2]].find(":") != -1:
+                    self.pip_offset += 1
 
                 # Executes a step
 
@@ -815,6 +845,8 @@ class Toolbar(ctk.CTkFrame):
                 master.toolbar.run_button.configure(self, fg_color="forestgreen", state="normal")
                 master.toolbar.runsbs_button.configure(self, fg_color="forestgreen", state="normal")
         
+
+        self.pip_offset = 0
 
         self.download_button = ctk.CTkButton(self, text="Download Code", width=100, height=10, font = ("Arial", 11), corner_radius=25, fg_color="gray", hover_color="darkgreen", state="disabled", command=download_code)
         self.download_button.pack(side="right", padx=5)
