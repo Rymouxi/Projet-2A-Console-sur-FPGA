@@ -216,4 +216,43 @@ BNE CROSS
 ; We know that Ra contains the case number 
 ; during all the previous test, we did the modification with Re (which contains the case number but modfied during the test)
 
+; Function to check if a player wins
+CheckWin:
+    ; First, let's check rows
+    MOV R0, #0       ; Counter for rows
+    CHECK_ROW:
+        ; Compute the starting address of the row
+        MOV R4, R0       ; Copy the row index to R4
+        LSL R4, R4, #2   ; Multiply by 4 (assuming each cell occupies 4 bytes)
+        ADD R4, R5, R4   ; Add the base address of the game to get the starting address of the row
+        ; Load the first cell of the row
+        LDR R6, [R4]
 
+        ; Check if all cells in the row match the symbol of the current player
+        MOV R7, #0       ; Counter for matching cells
+        MOV R8, R6       ; Copy the symbol of the first cell to R8
+        CHECK_CELL:
+            CMP R8, R6        ; Compare the symbol of the current cell with the symbol of the first cell
+            BNE ROW_END       ; If symbols are not equal, exit the loop
+            ADD R7, R7, #1    ; Increment the counter of matching cells
+            ADD R4, R4, #4    ; Move to the next cell in the row
+            LDR R6, [R4]      ; Load the symbol of the next cell
+            CMP R7, #3        ; Check if we have found 3 matching cells
+            BEQ WINNER_FOUND  ; If so, the player wins
+            B CHECK_CELL      ; Repeat the loop for the next cell
+        ROW_END:
+        ADD R0, R0, #1    ; Move to the next row
+        CMP R0, #3        ; Check if we have checked all rows
+        BLT CHECK_ROW     ; If not, repeat the loop for the next row
+
+    ; If we reached here, the player didn't win with rows, let's check columns and diagonals
+    ; You can implement similar checks for columns and diagonals here
+
+    ; If no winner is found, return 0
+    MOV R0, #0
+    BX LR
+
+WINNER_FOUND:
+    ; If a winner is found, return 1
+    MOV R0, #1
+    BX LR
