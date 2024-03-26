@@ -31,6 +31,11 @@ from instruction_translation import *
 
 # bug highlight when empty lines
 
+# Pipeline décalé
+
+# Step count sur le Run
+
+
 
 
 
@@ -227,12 +232,13 @@ class ASMWindow(ctk.CTkFrame):
         # Looking for BXX Loops
 
         bxx_loops = {
-            "BNE ": "label",
-            "BEQ ": "label",
-            "BGE ": "label",
-            "BLT ": "label",
-            "BGT ": "label",
-            "BLE ": "label"}
+            "BNE ": "label", "bne ": "label",
+            "BEQ ": "label", "beq ": "label",
+            "BGE ": "label", "bge ": "label",
+            "BLT ": "label", "blt ": "label",
+            "BGT ": "label", "bgt ": "label",
+            "BLE ": "label", "ble ": "label",
+            "B ": "label", "b ": "label"}
 
         # Iterate through the bxx_loops and tag the text accordingly
         for pattern, tag in bxx_loops.items():
@@ -243,23 +249,13 @@ class ASMWindow(ctk.CTkFrame):
                     break
 
                 # Tag the text after the BNE Loop
-                start_index = self.textbox.index(f"{start_index} +4c")
+                if pattern == "b " or pattern == "B ":
+                    start_index = self.textbox.index(f"{start_index} +2c")
+                else:
+                    start_index = self.textbox.index(f"{start_index} +4c")
                 end_index = self.textbox.index(f"{start_index} lineend")
                 self.textbox.tag_add(tag, start_index, end_index)
                 start_index = f"{start_index}+1c"
-
-        # Simple B loop
-        start_index = "1.0"
-        while True:
-            start_index = self.textbox.search("B ", start_index, tk.END, regexp=True)
-            if not start_index:
-                break
-
-            # Tag the text after the BNE Loop
-            start_index = self.textbox.index(f"{start_index} +2c")
-            end_index = self.textbox.index(f"{start_index} lineend")
-            self.textbox.tag_add("label", start_index, end_index)
-            start_index = f"{start_index}+1c"
 
         # Error highlight
         self.textbox.tag_remove("ERROR", "1.0", tk.END)
