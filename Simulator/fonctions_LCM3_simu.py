@@ -104,8 +104,7 @@ def LDR_simu(instruction:str,line:int):
 
     #LDR Rt,[Rn]
     if type(virtual_memory_read(virtual_register[int(register_recognition(instruction)[1],2)]))==str:
-        error_simu.append(virtual_memory_read(register_recognition(instruction)[1]))
-        error_simu.append(line) 
+        error_simu.append(virtual_memory_read(virtual_register[int(register_recognition(instruction)[1],2)])) 
         error_count+=1
     if error_count==0:
         #Rt et Rn sont les numéros (en binaire) des registres dans LDR
