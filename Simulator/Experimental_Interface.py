@@ -25,8 +25,6 @@ from instruction_translation import *
 
 # Breakpoints
 
-# Step counter
-
 # Change the text on the switch to hex button
 
 # Sauter les labels dans les instructions pipeline
@@ -351,7 +349,7 @@ class RegisterWindow(ctk.CTkFrame):
             self.grid_columnconfigure(j, weight=1)
 
         # Hex-Dec button
-        self.button = ctk.CTkButton(self.frame, text="Switch to hex", command=self.change_format)
+        self.button = ctk.CTkButton(self.frame, text="Switch to Hexa", command=self.change_format)
         self.button.pack(side="top")
         self.display = 0  # Variable to keep track of the mode
 
@@ -377,7 +375,7 @@ class RegisterWindow(ctk.CTkFrame):
                 hex_value = "0x"+format(decimal_value, "08x") if i<8 else label.cget("text")
                 label.configure(text=hex_value)
                 self.display = 1
-                self.button.configure(text="Switch to dec")
+                self.button.configure(text="Switch to Dec")
 
         else:  # in hex
             for i, label in enumerate(self.value_labels):
@@ -385,7 +383,7 @@ class RegisterWindow(ctk.CTkFrame):
                 decimal_value = int(hex_value[2:], 16) if i<8 else label.cget("text")
                 label.configure(text=str(decimal_value))
                 self.display = 0
-                self.button.configure(text="Switch to dec")
+                self.button.configure(text="Switch to Hexa")
 
 
     def set_step(self, value:int):
@@ -658,7 +656,6 @@ class Toolbar(ctk.CTkFrame):
             mem_and_bin.delete_bin()
 
             # Empties the pipeline
-            self.pip_offset = 0
             for i in range(3):
                 for j in range(20):
                     pipeline_window.set_cell(i, j+1, "", "#343638")
@@ -700,9 +697,6 @@ class Toolbar(ctk.CTkFrame):
             else:
 
                 register_window.set_step(max(self.state-3, 0))
-
-                if self.state < len(master.toolbar.line_update) + 2 and master.toolbar.split_instructions[master.toolbar.line_update[self.state - 2]].find(":") != -1:
-                    self.pip_offset += 1
 
                 # Executes a step
 
@@ -790,7 +784,7 @@ class Toolbar(ctk.CTkFrame):
 
             # Fetching the code
             code = asm_window.get_text_content()
-            master.toolbar.split_instructions, master.toolbar.bitstream, master.toolbar.register_update, master.toolbar.line_update, master.toolbar.memory_update, master.toolbar.error = instruction_translation(code)
+            master.toolbar.split_instructions, _, master.toolbar.bitstream, master.toolbar.register_update, master.toolbar.line_update, master.toolbar.memory_update, master.toolbar.error = instruction_translation(code)
 
             # Funny text variations for when user tries to assemble empty code
             variations = ["sipping a coconut", "catching some rays", "in a hammock", "on a beach", "snorkeling", "in a tropical paradise", "surfing the clouds",
@@ -844,8 +838,6 @@ class Toolbar(ctk.CTkFrame):
                 master.toolbar.run_button.configure(self, fg_color="forestgreen", state="normal")
                 master.toolbar.runsbs_button.configure(self, fg_color="forestgreen", state="normal")
         
-
-        self.pip_offset = 0
 
         self.download_button = ctk.CTkButton(self, text="Download Code", width=100, height=10, font = ("Arial", 11), corner_radius=25, fg_color="gray", hover_color="darkgreen", state="disabled", command=download_code)
         self.download_button.pack(side="right", padx=5)
@@ -983,6 +975,9 @@ class FileMenu(ctk.CTkFrame):
         
 
 
+
+
+
 class SettingsMenu(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
@@ -998,6 +993,9 @@ class SettingsMenu(ctk.CTkFrame):
         # Add items to the File menu
         self.menu.add_command(label="Dark mode", command=master.master.theme_toggle_dark)
         self.menu.add_command(label="Light mode", command=master.master.theme_toggle_light)
+
+
+
 
 
 
@@ -1023,6 +1021,9 @@ class HelpMenu(ctk.CTkFrame):
         self.menu.add_command(label="This Simulator Documentation", command=SimulatorDocumentation)
         self.menu.add_separator()
         self.menu.add_command(label="LCM3 Documentation", command=help_lcm3_docu)
+
+
+
 
 
 
@@ -1107,3 +1108,4 @@ class SimulatorDocumentation(ctk.CTkToplevel):
 
 app = EnseaSimulator()
 app.mainloop()
+
