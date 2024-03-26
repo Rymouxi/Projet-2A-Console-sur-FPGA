@@ -50,6 +50,7 @@ B DIVISION                  ; R1/R2
         BX LR               
 
 MOV Ra, R0                  ; Ra contains the 4 bits indicating the case number
+MOV Re, R0                  ; Re contains also the 4 bits indicating the case number but we use it to check the succes or not
 
 ; We read the bit which indicates the action to take (X/O)
 
@@ -99,22 +100,22 @@ MOV Rb, R0                      ; Rb contains the bit indicating the action X/O
 CMP Rb, #0                      
 BEQ CIRCLE
     MOV Rc, #3                  ; 3 in binary is 11 (we are goint to change the case value from 00 to 11)
-    SUB Ra, #1                  ; because we want a value as 100..00
+    SUB Re, #1                  ; because we want a value as 100..00
 
     MOV R2, #2
     B MULTIPLICATION            ; R0 = Ra*2
         MOV R0, #0      		; Initialize the result R0 as 0
 
     	MUL_LOOP:
-       		CMP Ra, #0         ; check if Ra is 0
+       		CMP Re, #0         ; check if Ra (Re) is 0
        		BEQ MUL_DONE       ; if so return R0 = 0
 
             CMP R2, #0         	; check if Ra is 0
        		BEQ MUL_DONE        ; if so return R0 = 0
 
             ADD R0, R0, R2      ; R0 = R0 + R2 = R0 + 2
-       		SUB Ra, Ra, #1     	; Ra = Ra - 1
-            CMP Ra, #0      
+       		SUB Re, Re, #1     	; Ra = Ra - 1
+            CMP Re, #0      
             BGE MUL_LOOP        ; Repeat the loop until Ra is zero
 
     	MUL_DONE:
@@ -156,22 +157,22 @@ BEQ CIRCLE
 
 BNE CROSS
     MOV Rc, #1                  ; 1 in binary is 01 (we are goint to change the case value from 00 to 01)
-    SUB Ra, #1                  ; because we want a value as 100..00
+    SUB Re, #1                  ; because we want a value as 100..00
 
     MOV R2, #2
     B MULTIPLICATION            ; R0 = Ra*2
         MOV R0, #0      		; Initialize the result R0 as 0
 
     	MUL_LOOP:
-       		CMP Ra, #0         ; check if Ra is 0
+       		CMP Re, #0         ; check if Ra is 0
        		BEQ MUL_DONE       ; if so return R0 = 0
 
             CMP R2, #0         	; check if Ra is 0
        		BEQ MUL_DONE        ; if so return R0 = 0
 
             ADD R0, R0, R2      ; R0 = R0 + R2 = R0 + 2
-       		SUB Ra, Ra, #1     	; Ra = Ra - 1
-            CMP Ra, #0      
+       		SUB Re, Re, #1     	; Ra = Ra - 1
+            CMP Re, #0      
             BGE MUL_LOOP        ; Repeat the loop until Ra is zero
 
     	MUL_DONE:
@@ -210,4 +211,9 @@ BNE CROSS
         	; the result is in R0, we have now 0100..00, so can change the value at the position we want by adding this value
         	BX LR
     ADD R1, R1, R0
+
+; Now we check the corresponded line, column and diagonalline to verify if anybody wins
+; We know that Ra contains the case number 
+; during all the previous test, we did the modification with Re (which contains the case number but modfied during the test)
+
 
