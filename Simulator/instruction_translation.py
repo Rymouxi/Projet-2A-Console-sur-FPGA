@@ -19,6 +19,7 @@ def instruction_translation(ASM:str):
     line_update=[0]
     memory_update=[]
     error=[]
+    sequence_break=False
     virtual_register_reset()
     virtual_memory_reset()
     label_recognition(split_instruction)
@@ -33,14 +34,14 @@ def instruction_translation(ASM:str):
         while split_instructions_with_END[line_pointer]!="END":
             instruction=split_instructions_with_END[line_pointer]
             #Rupture de séquence dans le cas d'un branchement
-            if is_instruction_b_instruct(instruction):
+            register_update_instruction,sequence_break,line_pointer,memory_update_instruction,error_simu=instruction_recognition(instruction,line_pointer,simu='ON')
+            if sequence_break==False and is_instruction_b_instruct(instruction)==True:
                 line_update.append(-1)
                 line_update.append(-1)
                 memory_update.append([])
                 memory_update.append([])
                 register_update.append([])
                 register_update.append([])
-            register_update_instruction,line_pointer,memory_update_instruction,error_simu=instruction_recognition(instruction,line_pointer,simu='ON')
             if register_update_instruction!=[]:
                 if type(register_update_instruction[0])==list:
                     register_update.extend(register_update_instruction)

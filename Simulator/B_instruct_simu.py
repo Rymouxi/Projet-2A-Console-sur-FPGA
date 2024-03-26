@@ -15,6 +15,7 @@ def B_instruct_simu(instruction:str,line:int):
     #Ici on peut, au besoin, rajouter BGE, BLT, BGT, BLE
     line_update=0
     error_simu=[]
+    sequence_break=False
     if instruction[0:4]=='BEQ ':
         #BEQ label
         line_update,error_simu=BEQ_label_simu(instruction,line)
@@ -36,8 +37,10 @@ def B_instruct_simu(instruction:str,line:int):
     elif instruction[0:2]=='B ':
         #B label
         line_update,error_simu=B_label_simu(instruction,line)
+    if line_update==line+1:
+        sequence_break=True
 
-    return line_update,error_simu
+    return line_update,sequence_break,error_simu
 
 
 def B_label_simu(instruction:str,line:int):
