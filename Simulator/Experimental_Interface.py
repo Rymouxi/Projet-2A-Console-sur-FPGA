@@ -178,6 +178,8 @@ class ASMWindow(ctk.CTkFrame):
         # Color for labels
         self.textbox.tag_remove("label", "1.0", tk.END)
         index = "1.0"
+
+        # Looking for labels
         while True:
             index = self.textbox.search(":", index, tk.END)
             if not index:
@@ -221,6 +223,43 @@ class ASMWindow(ctk.CTkFrame):
                 # Tag and jump to next character
                 self.textbox.tag_add(tag, start_index, end_index)
                 start_index = f"{end_index}+1c"
+
+        # Looking for BXX Loops
+
+        bxx_loops = {
+            "BNE ": "label",
+            "BEQ ": "label",
+            "BGE ": "label",
+            "BLT ": "label",
+            "BGT ": "label",
+            "BLE ": "label"}
+
+        # Iterate through the bxx_loops and tag the text accordingly
+        for pattern, tag in bxx_loops.items():
+            start_index = "1.0"
+            while True:
+                start_index = self.textbox.search(pattern, start_index, tk.END, regexp=True)
+                if not start_index:
+                    break
+
+                # Tag the text after the BNE Loop
+                start_index = self.textbox.index(f"{start_index} +4c")
+                end_index = self.textbox.index(f"{start_index} lineend")
+                self.textbox.tag_add(tag, start_index, end_index)
+                start_index = f"{start_index}+1c"
+
+        # Simple B loop
+        start_index = "1.0"
+        while True:
+            start_index = self.textbox.search("B ", start_index, tk.END, regexp=True)
+            if not start_index:
+                break
+
+            # Tag the text after the BNE Loop
+            start_index = self.textbox.index(f"{start_index} +2c")
+            end_index = self.textbox.index(f"{start_index} lineend")
+            self.textbox.tag_add("label", start_index, end_index)
+            start_index = f"{start_index}+1c"
 
         # Error highlight
         self.textbox.tag_remove("ERROR", "1.0", tk.END)
