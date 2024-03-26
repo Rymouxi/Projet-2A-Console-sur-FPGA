@@ -76,9 +76,9 @@ def instruction_translation(ASM:str):
         memory_update.append([])
         memory_update.append([])
         
-    for line in line_update:
-        if line in label_table:
-            line_update.remove(line)
+    #for line in line_update:
+    #    if line in label_table:
+    #        line_update.remove(line)
 
     return split_instruction,bitstream,register_update,line_update,memory_update,error
 
