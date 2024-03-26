@@ -25,15 +25,11 @@ from instruction_translation import *
 
 # Breakpoints
 
-# Change the text on the switch to hex button
-
 # Sauter les labels dans les instructions pipeline
 
 # bug highlight when empty lines
 
 # Pipeline décalé
-
-# Step count sur le Run
 
 
 
@@ -87,16 +83,16 @@ class EnseaSimulator(ctk.CTk):
         self.toolbar = Toolbar(self, self.asm_window, self.debugger_window, self.register_window, self.mem_and_bin, self.pipeline_window)  # Toolbar at the top
         self.toolbar.pack(fill="x")
 
+        self.theme_toggle_dark()
+
 
     def theme_toggle_dark(event=None):
         '''Toggles dark theme.'''
-
         ctk.set_appearance_mode("dark")
 
 
     def theme_toggle_light(event=None):
         '''Toggles light theme.'''
-
         ctk.set_appearance_mode("light")
 
 
@@ -124,79 +120,58 @@ class ASMWindow(ctk.CTkFrame):
         def update_line_count(event=None):
             '''Updates the content of the line counter widget with line numbers.'''
 
-            line_count = int(self.textbox.index('end-1c').split('.')[0])  # Get the number of lines in the textbox
+            line_count = int(self.textbox.index('end-1c').split('.')[0])        # Get the number of lines in the textbox
             line_numbers = '\n'.join(str(i) for i in range(1, line_count + 1))  # Generate line numbers
-            self.line_count.configure(state="normal")
-            self.line_count.delete(1.0, tk.END)  # Clear previous content
-            self.line_count.insert(1.0, line_numbers)  # Insert new line numbers
-            self.line_count.configure(state="disabled")
-            self.line_count.configure(width=34+7*math.floor(math.log10(int(line_numbers.splitlines()[-1]))))
+            self.line_count.configure(state="normal")                           # Make text editable
+            self.line_count.delete(1.0, tk.END)                                 # Clear previous content
+            self.line_count.insert(1.0, line_numbers)                           # Insert new line numbers
+            self.line_count.configure(state="disabled")                         # Make text disabled again
+            self.line_count.configure(width=34+7*math.floor(math.log10(int(line_numbers.splitlines()[-1]))))  # Sets an appropriate width for the frame
 
 
         def update_line_numbers(event=None):
             '''Updates the view of the line counter to sync it with the textbox.'''
 
-            textbox_scroll_fraction = self.textbox.yview()[0]  # Get the current vertical scrollbar position of the textbox
+            textbox_scroll_fraction = self.textbox.yview()[0]      # Get the current vertical scrollbar position of the textbox
             self.line_count.yview_moveto(textbox_scroll_fraction)  # Set the vertical scrollbar position of the line counter to match the textbox
-            self.after(10, update_line_numbers)  # Schedule the function to run again after 10 milliseconds
+            self.after(10, update_line_numbers)                    # Schedule the function to run again after 10 milliseconds
 
 
-        self.frame = ctk.CTkFrame(self, corner_radius=0)
+        # Frames
+        self.frame = ctk.CTkFrame(self, corner_radius=0)                                       # Object Frame
         self.frame.pack(side="top", fill="both", expand=True)
-
-        self.title = ctk.CTkLabel(self.frame, text="ASM Code Window", bg_color="transparent")
+        self.title = ctk.CTkLabel(self.frame, text="ASM Code Window", bg_color="transparent")  # Title
         self.title.pack(side="top", fill="x")
-
-        self.textbox_frame = ctk.CTkFrame(self.frame, corner_radius=0)
+        self.textbox_frame = ctk.CTkFrame(self.frame, corner_radius=0)                         # Frame containing the ASM window and the line numbers
         self.textbox_frame.pack(side="top", fill="both", expand=True)
-
         self.line_count = ctk.CTkTextbox(self.textbox_frame, width=20, text_color="#C0C0C0", fg_color="#404040", scrollbar_button_hover_color="#404040", scrollbar_button_color="#404040")
-        self.line_count.pack(side="left", fill="both", expand=False)
-
-        self.textbox = ctk.CTkTextbox(self.textbox_frame, width=700, text_color="#2060D0")
+        self.line_count.pack(side="left", fill="both", expand=False)                           # Line numbers
+        self.textbox = ctk.CTkTextbox(self.textbox_frame, width=700, text_color="#2060D0")     # ASM window text box
         self.textbox.pack(side="right", fill="both", expand=True)
 
         # Configure tags for syntax highlighting
-        self.textbox.tag_config("label", foreground="#E02020")
-        self.textbox.tag_config("Register", foreground="#309030")
-        self.textbox.tag_config("register", foreground="#309030")
-        self.textbox.tag_config("comma", foreground="#B02080")
-        self.textbox.tag_config("bracket", foreground="#006000")
-        self.textbox.tag_config("hash", foreground="#E08030")
-        self.textbox.tag_config("comment", foreground="#888888")
-        self.textbox.tag_config("ERROR", background="#702020")
-        self.textbox.tag_config("next_line", background="#304030")
+        self.textbox.tag_config("label", foreground="#E02020")      # Red
+        self.textbox.tag_config("Register", foreground="#309030")   # Green
+        self.textbox.tag_config("register", foreground="#309030")   # Green
+        self.textbox.tag_config("comma", foreground="#B02080")      # Magenta
+        self.textbox.tag_config("bracket", foreground="#006000")    # Dark Green
+        self.textbox.tag_config("hash", foreground="#E08030")       # Orange
+        self.textbox.tag_config("comment", foreground="#888888")    # Gray
+        self.textbox.tag_config("ERROR", background="#702020")      # Red
+        self.textbox.tag_config("next_line", background="#304030")  # Dark Gray
 
         # Bind events to update syntax highlighting & buttons update
         self.textbox.bind("<KeyRelease>", self.highlight_syntax)
         self.textbox.bind("<KeyRelease>", update_btns_on_modif)
         self.textbox.bind("<KeyRelease>", update_line_count)
 
-        # Set the first number on the line counter
+        # Set the first number on the line counter and start to update the view
         update_line_numbers()
         update_line_count()
 
 
     def highlight_syntax(self, event=None, errors=[], next_line:int=-1):
         '''Update syntax highlighting.'''
-        
-        # Color for labels
-        self.textbox.tag_remove("label", "1.0", tk.END)
-        index = "1.0"
-
-        # Looking for labels
-        while True:
-            index = self.textbox.search(":", index, tk.END)
-            if not index:
-                break
-
-            # Tag the text before the semicolon
-            start_index = self.textbox.index(f"{index} linestart")
-            end_index = self.textbox.index(f"{index}+1c")
-            self.textbox.tag_add("label", start_index, end_index)
-            index = f"{index}+1c"
-
-        # Color for the rest of the syntax
 
         # Define patterns and corresponding tags
         patterns = {
@@ -205,11 +180,33 @@ class ASMWindow(ctk.CTkFrame):
             "[\\[\\]]": "bracket",
             ",": "comma",
             "#": "hash",
-            ";": "comment"}
+            ";": "comment",
+            "BNE ": "label", "bne ": "label",
+            "BEQ ": "label", "beq ": "label",
+            "BGE ": "label", "bge ": "label",
+            "BLT ": "label", "blt ": "label",
+            "BGT ": "label", "bgt ": "label",
+            "BLE ": "label", "ble ": "label",
+            "B ": "label", "b ": "label"}
 
         # Remove existing tags
         for tag in patterns.values():
             self.textbox.tag_remove(tag, "1.0", tk.END)
+
+        # Looking for labels
+
+        index = "1.0"
+        while True:
+            index = self.textbox.search(":", index, tk.END)
+            if not index:
+                break
+            # Tag the text before the semicolon
+            start_index = self.textbox.index(f"{index} linestart")
+            end_index = self.textbox.index(f"{index}+1c")
+            self.textbox.tag_add("label", start_index, end_index)
+            index = f"{index}+1c"
+
+        # Colors for the rest of the syntax
 
         # Iterate through the patterns and tag the text accordingly
         for pattern, tag in patterns.items():
@@ -220,42 +217,20 @@ class ASMWindow(ctk.CTkFrame):
                     break
 
                 # Compute end_index based on the pattern
-                if pattern == "," or pattern == "[\\[\\]]":
+                if pattern == "," or pattern == "[\\[\\]]":                                   # tags of length 1
                     end_index = self.textbox.index(f"{start_index}+1c")
+                elif pattern == "b " or pattern == "B ":
+                    start_index = self.textbox.index(f"{start_index} +2c")                    # Short loops "B"
+                    end_index = self.textbox.index(f"{start_index} lineend")
+                elif pattern == " R" or pattern == " r" or pattern == "#" or pattern == ";":  # tags of length > 1
+                    end_index = self.textbox.index(f"{start_index} lineend")
                 else:
+                    start_index = self.textbox.index(f"{start_index} +4c")                    # Long Loops "BXX"
                     end_index = self.textbox.index(f"{start_index} lineend")
 
                 # Tag and jump to next character
                 self.textbox.tag_add(tag, start_index, end_index)
                 start_index = f"{end_index}+1c"
-
-        # Looking for BXX Loops
-
-        bxx_loops = {
-            "BNE ": "label", "bne ": "label",
-            "BEQ ": "label", "beq ": "label",
-            "BGE ": "label", "bge ": "label",
-            "BLT ": "label", "blt ": "label",
-            "BGT ": "label", "bgt ": "label",
-            "BLE ": "label", "ble ": "label",
-            "B ": "label", "b ": "label"}
-
-        # Iterate through the bxx_loops and tag the text accordingly
-        for pattern, tag in bxx_loops.items():
-            start_index = "1.0"
-            while True:
-                start_index = self.textbox.search(pattern, start_index, tk.END, regexp=True)
-                if not start_index:
-                    break
-
-                # Tag the text after the BNE Loop
-                if pattern == "b " or pattern == "B ":
-                    start_index = self.textbox.index(f"{start_index} +2c")
-                else:
-                    start_index = self.textbox.index(f"{start_index} +4c")
-                end_index = self.textbox.index(f"{start_index} lineend")
-                self.textbox.tag_add(tag, start_index, end_index)
-                start_index = f"{start_index}+1c"
 
         # Error highlight
         self.textbox.tag_remove("ERROR", "1.0", tk.END)
@@ -297,13 +272,11 @@ class DebuggerWindow(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
 
-        self.frame = ctk.CTkFrame(self, corner_radius=0)
+        self.frame = ctk.CTkFrame(self, corner_radius=0)                                # Object Frame
         self.frame.pack(side="top", fill="both", expand=True)
-
-        self.title = ctk.CTkLabel(self.frame, text="Debugger", bg_color="transparent")
+        self.title = ctk.CTkLabel(self.frame, text="Debugger", bg_color="transparent")  # Title
         self.title.pack(side="top", fill="x")
-
-        self.textbox = ctk.CTkTextbox(self.frame)
+        self.textbox = ctk.CTkTextbox(self.frame)                                       # Debugger text box
         self.textbox.pack(side="top", fill="both", expand=True)
         self.textbox.configure(state="disabled")
     
@@ -334,46 +307,40 @@ class RegisterWindow(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
 
-        self.frame = ctk.CTkFrame(self, corner_radius=0)
+        self.frame = ctk.CTkFrame(self, corner_radius=0)  # Object Frame
         self.frame.pack(side="top", fill="both", expand=True)
 
         # Step Counter
-        self.step_counter_title = ctk.CTkLabel(self.frame, text="Step Counter", bg_color="transparent", padx=50)
+        self.step_counter_title = ctk.CTkLabel(self.frame, text="Step Counter", bg_color="transparent", padx=50)    # Title
         self.step_counter_title.pack(side="top", fill="x")
-
-        self.step_counter_frame = ctk.CTkFrame(self.frame, corner_radius=0)
+        self.step_counter_frame = ctk.CTkFrame(self.frame, corner_radius=0)                                         # Sub-frame of the counter
         self.step_counter_frame.pack(side="top", fill="x")
-
-        self.step_counter_label = ctk.CTkLabel(self.step_counter_frame, text="Step:", padx=5, pady=30, anchor="w")
+        self.step_counter_label = ctk.CTkLabel(self.step_counter_frame, text="Step:", padx=5, pady=30, anchor="w")  # Label "Step:"
         self.step_counter_label.pack(side="left")
-
-        self.step_counter_value = ctk.CTkLabel(self.step_counter_frame, text="0", padx=5, pady=30, anchor="w")
+        self.step_counter_value = ctk.CTkLabel(self.step_counter_frame, text="0", padx=5, pady=30, anchor="w")      # Value
         self.step_counter_value.pack(side="left")
 
         # Register Frame
-        self.title = ctk.CTkLabel(self.frame, text="Registers", bg_color="transparent")
+        self.title = ctk.CTkLabel(self.frame, text="Registers", bg_color="transparent")  # Title
         self.title.pack(side="top", fill="x")
-
-        self.sub_frame = ctk.CTkFrame(self.frame, corner_radius=0, width=100)
+        self.sub_frame = ctk.CTkFrame(self.frame, corner_radius=0, width=100)            # Sub-frame of the registers
         self.sub_frame.pack(side="top", fill="both")
 
+        # Storing register values
         self.value_labels = []
 
         # Create data entry widgets for Register 0 to 7
         for i in range(8):
-            self.register_label = ctk.CTkLabel(self.sub_frame, text=f"R{i}:", padx=5, pady=2, anchor="w")
+            self.register_label = ctk.CTkLabel(self.sub_frame, text=f"R{i}:", padx=5, pady=2, anchor="w")  # Labels "RX"
             self.register_label.grid(row=i, column=0, sticky="nsew")
-
-            self.value_label = ctk.CTkLabel(self.sub_frame, text="0", padx=5, pady=2, anchor="w")
+            self.value_label = ctk.CTkLabel(self.sub_frame, text="0", padx=5, pady=2, anchor="w")          # Values
             self.value_label.grid(row=i, column=1, sticky="nsew")
             self.value_labels.append(self.value_label)
 
         # For NZVC
-        self.register_label = ctk.CTkLabel(self.sub_frame, text="NZVC:", padx=5, pady=2, anchor="w")
+        self.register_label = ctk.CTkLabel(self.sub_frame, text="NZVC:", padx=5, pady=2, anchor="w")  # Labels "NZVC"
         self.register_label.grid(row=8, column=0, sticky="nsew")
-
-        # Value labels
-        self.value_label = ctk.CTkLabel(self.sub_frame, text="0000", padx=5, pady=2, anchor="w")
+        self.value_label = ctk.CTkLabel(self.sub_frame, text="0000", padx=5, pady=2, anchor="w")      # Value
         self.value_label.grid(row=8, column=1, sticky="nsew")
         self.value_labels.append(self.value_label)
 
@@ -406,16 +373,16 @@ class RegisterWindow(ctk.CTkFrame):
 
         if self.display == 0:  # in dec
             for i, label in enumerate(self.value_labels):
-                decimal_value = int(label.cget("text"))
-                hex_value = "0x"+format(decimal_value, "08x") if i<8 else label.cget("text")
+                decimal_value = int(label.cget("text"))                                       # Retrieving the value
+                hex_value = "0x"+format(decimal_value, "08x") if i<8 else label.cget("text")  # Changing the format
                 label.configure(text=hex_value)
                 self.display = 1
                 self.button.configure(text="Switch to Dec")
 
         else:  # in hex
             for i, label in enumerate(self.value_labels):
-                hex_value = label.cget("text")
-                decimal_value = int(hex_value[2:], 16) if i<8 else label.cget("text")
+                hex_value = label.cget("text")                                         # Retrieving the value
+                decimal_value = int(hex_value[2:], 16) if i<8 else label.cget("text")  # Changing the format
                 label.configure(text=str(decimal_value))
                 self.display = 0
                 self.button.configure(text="Switch to Hexa")
@@ -446,6 +413,7 @@ class MemAndBin(ctk.CTkTabview):
         self.code_memory = ctk.CTkFrame(master=self.tab("Code Memory"))
         self.code_memory.pack(expand=True, fill="both")
  
+        # Code memory array
         self.code_headers = ["Adress", "Value", "Instruction"]
         self.code_tree = tk.ttk.Treeview(self.code_memory, columns=self.code_headers, show="headings")
         self.code_tree.tag_configure("even_row", background="#202020", foreground="lightcyan")  # Even row style
@@ -466,9 +434,7 @@ class MemAndBin(ctk.CTkTabview):
         # Vertical scrollbar
         self.code_scrollbar = ctk.CTkScrollbar(self.code_memory, orientation="vertical", command=self.code_tree.yview)
         self.code_tree.configure(yscrollcommand=self.code_scrollbar.set)
-
-        # Pack components
-        self.code_tree.pack(side="left", fill="both", expand=True)
+        self.code_tree.pack(side="left", fill="both", expand=True)  # Pack components
         self.code_scrollbar.pack(side="right", fill="y")
 
         # ---- User Memory ----
@@ -476,6 +442,7 @@ class MemAndBin(ctk.CTkTabview):
         self.user_memory = ctk.CTkFrame(master=self.tab("User Memory"))
         self.user_memory.pack(expand=True, fill="both")
 
+        # User memory array
         user_headers = ["Adress", "Value"]
         self.user_tree = tk.ttk.Treeview(self.user_memory, columns=user_headers, show="headings")
         self.user_tree.tag_configure("even_row", background="#202020", foreground="lightcyan")  # Even row style
@@ -495,23 +462,16 @@ class MemAndBin(ctk.CTkTabview):
         # Vertical scrollbar
         self.user_scrollbar = ctk.CTkScrollbar(self.user_memory, orientation="vertical", command=self.user_tree.yview)
         self.user_tree.configure(yscrollcommand=self.user_scrollbar.set)
-
-        # Pack components
-        self.user_tree.pack(side="left", fill="both", expand=True)
+        self.user_tree.pack(side="left", fill="both", expand=True)  # Pack components
         self.user_scrollbar.pack(side="right", fill="y")
 
         # ---- Binary window ----
 
-        self.binary = ctk.CTkFrame(master=self.tab("Binary"))
+        self.binary = ctk.CTkFrame(master=self.tab("Binary"))                              # Frame
         self.binary.pack(expand=True, fill="both")
-
-        self.bin_frame = ctk.CTkFrame(self.binary, corner_radius=0)
-        self.bin_frame.pack(side="top", fill="both", expand=True)
-
-        self.bin_title = ctk.CTkLabel(self.bin_frame, text="Binary", bg_color="transparent")
+        self.bin_title = ctk.CTkLabel(self.binary, text="Binary", bg_color="transparent")  # Title
         self.bin_title.pack(side="top", fill="x")
-
-        self.bin_textbox = ctk.CTkTextbox(self.bin_frame)
+        self.bin_textbox = ctk.CTkTextbox(self.binary)                                     # Text box
         self.bin_textbox.pack(side="top", fill="both", expand=True)
         self.bin_textbox.configure(state="disabled")
 
@@ -556,8 +516,6 @@ class PipelineWindow(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
 
-        self.color_map = {}  # Dictionary to store color for each instruction
-
         pip_headers = ["Fetch", "Decode", "Execute"]
 
         # Create header labels on the left
@@ -575,7 +533,6 @@ class PipelineWindow(ctk.CTkFrame):
         # Configure grid weights for resizing
         for i in range(3):
             self.grid_rowconfigure(i, weight=1)
-
         for j in range(21):
             self.grid_columnconfigure(j, weight=1)
 
@@ -586,7 +543,6 @@ class PipelineWindow(ctk.CTkFrame):
         if 0 <= row <= 2 and 1 <= col <= 20:
             entry_widget = self.grid_slaves(row=row, column=col)[0]
             return entry_widget.get(), entry_widget.cget('fg_color')
-        
         else:
             return None
 
@@ -636,7 +592,7 @@ class PipelineWindow(ctk.CTkFrame):
     
     def generate_random_color(self):
         '''Generate a random hexadecimal color code.'''
-        return "#{:02x}".format(random.randint(0x40, 0x80))+"{:02x}".format(random.randint(0x40, 0x80))+"{:02x}".format(random.randint(0x40, 0x80))
+        return "#{:02x}".format(random.randint(0x40, 0x70))+"{:02x}".format(random.randint(0x40, 0x70))+"{:02x}".format(random.randint(0x40, 0x70))
 
 
 
@@ -695,7 +651,7 @@ class Toolbar(ctk.CTkFrame):
                 for j in range(20):
                     pipeline_window.set_cell(i, j+1, "", "#343638")
 
-            # 0Updates button states
+            # Updates button states
             master.toolbar.assemble_button.configure(self, fg_color="forestgreen", state="normal", text="Assemble")
             master.toolbar.run_button.configure(self, fg_color="gray", state="disabled", text="Run")
             master.toolbar.runsbs_button.configure(self, fg_color="gray", state="disabled", text="Run Step By Step", hover_color="darkgreen")
@@ -730,12 +686,11 @@ class Toolbar(ctk.CTkFrame):
                 master.toolbar.runsbs_button.configure(self, fg_color="forestgreen", text="Step->")
                 self.state = 2
             else:
-
                 register_window.set_step(max(self.state-3, 0))
 
                 # Executes a step
-
                 if self.state != len(master.toolbar.line_update) + 2:
+
                     # Update the Pipeline
                     if master.toolbar.line_update[self.state - 2] == -1:
                         pipeline_window.iter_pip("---")
@@ -744,10 +699,10 @@ class Toolbar(ctk.CTkFrame):
                 
                     # Wait 2 more steps because instructions must go through the pipeline before being executed
                     if self.state > 3:
+
                         # Update the Register
                         if master.toolbar.register_update[self.state - 4] != []:
                             register_window.set_register_values(master.toolbar.register_update[self.state - 4][0], master.toolbar.register_update[self.state - 4][1])
-
                         # Update the User Mem
                         if master.toolbar.memory_update[self.state - 4] != []:
                             mem_and_bin.user_mem_set("0x"+format(master.toolbar.memory_update[self.state - 4][0], "08x"), master.toolbar.memory_update[self.state - 4][1])
@@ -785,13 +740,13 @@ class Toolbar(ctk.CTkFrame):
                 self.state = 2  # Corresponds to 0 executions
 
             # Update register values
-            for i in range(9):
+            register_window.set_step(len(master.toolbar.line_update) - 1)
+            for i in range(8):
                 register_window.set_register_values(i, virtual_register[i])
-            nzvc = '0000'
             for e in master.toolbar.register_update:
                 if e != [] and e[0] == 8:
                     nzvc = e[1]
-                register_window.set_register_values(8, nzvc)
+                    register_window.set_register_values(8, nzvc)
 
             # Update User RAM values
             for i in range(0, len(virtual_memory), 2):
@@ -820,6 +775,7 @@ class Toolbar(ctk.CTkFrame):
             # Fetching the code
             code = asm_window.get_text_content()
             master.toolbar.split_instructions, master.toolbar.bitstream, master.toolbar.register_update, master.toolbar.line_update, master.toolbar.memory_update, master.toolbar.error = instruction_translation(code)
+            print(instruction_translation(code))
 
             # Funny text variations for when user tries to assemble empty code
             variations = ["sipping a coconut", "catching some rays", "in a hammock", "on a beach", "snorkeling", "in a tropical paradise", "surfing the clouds",
@@ -861,7 +817,7 @@ class Toolbar(ctk.CTkFrame):
                                 mem_and_bin.code_mem_set(master.toolbar.line_update[l] - offset, master.toolbar.bitstream[master.toolbar.line_update[l]], master.toolbar.split_instructions[master.toolbar.line_update[l]])
                             
                             # Display the instruction in the binary window
-                            mem_and_bin.insert_bin(master.toolbar.bitstream[master.toolbar.line_update[l]])
+                            mem_and_bin.insert_bin(master.toolbar.bitstream[master.toolbar.line_update[l]] + "\n")
                         else:
                             offset += 1
                     mem_and_bin.code_mem_set(master.toolbar.line_update[l] - offset +1, master.toolbar.bitstream[master.toolbar.line_update[l]], 'BNE ENDENDEND')
@@ -876,34 +832,26 @@ class Toolbar(ctk.CTkFrame):
 
         self.download_button = ctk.CTkButton(self, text="Download Code", width=100, height=10, font = ("Arial", 11), corner_radius=25, fg_color="gray", hover_color="darkgreen", state="disabled", command=download_code)
         self.download_button.pack(side="right", padx=5)
-
         self.connect_button = ctk.CTkButton(self, text="Connect Board", width=100, height=10, font = ("Arial", 11), corner_radius=25, fg_color="forestgreen", hover_color="darkgreen", command=connect_board)
         self.connect_button.pack(side="right")
-
         self.reset_button = ctk.CTkButton(self, text="Reset", width=100, height=10, font = ("Arial", 11), corner_radius=25, fg_color="forestgreen", hover_color="darkgreen", command=reset)
         self.reset_button.pack(side="right", padx=5)
-
         self.stop_button = ctk.CTkButton(self, text="STOP", width=100, height=10, font = ("Arial", 11), corner_radius=25, fg_color="gray", hover_color="maroon", state="disabled", command=stop)
         self.stop_button.pack(side="right")
-
         self.runsbs_button = ctk.CTkButton(self, text="Run Step By Step", width=100, height=10, font = ("Arial", 11), corner_radius=25, fg_color="gray", hover_color="darkgreen", state="disabled", command=run_step_by_step)
         self.runsbs_button.pack(side="right", padx=5)
-
         self.run_button = ctk.CTkButton(self, text="Run", width=100, height=10, font = ("Arial", 11), corner_radius=25, fg_color="gray", hover_color="darkgreen", state="disabled", command=run)
         self.run_button.pack(side="right")
-
         self.assemble_button = ctk.CTkButton(self, text="Assemble", width=100, height=10, font = ("Arial", 11), corner_radius=25, fg_color="forestgreen", hover_color="darkgreen", command=assemble)
         self.assemble_button.pack(side="right", padx=5)
-
         self.file_menu = FileMenu(self, asm_window)
         self.file_menu.pack(side="left")
-
         self.settings_menu = SettingsMenu(self)
         self.settings_menu.pack(side="left")
-
         self.help_menu = HelpMenu(self)
         self.help_menu.pack(side="left")
 
+        # Variable keeping track of the running state (assembled? runsbs? run? which step?)
         self.state = 0
 
         self.split_instruction, self.line_instruction, self.bitstream, self.register_update, self.line_update, self.memory_update, self.error = [], [], [], [], [], [], []
@@ -1143,4 +1091,5 @@ class SimulatorDocumentation(ctk.CTkToplevel):
 
 app = EnseaSimulator()
 app.mainloop()
+
 
