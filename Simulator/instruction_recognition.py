@@ -20,6 +20,7 @@ def instruction_recognition(instruction:str,line:int,simu='OFF'):
     memory_update=[]
     line_update=line+1
     error_simu=[]
+    sequence_break=False
 
     if  instruction[0]!='b'and instruction[0]!='B' :
         if instruction.find(':')==-1:
@@ -55,13 +56,13 @@ def instruction_recognition(instruction:str,line:int,simu='OFF'):
     elif simu=='ON':
         if n>0:
             if instruction.count(':')==1:
-                return register_update,line_update,memory_update,error_simu
+                return register_update,sequence_break,line_update,memory_update,error_simu
             elif instruction[0:4]=='ADD ' or instruction[0:4]=='add ':
                 register_update=ADD_simu(instruction,line)
             elif instruction[0:4]=='AND ' or instruction[0:4]=='and ':
                 register_update=AND_simu(instruction,line)
             elif instruction[0]=='B' or instruction[0]=='b':
-                line_update,error=B_instruct_simu(instruction,line)
+                line_update,sequence_break,error=B_instruct_simu(instruction,line)
             elif instruction[0:4]=='CMP ' or instruction[0:4]=='cmp ':
                 register_update,error_simu=CMP_simu(instruction,line)
             elif instruction[0:4]=='EOR ' or instruction[0:4]=='eor ':
@@ -78,5 +79,5 @@ def instruction_recognition(instruction:str,line:int,simu='OFF'):
                 register_update,error_simu=SUB_simu(instruction,line)
 
 
-        return register_update,line_update,memory_update,error_simu
+        return register_update,sequence_break,line_update,memory_update,error_simu
     
