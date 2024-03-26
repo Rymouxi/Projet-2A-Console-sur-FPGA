@@ -76,9 +76,7 @@ def instruction_translation(ASM:str):
         memory_update.append([])
         memory_update.append([])
         
-    #for line in line_update:
-    #    if line in label_table:
-    #        line_update.remove(line)
+    line_update, register_update, memory_update = label_remove(split_instruction, register_update, line_update, memory_update)
 
     return split_instruction,bitstream,register_update,line_update,memory_update,error
 
@@ -91,3 +89,18 @@ def is_instruction_b_instruct(instruction):
         if instruction[:4]=='BNE' or instruction[:4]=='BEQ' or instruction[:4]=='BGE' or instruction[:4]=='BLT' or instruction[:4]=='BGT' or instruction[:4]=='BLE':
             result = True
     return result
+
+def label_remove(split_instruction, register_update, line_update, memory_update):
+    
+    line_update2 = []
+    register_update2 = []
+    memory_update2 = []
+
+    for i in range(len(line_update) - 1):
+        if ":" not in split_instruction[line_update[i]]:
+            line_update2.append(line_update[i])
+            register_update2.append(register_update[i])
+            memory_update2.append(memory_update[i])
+    line_update2.append(line_update[i+1])
+
+    return line_update2, register_update2, memory_update2

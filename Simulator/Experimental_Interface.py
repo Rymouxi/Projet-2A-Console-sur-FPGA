@@ -29,7 +29,6 @@ from instruction_translation import *
 
 # bug highlight when empty lines
 
-# Pipeline décalé
 
 
 
