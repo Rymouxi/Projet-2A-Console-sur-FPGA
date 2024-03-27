@@ -726,7 +726,7 @@ class Toolbar(ctk.CTkFrame):
                     self.state += 1
 
                     # Higlight the next line in ASM window
-                    next_line = asm_window.correct_line(master.toolbar.line_update[self.state - 3])  # Corrects for eventual empty lines
+                    next_line = asm_window.correct_line(master.toolbar.line_update[self.state - 4] + 1)  # Corrects for eventual empty lines
                     asm_window.highlight_syntax(None, [], next_line)
 
                 # End of the step-by-step
