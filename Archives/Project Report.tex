@@ -1,0 +1,383 @@
+\documentclass{article}
+\usepackage{geometry}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{hyperref} % Required for the links
+\usepackage{inconsolata}
+\usepackage{xcolor}
+\usepackage{listings} % Required to show code lines
+
+\geometry{a4paper, top=1.0in, left=0.75in ,bottom=1.44in, right=0.52in}
+
+%  Colors for code lines:
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codedeepturquoise}{rgb}{0,0.42,0.44}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{codeorange}{rgb}{1,0.53,0.11}
+\definecolor{codeblue}{rgb}{0,0,0.9}
+\definecolor{codered}{rgb}{0.79,0.113,0.113}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinelanguage{MyPython}{
+    keywords={def, True, False, and, or, in, not},
+    keywordstyle=\color{codeorange},
+    morekeywords={[2]while, for, if, else, elif,return},
+    keywordstyle={[2]\color{codepurple}},
+    morekeywords={[3]type,int,str,range,enumerate},%type color
+    keywordstyle={[3]\color{codered}},
+    morekeywords={[4]find,len,count,self,append,DecToBin,print,exit,format,index,isdigit},%Function colors
+    keywordstyle={[4]\color{codeblue}},
+    commentstyle={\color{codegray}},
+    morecomment=[l]{\#},
+    stringstyle=\color{codegreen},
+    morestring=[b]{'},
+    morestring=[b]{"},
+    numberstyle=\tiny\color{codedeepturquoise},
+    numbers=left,
+    frame=single,
+    breaklines=true,
+    showstringspaces=false,
+    sensitive=true,
+    basicstyle=\ttfamily\fontfamily{zi4}\selectfont,
+}
+\lstdefinelanguage{MyVHDL}{
+    keywords={ADD, AND, B, BGE, BLT, BGT, BLE, CMP, EOR, LDR, LSL, MOV, STR, SUB},
+    keywordstyle=\color{codeblue},
+    morekeywords={[2]while, for, if, else, elif,return},
+    keywordstyle={[2]\color{codepurple}},
+    morekeywords={[3]type,int,str,range,enumerate},%type color
+    keywordstyle={[3]\color{codered}},
+    morekeywords={[4]find,len,count,self,append,DecToBin,print,exit,format,index,isdigit},%Function colors
+    keywordstyle={[4]\color{codeblue}},
+    commentstyle={\color{codegray}},
+    morecomment=[l]{\#},
+    stringstyle=\color{codegreen},
+    morestring=[b]{'},
+    morestring=[b]{"},
+    numberstyle=\tiny\color{codedeepturquoise},
+    numbers=left,
+    frame=single,
+    breaklines=true,
+    showstringspaces=false,
+    sensitive=true,
+    basicstyle=\ttfamily\fontfamily{zi4}\selectfont,
+}
+\lstdefinelanguage{MyASM}{
+    keywords={ADD, AND, B, BGE, BLT, BGT, BLE, CMP, EOR, LDR, LSL, MOV, STR, SUB},
+    keywordstyle=\color{codeblue},
+    morekeywords={[2]R0,R1,R2,R3,R4,R5,R6,R7},
+    keywordstyle={[2]\color{codegreen}},
+    commentstyle={\color{codegray}},
+    morecomment=[l]{;},
+    numberstyle=\tiny\color{codedeepturquoise},
+    numbers=left,
+    frame=single,
+    breaklines=true,
+    showstringspaces=false,
+    sensitive=true,
+    basicstyle=\ttfamily\fontfamily{zi4}\selectfont,
+}
+% Links colors configuration
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=magenta,      
+    urlcolor=cyan}
+    
+%Macro Definition
+\newcommand{\code}[1]{\fontfamily{zi4}\texttt{#1}}
+\newcommand{\codebf}[1]{\textbf{\code{#1}}}
+\newcommand{\codeASM}[0]{\code{code\_ASM }}
+\newcommand{\n}[0]{\(\backslash\)n}
+
+% maketitle override to suppress the auto date
+\makeatletter
+\renewcommand{\@maketitle}{%
+  \newpage
+  \null
+  \vskip 2em%
+  \begin{center}%
+  \let \footnote \thanks
+    {\LARGE \@title \par}%
+    \vskip 1.5em%
+    {\large
+      \lineskip .5em%
+      \begin{tabular}[t]{c}%
+        \@author
+      \end{tabular}\par}%
+    \vskip 1em%
+  \end{center}%
+  \par
+  \vskip 1.5em}
+\makeatother
+
+
+
+
+\title{Project Report\\ASM IDE in Python for our VHDL-Programmed FPGA}
+\author{APPOURCHAUX Léo, BITAUD-CANOEN Laël, GABORIEAU Cyprien, JIN Clémentine,\\LATRECHE Loubna, OULAD ALI Rym, XIANG, Justine, YE Yumeng}
+
+\begin{document}
+\maketitle
+\author{With the help of KESSAL Lounis, LAROCHE Christian and MONCHAL Laurent}
+
+\tableofcontents
+
+
+
+
+
+
+\newpage
+\section{Project explanation}
+
+
+\newpage
+\section{Software}
+\subsection{Simulator}
+
+Let's consider the code we get from the UI is called \codeASM  and is a string containing raw code of ASM. 
+\subsubsection{Global structure}
+\subsubsection{Text slicing}
+\paragraph{}
+The very first step of this process is to reshape the data to be easily exploited. To do so we must take into account the fact that the interface is sending us some text in the shape of a string. What we need is a data table whose every argument is a string type instruction.
+
+\paragraph{Séparateur d'instruction:}
+To split our instructions, we use the separator '\n'. Le's take an example for the code we get:
+\begin{lstlisting}[language=MyPython]
+code_ASM="MOV R0,#10\nMOV R1,#5"
+\end{lstlisting}
+Here we have 2 instructions: \code{MOV~R0,\#10} and \code{MOV~R1,\#5} that we must separate. To do that we slice the str, cutting the \n and separating these instructions in an array in split\_instructions:
+\begin{lstlisting}[language=MyPython]
+def line_jump(codeASM):
+    split_instruction=[]
+    return split_instructions
+\end{lstlisting}
+
+\begin{lstlisting}[language=MyPython]
+def tamerere():
+    return yolo
+    type
+    27476
+index=code.find('\n') and this
+    #Allez
+\end{lstlisting}
+
+
+\subsubsection{Reconnaissance des instructions "Actions"}
+\subsubsection{Reconnaissance des registres}
+Every element of the instruction list is now starting by an action function, in order to recognize an action function (MOV, LDR ...) we put the instruction into a multi if condition checking the first 3 element of every instructions looking for a "MOV" for instance.
+\subsubsection{Reconnaissance des arguments de type nombre}
+\subsubsection{Simulation interne des registres}
+\subsubsection{Simulation interne de la mémoire}
+\subsubsection{Cas particulier des branchements}
+\paragraph{La reconnaissance de labels}
+\paragraph{Gestion du saut vers une ligne}
+\paragraph{Les B/BXX label}
+\subsubsection{Gestion des erreurs}
+\subsubsection{Génération d'un bitstream}
+
+\subsubsection{Tests}
+
+
+\paragraph{}
+
+
+\newpage
+\subsection{Interface}
+\subsubsection{Introduction}
+
+The interface of the simulator provides an ergonomic platform to code in ASM.\\
+Specific goals include creating a visually appealing user interface, providing accurate syntax and error highlighting, and establishing an environment conducive to learning the fundamental concepts of assembly language. The user should also be able to save or import code, connect a board and download code on it.
+
+\noindent \\Primary objectives of the interface are:
+
+\begin{itemize}
+  \item Create an ASM window in which we can read and write code.
+  \item Create a debugger to display all potential errors.
+  \item Create a register window to display register values.
+  \item Create memory windows to display where the code is stored and where the user can edit the RAM.
+  \item Create a pipeline in which we can see the instructions going through Fetch, Decode, and Execute.
+  \item Create a binary window in which we can read the binary corresponding to our code.
+  \item Create buttons to save, import, assemble, run, run step by step, reset, connect a board, and download code.
+  \item Provide documentation about the LCM3 and the simulator itself.
+  \item Have re-sizeable frames, light and dark themes, syntax highlighting, and a bit of colour.
+\end{itemize}
+
+
+\subsubsection{Modules Used}
+To code the interface, we used several modules:
+
+\begin{itemize}
+    \item \textbf{Tkinter}: The graphical user interface is built using Tkinter, a popular GUI toolkit used in Python.
+    \item \textbf{CustomTkinter}: An extension of Tkinter with a more modern look.
+    \item \textbf{Random}: The classic random library to pick random numbers or elements.
+    \item \textbf{Webbrowser}: Useful to open an online documentation of the ASM LCM3.
+    
+\end{itemize}
+
+
+\subsubsection{Interface Architecture}
+
+The interface code is Object-Oriented. There's a class for every CustomTkinter object (every frame/button/etc.).
+
+\paragraph{Toolbar Functionality}
+The toolbar serves as a central hub for quick access to essential functionalities. Here's an overview of the core toolbar functions:
+
+\paragraph{Toolbar Functionality}
+The toolbar serves as a central hub for quick access to essential functionalities. Here's an overview of the core toolbar functions:
+\begin{itemize}
+  \item \textbf{File Management:} The file-related functions include creating a new file, importing code from an external file, saving the current code, and saving code with a new filename. These actions ensure efficient code management within the simulator.
+
+  \item \textbf{Theme Customization:} Users can toggle between dark and light themes using the "Settings" menu in the toolbar. This feature enhances the user experience by accommodating different preferences for visual appearance.
+
+  \item \textbf{Help and Documentation:} The toolbar provides quick access to documentation, including both simulator-specific help and external LCM3 documentation. This facilitates learning and troubleshooting.
+
+  \item \textbf{Simulation Controls:} Functions for assembling code, running simulations (both step-by-step and continuous), and resetting the simulator are conveniently accessible in the toolbar. These controls streamline the simulation process.
+\end{itemize}
+
+\paragraph{Menu Structure}
+The menu structure is organized logically, with distinct menus for file operations, settings, and help. This categorization enhances the discoverability of functions and ensures an intuitive user experience.
+
+\paragraph{Code Assembly Area}
+The main area of the interface is dedicated to code assembly. Users can write LCM3 assembly code in this section, with each instruction on a separate line. The code assembly area employs a simple and clean text editor interface for ease of use.
+
+\paragraph{Memory and Register Displays}
+Real-time updates on memory contents and register values are prominently displayed. These sections provide users with insights into the evolving state of the program during execution. Clear and organized representations of data contribute to a better understanding of program behavior.
+
+\paragraph{Pipeline Simulation}
+The pipeline simulation section illustrates the step-wise execution of instructions, including fetching, decoding, and execution phases. This dynamic visualization aids users in comprehending the flow of instructions through the simulator's pipeline.
+
+\paragraph{Buttons and Controls}
+Function-specific buttons, such as "Assemble," "Run," and "Step ->," are strategically placed for accessibility. These controls are responsive to the current state of the simulation, ensuring a seamless user experience.
+
+\paragraph{Overall Architecture}
+The interface architecture follows a modular design, with distinct components for each major function. This modularity enhances maintainability and facilitates future expansions or updates to the simulator. The use of the Tkinter library in Python provides a robust foundation for building the graphical user interface.
+
+The combination of these design elements results in an intuitive, efficient, and visually coherent interface for the LCM3 simulator, supporting effective code development and simulation.
+
+\subsubsection{Key Features}
+The LCM3 simulator encompasses the following key features:
+\begin{itemize}
+    \item \textbf{Code Assembly:} Users can write code in the LCM3 assembly language directly within the user interface. The simulator provides the capability to assemble this code, thereby generating the corresponding executable binary.
+
+  \item \textbf{Step-by-Step Simulation:} The step-by-step simulation feature allows users to execute their code incrementally. This facilitates debugging by enabling a detailed inspection of each instruction during execution.
+
+  \item \textbf{Memory and Register Management:} The interface displays real-time updates on the state of memory and registers throughout program execution. This enables users to track and understand the evolution of data during execution.
+
+  \item \textbf{Simulation Pipeline:} The pipeline simulation illustrates the various stages of instruction during execution, including Fetch, Decode, and Execute. This provides a dynamic visualization of the instruction flow through the pipeline.
+
+  \item \textbf{Customizable Themes:} Users can personalize the simulator's appearance by choosing between a dark and light theme. This enhances the user experience by allowing visual adaptation based on individual preferences.
+\end{itemize}
+These features offer a comprehensive platform for developing, debugging, and learning the LCM3 assembly language.
+
+
+
+
+\newpage
+\subsection{Connection to the board}
+\paragraph{}\textbf{Goal of having a connection:} To test the user's code behaviour on the simulator, it is necessary to establish a connection between the simulator and the board. A connection allows the communication between the IDE and the board: sending and receiving of information.
+
+\paragraph{}\textbf{Connection process :} The connection process is designed to be user-friendly, easy to use and flexible. The graphical user interface (GUI) provides a pop-up when the user clicks on "connect board". This pop-up allows the user to input specific parameters for establishing the serial connection. This includes selecting the Communication (COM) port, baudrate, timeout, parity, stopbits, and bytesize. These parameters are critical for configuring the serial communication protocol between the simulator and the Arty A7 board.
+
+We use the \texttt{tkinter} library to create an interactive interface, making it accessible for users. 
+\paragraph{The parameters to configure and send to the board :}
+ \begin{itemize}
+    \item \textbf{Com Ports:} The available COM ports are dynamically retrieved using the \texttt{serial.tools.list\_ports} library. Users are presented with a list of available COM ports in the connection pop-up, allowing them to select the appropriate port for communication. In the absence of any available COM ports, a notification is displayed, indicating that the connection is not possible until a valid port is detected.
+
+    \item \textbf{Baudrate:} The baudrate represents the speed of data transmission between the simulator and the Arty A7 board. Users can select from a range of predefined baudrates, such as 300, 1200, 2400, 4800, 9600, 14400, 19200, 38400, 57600, and 115200. The default baudrate is set to 9600, providing a balanced option for various communication scenarios.
+
+    \item \textbf{Timeout:} The timeout parameter defines the maximum time the simulator should wait for data from the Arty A7 board. Users can customize this value based on the specific requirements of their application. The default timeout is set to 1, offering a reasonable balance between responsiveness and efficiency.
+
+    \item \textbf{Parity:} Parity is a mechanism for error-checking during data transmission. Users can select from options including 'None,' 'Even,' 'Odd,' 'Mark,' and 'Space.' The default parity is set to 'None,' providing a starting point for users who may not require parity checking.
+
+    \item \textbf{Stopbit:} Stopbits indicate the number of bits used to signal the end of a data byte. Users can choose between 0 and 1 stopbit options. The default stopbit is set to 0, which represents one stop bit.
+
+    \item \textbf{Bytesize:} Bytesize refers to the number of data bits in each character. Users can choose from values such as 8, 16, and 32. The default bytesize is set to 8, a common and widely supported configuration for serial communication.
+
+\end{itemize}
+
+
+The \texttt{connect\_board} function orchestrates the creation of a \texttt{serial.Serial} object, incorporating the user-defined parameters. This object encapsulates the serial connection, serving as the communication link between the simulator and the Arty A7 board. Once the user finalizes their selections, the pop-up closes, leaving the simulator connected and ready for interaction.
+
+The available COM ports are retrieved using the \texttt{serial.tools.list\_ports} library, ensuring that users can select from the available options. If there is no COM port available, it will be indicated on the connection pop-up. Therefore, the connection won't be possible.
+\paragraph{}\textbf{Disconnect Management :}The code also integrates a disconnect mechanism, allowing users to gracefully terminate the serial connection when needed. This feature is crucial for scenarios where reconfiguration or adjustment of the simulation parameters is required without restarting the entire application.
+
+
+
+
+\newpage
+\section{FPGA}
+\subsection{Fetch}
+\subsection{Decode}
+\subsection{Execute}
+\subsection{UAL}
+\subsection{ROM-RAM}
+
+\newpage
+\section{Snake Game Coding}
+\subsection{Introduction}
+In this part, the goal was to develop the classic Snake game using ASM assembly language while adhering to strict constraints on the use of LCM3 instructions. To address these constraints, some foundational functions, including division, multiplication, and modulo, were pre-developed to simplify the game development.
+
+\subsection{Constraints and Preparation}
+ By anticipating essential arithmetic operations, some basic functions such as division, multiplication and modulo, were created in advance. These functions are crucial for managing positions, movement, and collisions in the Snake game.
+
+\subsubsection{Constraints of LCM3 Instructions}
+\subsubsection{Example: Division Function}
+The division function was implemented using an iterative subtraction approach (Euclidean division). This method involves repetitively subtracting the divisor from the dividend until the dividend becomes 0. And at the same time, we keep the quotient as a counter. This approach ensures obtaining a result of integer division.\\
+
+
+\newline
+\begin{lstlisting}[language={[ARM]Assembler}, frame=single]
+; Division function excerpt
+
+DIVIDE_LOOP:
+    CMP R3, #0
+    BEQ DIVIDE_DONE
+    CMP R3, R2
+    BNE DIVIDE_INCREMENT
+    SUB R3, R3, R2
+    ADD R0, R0, #1
+    B DIVIDE_LOOP
+DIVIDE_INCREMENT:
+    ADD R0, R0, #1
+    B DIVIDE_DONE
+DIVIDE_DONE:
+DIVIDE_ERROR:
+\end{lstlisting}
+\begin{enumerate}
+    \item \textbf{Initialization}:
+    \begin{itemize}
+        \item \texttt{DIVIDE\_LOOP} is the entry point for the division function.
+        \item \texttt{CMP R3, #0}: Compares the dividend (\texttt{R3}) with zero to check if the dividend is already zero.
+        \item \texttt{BEQ DIVIDE\_DONE}: Branches to \texttt{DIVIDE\_DONE} if the dividend is zero, indicating the division is complete.
+        \item \texttt{CMP R3, R2}: Compares the dividend (\texttt{R3}) with the divisor (\texttt{R2}).
+        \item \texttt{BNE DIVIDE\_INCREMENT}: Branches to \texttt{DIVIDE\_INCREMENT} if the dividend is not equal to the divisor.
+    \end{itemize}
+
+    \item \textbf{Subtraction Loop}:
+    \begin{itemize}
+        \item \texttt{SUB R3, R3, R2}: Subtracts the divisor from the dividend.
+        \item \texttt{ADD R0, R0, #1}: Increments the quotient (\texttt{R0}) to keep track of the number of subtractions.
+        \item \texttt{B DIVIDE\_LOOP}: Branches back to the beginning of the loop to repeat the subtraction process.
+    \end{itemize}
+
+    \item \textbf{Increment Loop}:
+    \begin{itemize}
+        \item \texttt{DIVIDE\_INCREMENT}: If the dividend is not equal to the divisor, the code branches here.
+        \item \texttt{ADD R0, R0, #1}: Increments the quotient to account for the remaining portion of the dividend.
+        \item \texttt{B DIVIDE\_DONE}: Branches to \texttt{DIVIDE\_DONE} to complete the division.
+    \end{itemize}
+
+    \item \textbf{Completion and Error Handling}:
+    \begin{itemize}
+        \item \texttt{DIVIDE\_DONE}: Marks the end of the division function.
+        \item \texttt{DIVIDE\_ERROR}: Placeholder for error handling.
+    \end{itemize}
+\end{enumerate}
+
+\end{document}
+
+
+
+
