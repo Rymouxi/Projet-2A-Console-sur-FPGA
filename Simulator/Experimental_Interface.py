@@ -172,8 +172,7 @@ class ASMWindow(ctk.CTkFrame):
 
         # Define patterns and corresponding tags
         patterns = {
-            " R": "Register",
-            " r": "register",
+            " R": "Register", " r": "register",
             "[\\[\\]]": "bracket",
             ",": "comma",
             "#": "hash",

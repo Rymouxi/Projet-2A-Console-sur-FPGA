@@ -96,11 +96,15 @@ def label_remove(split_instruction, register_update, line_update, memory_update)
     register_update2 = []
     memory_update2 = []
 
+    i = None  # !
     for i in range(len(line_update) - 1):
         if ":" not in split_instruction[line_update[i]]:
             line_update2.append(line_update[i])
             register_update2.append(register_update[i])
             memory_update2.append(memory_update[i])
-    line_update2.append(line_update[i+1])
+    if i:  # !
+        line_update2.append(line_update[i+1])
+
+    # ! Important when there is no bitstream, as "i" would not exist
 
     return line_update2, register_update2, memory_update2
