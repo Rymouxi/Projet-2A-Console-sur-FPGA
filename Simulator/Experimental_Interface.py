@@ -25,8 +25,7 @@ from instruction_translation import *
 
 # Breakpoints
 
-# bug highlight when empty lines
-
+# bug highlight when label (the highlight jumps on the label just after instead of the the instr beforehand)
 
 
 
@@ -256,6 +255,26 @@ class ASMWindow(ctk.CTkFrame):
     def insert_content(self, content):
         '''Inserts the content in the text box.'''
         return self.textbox.insert(tk.END, content)
+    
+
+    def correct_line(self, line_number: int):
+        '''Computes the real line pointed by 'Error' or 'Execute' from the simulator and the empty lines in the ASM window.'''
+
+        content = self.get_text_content().split('\n')  # Get the content of the text box and split it into lines
+        n = 0
+        real = 0
+
+        for line in content:
+            line = line.split(';')[0]  # Ignore comments
+            n += (1 if line.strip() or line.find(":")!=-1 else 0)
+            real += 1
+            if n == line_number:  # Check if we reached the desired line number
+                return real
+
+        # If the desired line number is not found, return -1 or raise an exception
+        return -1
+
+
     
 
 
@@ -707,7 +726,8 @@ class Toolbar(ctk.CTkFrame):
                     self.state += 1
 
                     # Higlight the next line in ASM window
-                    asm_window.highlight_syntax(None, [], master.toolbar.line_update[self.state - 3])
+                    next_line = asm_window.correct_line(master.toolbar.line_update[self.state - 3])  # Corrects for eventual empty lines
+                    asm_window.highlight_syntax(None, [], next_line)
 
                 # End of the step-by-step
                 
@@ -793,8 +813,9 @@ class Toolbar(ctk.CTkFrame):
                 # Display error in debugger
                 lines = []
                 for i in range(len(master.toolbar.error)//2):
-                    debugger_window.insert_content("%s at line %d\n" % (master.toolbar.error[2*i], master.toolbar.error[2*i+1]+1), "red")
-                    lines.append(master.toolbar.error[2*i+1]+1)
+                    error_line = asm_window.correct_line(master.toolbar.error[2*i+1]+1)  # Corrects for eventual empty lines
+                    debugger_window.insert_content("%s at line %d\n" % (master.toolbar.error[2*i], error_line), "red")
+                    lines.append(error_line)
 
                 # Highlight lines with errors
                 asm_window.highlight_syntax(None, lines)
