@@ -32,9 +32,13 @@ from instruction_translation import *
 
 
 
+
+
 # ---------- Variables ---------- #
 
 file_path = None
+
+
 
 
 
@@ -97,7 +101,9 @@ class EnseaSimulator(ctk.CTk):
 
 
 
-# ---------- ASM Window ---------- #
+
+
+# ---------- ASM Code Window ---------- #
 
 class ASMWindow(ctk.CTkFrame):
     def __init__(self, master):
@@ -276,7 +282,7 @@ class ASMWindow(ctk.CTkFrame):
         return -1
 
 
-    
+
 
 
 
@@ -288,13 +294,29 @@ class DebuggerWindow(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
 
+        def update_line_numbers(event=None):
+            '''Updates the view of the line counter to sync it with the textbox.'''
+
+            textbox_scroll_fraction = self.textbox.yview()[0]      # Get the current vertical scrollbar position of the textbox
+            self.line_count.yview_moveto(textbox_scroll_fraction)  # Set the vertical scrollbar position of the line counter to match the textbox
+            self.after(10, update_line_numbers)                    # Schedule the function to run again after 10 milliseconds
+
+
         self.frame = ctk.CTkFrame(self, corner_radius=0)                                # Object Frame
         self.frame.pack(side="top", fill="both", expand=True)
         self.title = ctk.CTkLabel(self.frame, text="Debugger", bg_color="transparent")  # Title
         self.title.pack(side="top", fill="x")
-        self.textbox = ctk.CTkTextbox(self.frame)                                       # Debugger text box
-        self.textbox.pack(side="top", fill="both", expand=True)
+        self.textbox_frame = ctk.CTkFrame(self.frame, corner_radius=0)                         # Frame containing the ASM window and the line numbers
+        self.textbox_frame.pack(side="top", fill="both", expand=True)
+        self.line_count = ctk.CTkTextbox(self.textbox_frame, width=20, text_color="#C0C0C0", fg_color="#404040", scrollbar_button_hover_color="#404040", scrollbar_button_color="#404040")
+        self.line_count.pack(side="left", fill="both", expand=False)
+        self.textbox = ctk.CTkTextbox(self.textbox_frame)                                       # Debugger text box
+        self.textbox.pack(side="right", fill="both", expand=True)
         self.textbox.configure(state="disabled")
+
+        # Set the first number on the line counter and start to update the view
+        update_line_numbers()
+        self.update_line_count()
     
 
     def delete_content(self):
@@ -311,6 +333,20 @@ class DebuggerWindow(ctk.CTkFrame):
         self.textbox.configure(state="normal")
         self.textbox.insert(tk.END, content)
         self.textbox.configure(state="disabled", text_color=color)
+
+
+    def update_line_count(self, event=None):
+        '''Updates the content of the line counter widget with line numbers.'''
+
+        line_count = int(self.textbox.index('end-1c').split('.')[0])        # Get the number of lines in the textbox
+        line_numbers = '\n'.join(str(i) for i in range(1, line_count + 1))  # Generate line numbers
+        self.line_count.configure(state="normal")                           # Make text editable
+        self.line_count.delete(1.0, tk.END)                                 # Clear previous content
+        self.line_count.insert(1.0, line_numbers)                           # Insert new line numbers
+        self.line_count.configure(state="disabled")                         # Make text disabled again
+        self.line_count.configure(width=34+7*math.floor(math.log10(int(line_numbers.splitlines()[-1]))))  # Sets an appropriate width for the frame
+
+
 
 
 
@@ -407,6 +443,8 @@ class RegisterWindow(ctk.CTkFrame):
     def set_step(self, value:int):
         '''Changes the step number displayed.'''
         self.step_counter_value.configure(text=str(value))
+
+
 
 
 
@@ -526,6 +564,8 @@ class MemAndBin(ctk.CTkTabview):
 
 
 
+
+
 # ---------- Pipeline window ---------- #
 
 class PipelineWindow(ctk.CTkFrame):
@@ -615,6 +655,8 @@ class PipelineWindow(ctk.CTkFrame):
 
 
 
+
+
 # ---------- Toolbar ---------- #
 
 class Toolbar(ctk.CTkFrame):
@@ -642,6 +684,8 @@ class Toolbar(ctk.CTkFrame):
 
             # Empties debugger
             master.debugger_window.delete_content()
+            # Update the line count in the Debugger
+            debugger_window.update_line_count()
 
             # Empties registers
             for i in range(8):
@@ -688,6 +732,11 @@ class Toolbar(ctk.CTkFrame):
             master.toolbar.stop_button.configure(self, fg_color="gray", state="disabled")
             master.toolbar.assemble_button.configure(self, fg_color="forestgreen", state="normal")
             self.state = 0
+
+            # Display success message in the Debugger
+            debugger_window.insert_content("Execution Aborted\n", "lime")
+            # Update the line count in the Debugger
+            debugger_window.update_line_count()
 
 
         def run_step_by_step():
@@ -740,8 +789,10 @@ class Toolbar(ctk.CTkFrame):
                     master.toolbar.assemble_button.configure(self, fg_color="forestgreen", state="normal")
                     self.state = 0
 
-                    # Display success message in debugger
+                    # Display success message in the Debugger
                     debugger_window.insert_content("Run Finished\n", "lime")
+                    # Update the line count in the Debugger
+                    debugger_window.update_line_count()
 
 
         def run():
@@ -777,8 +828,10 @@ class Toolbar(ctk.CTkFrame):
                     pipeline_window.iter_pip(master.toolbar.split_instructions[e][:3])
             self.state = 0
 
-            # Display success message in debugger
+            # Display success message in the Debugger
             debugger_window.insert_content("Run Finished\n", "lime")
+            # Update the line count in the Debugger
+            debugger_window.update_line_count()
 
 
         def assemble():
@@ -843,6 +896,9 @@ class Toolbar(ctk.CTkFrame):
                 # Enables buttons Run and RSBS
                 master.toolbar.run_button.configure(self, fg_color="forestgreen", state="normal")
                 master.toolbar.runsbs_button.configure(self, fg_color="forestgreen", state="normal")
+
+            # Update the line count in the Debugger
+            debugger_window.update_line_count()
         
 
         self.download_button = ctk.CTkButton(self, text="Download Code", width=100, height=10, font = ("Arial", 11), corner_radius=25, fg_color="gray", hover_color="darkgreen", state="disabled", command=download_code)
@@ -870,6 +926,8 @@ class Toolbar(ctk.CTkFrame):
         self.state = 0
 
         self.split_instruction, self.line_instruction, self.bitstream, self.register_update, self.line_update, self.memory_update, self.error = [], [], [], [], [], [], []
+
+
 
 
 
@@ -976,6 +1034,8 @@ class FileMenu(ctk.CTkFrame):
 
 
 
+
+
 class SettingsMenu(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
@@ -991,6 +1051,8 @@ class SettingsMenu(ctk.CTkFrame):
         # Add items to the File menu
         self.menu.add_command(label="Dark mode", command=master.master.theme_toggle_dark)
         self.menu.add_command(label="Light mode", command=master.master.theme_toggle_light)
+
+
 
 
 
@@ -1019,6 +1081,8 @@ class HelpMenu(ctk.CTkFrame):
         self.menu.add_command(label="This Simulator Documentation", command=SimulatorDocumentation)
         self.menu.add_separator()
         self.menu.add_command(label="LCM3 Documentation", command=help_lcm3_docu)
+
+
 
 
 
@@ -1119,17 +1183,16 @@ class SimulatorDocumentation(ctk.CTkToplevel):
         "        AND CHECK THE LCM3 SYNTAX!\n\n\n\n"
         "\t\t\t\tHave a nice time coding!\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
 
-        self.title("ENSEA's Python LCM3 Simulator - Documentation")
+        self.title("ENSEA's Python LCM3 Simulator - Documentation")  # Title
         self.geometry("1200x800")
-
-        self.frame = ctk.CTkFrame(self)
+        self.frame = ctk.CTkFrame(self)                              # Frame
         self.frame.pack(fill="both", expand=True)
-
-        self.text_widget = ctk.CTkTextbox(self.frame, wrap="word")
+        self.text_widget = ctk.CTkTextbox(self.frame, wrap="word")   # Text box
         self.text_widget.pack(side="left", fill="both", expand=True)
-
         self.text_widget.insert(tk.END, self.text)
         self.text_widget.configure(state="disabled", font=("Helvetica",12))
+
+
 
 
 
