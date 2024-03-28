@@ -111,80 +111,6 @@ class ASMWindow(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
 
-        def highlight_syntax(event=None, errors=[], next_line:int=-1):
-            '''Update syntax highlighting.'''
-
-            # Define patterns and corresponding tags
-            patterns = {
-                ' R': 'Register', ' r': 'register',
-                '[\\[\\]]': 'bracket', ',': 'comma',
-                '#': 'hash', ';': 'comment',
-                'BNE ': 'label', 'bne ': 'label',
-                'BEQ ': 'label', 'beq ': 'label',
-                'BGE ': 'label', 'bge ': 'label',
-                'BLT ': 'label', 'blt ': 'label',
-                'BGT ': 'label', 'bgt ': 'label',
-                'BLE ': 'label', 'ble ': 'label',
-                'B ': 'label', 'b ': 'label'}
-
-            # Remove existing tags
-            for tag in patterns.values():
-                self.textbox.tag_remove(tag, '1.0', tk.END)
-
-            # Looking for labels
-
-            index = '1.0'
-            while True:
-                index = self.textbox.search(':', index, tk.END)
-                if not index:
-                    break
-                # Tag the text before the semicolon
-                start_index = self.textbox.index(f'{index} linestart')
-                end_index = self.textbox.index(f'{index}+1c')
-                self.textbox.tag_add('label', start_index, end_index)
-                index = f'{index}+1c'
-
-            # Colors for the rest of the syntax
-
-            # Iterate through the patterns and tag the text accordingly
-            for pattern, tag in patterns.items():
-                start_index = '1.0'
-                while True:
-                    start_index = self.textbox.search(pattern, start_index, tk.END, regexp=True)
-                    if not start_index:
-                        break
-
-                    # Compute end_index based on the pattern
-                    if pattern == ',' or pattern == '[\\[\\]]':                                   # tags of length 1
-                        end_index = self.textbox.index(f'{start_index}+1c')
-                    elif pattern == 'b ' or pattern == 'B ':
-                        start_index = self.textbox.index(f'{start_index} +2c')                    # Short loops 'B'
-                        end_index = self.textbox.index(f'{start_index} lineend')
-                    elif pattern == ' R' or pattern == ' r' or pattern == '#' or pattern == ';':  # tags of length > 1
-                        end_index = self.textbox.index(f'{start_index} lineend')
-                    else:
-                        start_index = self.textbox.index(f'{start_index} +4c')                    # Long Loops 'BXX'
-                        end_index = self.textbox.index(f'{start_index} lineend')
-
-                    # Tag and jump to next character
-                    self.textbox.tag_add(tag, start_index, end_index)
-                    start_index = f'{end_index}+1c'
-
-            # Error highlight
-            self.textbox.tag_remove('ERROR', '1.0', tk.END)
-            for e in errors:
-                start_index = f'{e}.0'
-                end_index = f'{e}.end'
-                self.textbox.tag_add('ERROR', start_index, end_index)
-
-            # Highlighting the next line to execute in step-by-step
-            self.textbox.tag_remove('next_line', '1.0', tk.END)
-            if next_line > 0:
-                start_index = f'{next_line}.0'
-                end_index = f'{next_line}.end'
-                self.textbox.tag_add('next_line', start_index, end_index)
-
-
         def update_btns_on_modif(self, event=None):
             '''Reenables the assembly button and turns off the others on code modification by the user.'''
 
@@ -194,27 +120,6 @@ class ASMWindow(ctk.CTkFrame):
                 master.master.master.master.toolbar.runsbs_button.configure(self, fg_color='gray', state='disabled', text='Run Step By Step', hover_color='darkgreen')
                 master.master.master.master.toolbar.assemble_button.configure(self, fg_color='forestgreen', state='normal', text='Assemble')
                 master.master.master.master.toolbar.state = 0
-
-
-        def update_line_count(event=None):
-            '''Updates the content of the line counter widget with line numbers.'''
-
-            line_count = int(self.textbox.index('end-1c').split('.')[0])        # Get the number of lines in the textbox
-            line_numbers = '\n'.join(str(i) for i in range(1, line_count + 1))  # Generate line numbers
-            self.line_count.configure(state='normal')                           # Make text editable
-            self.line_count.delete(1.0, tk.END)                                 # Clear previous content
-            self.line_count.insert(1.0, line_numbers)                           # Insert new line numbers
-            self.line_count.configure(state='disabled')                         # Make text disabled again
-            self.line_count.configure(width=35+7*math.floor(math.log10(int(line_numbers.splitlines()[-1]))))  # Sets an appropriate width for the frame
-
-            # Remove existing breakpoints
-            self.line_count.tag_remove("breakpoint", '1.0', tk.END)
-
-            # Adding new breakpoints
-            for line_number in self.break_list:
-                start_index = f"{line_number}.0"  # Calculate the index of the start of the line
-                end_index = f"{line_number}.end"  # Calculate the index of the end of the line
-                self.line_count.tag_add('breakpoint', start_index, end_index)  # Add the 'breakpoint' tag to highlight the line
 
 
         def update_line_view(event=None):
@@ -241,7 +146,7 @@ class ASMWindow(ctk.CTkFrame):
                 self.break_list.append(line_number)
 
             # Update the visuals
-            update_line_count()
+            self.update_line_count()
 
 
         # Frames
@@ -272,30 +177,110 @@ class ASMWindow(ctk.CTkFrame):
         self.break_list = []
 
         # Bind events to update syntax highlighting, buttons update, line counter update, and breakpoint placing/removing
-        self.textbox.bind('<KeyRelease>', highlight_syntax)
+        self.textbox.bind('<KeyRelease>', self.highlight_syntax)
         self.textbox.bind('<KeyRelease>', update_btns_on_modif)
-        self.textbox.bind('<KeyRelease>', update_line_count)
+        self.textbox.bind('<KeyRelease>', self.update_line_count)
         self.line_count.bind('<Button-1>', place_breakpoint)
 
         # Set the first number on the line counter and start to update the view
         update_line_view()
-        update_line_count()
+        self.update_line_count()
 
 
-    def get_text_content(self):
-        '''Gets the content of the text box.'''
-        return self.textbox.get('1.0', tk.END)
+    def update_line_count(self, event=None):
+        '''Updates the content of the line counter widget with line numbers.'''
+
+        line_count = int(self.textbox.index('end-1c').split('.')[0])        # Get the number of lines in the textbox
+        line_numbers = '\n'.join(str(i) for i in range(1, line_count + 1))  # Generate line numbers
+        self.line_count.configure(state='normal')                           # Make text editable
+        self.line_count.delete(1.0, tk.END)                                 # Clear previous content
+        self.line_count.insert(1.0, line_numbers)                           # Insert new line numbers
+        self.line_count.configure(state='disabled')                         # Make text disabled again
+        self.line_count.configure(width=35+7*math.floor(math.log10(int(line_numbers.splitlines()[-1]))))  # Sets an appropriate width for the frame
+
+        # Remove existing breakpoints
+        self.line_count.tag_remove("breakpoint", '1.0', tk.END)
+
+        # Adding new breakpoints
+        for line_number in self.break_list:
+            start_index = f"{line_number}.0"  # Calculate the index of the start of the line
+            end_index = f"{line_number}.end"  # Calculate the index of the end of the line
+            self.line_count.tag_add('breakpoint', start_index, end_index)  # Add the 'breakpoint' tag to highlight the line
 
 
-    def delete_content(self):
-        '''Deletes the content of the text box.'''
-        return self.textbox.delete('1.0', tk.END)
-    
+    def highlight_syntax(self, event=None, errors=[], next_line:int=-1):
+        '''Update syntax highlighting.'''
 
-    def insert_content(self, content):
-        '''Inserts the content in the text box.'''
-        return self.textbox.insert(tk.END, content)
-    
+        # Define patterns and corresponding tags
+        patterns = {
+            ' R': 'Register', ' r': 'register',
+            '[\\[\\]]': 'bracket', ',': 'comma',
+            '#': 'hash', ';': 'comment',
+            'BNE ': 'label', 'bne ': 'label',
+            'BEQ ': 'label', 'beq ': 'label',
+            'BGE ': 'label', 'bge ': 'label',
+            'BLT ': 'label', 'blt ': 'label',
+            'BGT ': 'label', 'bgt ': 'label',
+            'BLE ': 'label', 'ble ': 'label',
+            'B ': 'label', 'b ': 'label'}
+
+        # Remove existing tags
+        for tag in patterns.values():
+            self.textbox.tag_remove(tag, '1.0', tk.END)
+
+        # Looking for labels
+
+        index = '1.0'
+        while True:
+            index = self.textbox.search(':', index, tk.END)
+            if not index:
+                break
+            # Tag the text before the semicolon
+            start_index = self.textbox.index(f'{index} linestart')
+            end_index = self.textbox.index(f'{index}+1c')
+            self.textbox.tag_add('label', start_index, end_index)
+            index = f'{index}+1c'
+
+        # Colors for the rest of the syntax
+
+        # Iterate through the patterns and tag the text accordingly
+        for pattern, tag in patterns.items():
+            start_index = '1.0'
+            while True:
+                start_index = self.textbox.search(pattern, start_index, tk.END, regexp=True)
+                if not start_index:
+                    break
+
+                # Compute end_index based on the pattern
+                if pattern == ',' or pattern == '[\\[\\]]':                                   # tags of length 1
+                    end_index = self.textbox.index(f'{start_index}+1c')
+                elif pattern == 'b ' or pattern == 'B ':
+                    start_index = self.textbox.index(f'{start_index} +2c')                    # Short loops 'B'
+                    end_index = self.textbox.index(f'{start_index} lineend')
+                elif pattern == ' R' or pattern == ' r' or pattern == '#' or pattern == ';':  # tags of length > 1
+                    end_index = self.textbox.index(f'{start_index} lineend')
+                else:
+                    start_index = self.textbox.index(f'{start_index} +4c')                    # Long Loops 'BXX'
+                    end_index = self.textbox.index(f'{start_index} lineend')
+
+                # Tag and jump to next character
+                self.textbox.tag_add(tag, start_index, end_index)
+                start_index = f'{end_index}+1c'
+
+        # Error highlight
+        self.textbox.tag_remove('ERROR', '1.0', tk.END)
+        for e in errors:
+            start_index = f'{e}.0'
+            end_index = f'{e}.end'
+            self.textbox.tag_add('ERROR', start_index, end_index)
+
+        # Highlighting the next line to execute in step-by-step
+        self.textbox.tag_remove('next_line', '1.0', tk.END)
+        if next_line > 0:
+            start_index = f'{next_line}.0'
+            end_index = f'{next_line}.end'
+            self.textbox.tag_add('next_line', start_index, end_index)
+
 
     def correct_line(self, line_number: int):
         '''Computes the real line pointed by 'Error' or 'Execute' from the simulator and the empty lines in the ASM window.'''
@@ -313,6 +298,21 @@ class ASMWindow(ctk.CTkFrame):
 
         # If the desired line number is not found, return -1 or raise an exception
         return -1
+
+
+    def get_text_content(self):
+        '''Gets the content of the text box.'''
+        return self.textbox.get('1.0', tk.END)
+
+
+    def delete_content(self):
+        '''Deletes the content of the text box.'''
+        return self.textbox.delete('1.0', tk.END)
+    
+
+    def insert_content(self, content):
+        '''Inserts the content in the text box.'''
+        return self.textbox.insert(tk.END, content)
     
 
     def get_breakpoints(self):
@@ -841,47 +841,64 @@ class Toolbar(ctk.CTkFrame):
 
                     # Display success message in the Debugger
                     debugger_window.insert_content('Run Finished\n', 'lime')
-                    # Update the line count in the Debugger
-                    debugger_window.update_line_count()
+                    debugger_window.update_line_count()  # Update the line count in the Debugger
 
 
         def run():
             '''Runs the code in one go.\n
                Also allows to resume after a runsbs.'''
-            
-            # Update button states
-            master.toolbar.run_button.configure(self, fg_color='gray', state='disabled', text='Run')
-            master.toolbar.runsbs_button.configure(self, fg_color='gray', state='disabled', text='Run Step By Step', hover_color='darkgreen')
-            master.toolbar.stop_button.configure(self, fg_color='gray', state='disabled')
-            master.toolbar.assemble_button.configure(self, fg_color='forestgreen', state='normal')
+
+            # Get into the state of running
             if self.state < 2:
-                self.state = 2  # Corresponds to 0 executions
+                self.state = 2  # Corresponds to 0 executions (1decode or 2fetch)
+            
+            # Check if there are breakpoints
+            breaks = asm_window.get_breakpoints().copy()
+            while breaks != [] and breaks[0] < self.state - 2:  # Ignore all breakpoints before current step
+                breaks.pop(0)
+            if breaks != []:
+                while self.state - 3 < breaks[0]:  # Gets to the next breakpoint
+                    run_step_by_step()
+                debugger_window.insert_content('Breakpoint at line %d\nYou can execute step by step or resume the execution\n\n' % breaks[0], 'yellow')
+                debugger_window.update_line_count()  # Update the line count in the Debugger
+                
 
-            # Update register values
-            register_window.set_step(len(master.toolbar.line_update) - 1)
-            for i in range(8):
-                register_window.set_register_values(i, virtual_register[i])
-            for e in master.toolbar.register_update:
-                if e != [] and e[0] == 8:
-                    nzvc = e[1]
-                    register_window.set_register_values(8, nzvc)
+            # No breakpoints -> run everything
+            else:
 
-            # Update User RAM values
-            for i in range(0, len(virtual_memory), 2):
-                mem_and_bin.user_mem_set(virtual_memory[i], virtual_memory[i+1])
+                # Update button states
+                master.toolbar.run_button.configure(self, fg_color='gray', state='disabled', text='Run')
+                master.toolbar.runsbs_button.configure(self, fg_color='gray', state='disabled', text='Run Step By Step', hover_color='darkgreen')
+                master.toolbar.stop_button.configure(self, fg_color='gray', state='disabled')
+                master.toolbar.assemble_button.configure(self, fg_color='forestgreen', state='normal')
 
-            # Updates the Pipeline
-            for e in master.toolbar.line_update[max(-24, self.state - len(master.toolbar.line_update) - 2):]:
-                if e == -1:
-                    pipeline_window.iter_pip('---')
-                else:
-                    pipeline_window.iter_pip(master.toolbar.split_instructions[e][:3])
-            self.state = 0
+                # Update register values
+                register_window.set_step(len(master.toolbar.line_update) - 1)
+                for i in range(8):
+                    register_window.set_register_values(i, virtual_register[i])
+                for e in master.toolbar.register_update:
+                    if e != [] and e[0] == 8:
+                        nzvc = e[1]
+                        register_window.set_register_values(8, nzvc)
 
-            # Display success message in the Debugger
-            debugger_window.insert_content('Run Finished\n', 'lime')
-            # Update the line count in the Debugger
-            debugger_window.update_line_count()
+                # Update User RAM values
+                for i in range(0, len(virtual_memory), 2):
+                    mem_and_bin.user_mem_set(virtual_memory[i], virtual_memory[i+1])
+
+                # Updates the Pipeline
+                for e in master.toolbar.line_update[max(-24, self.state - len(master.toolbar.line_update) - 2):]:
+                    if e == -1:
+                        pipeline_window.iter_pip('---')
+                    else:
+                        pipeline_window.iter_pip(master.toolbar.split_instructions[e][:3])
+                self.state = 0
+
+                # Display success message in the Debugger
+                debugger_window.insert_content('Run Finished\n', 'lime')
+                debugger_window.update_line_count()  # Update the line count in the Debugger
+
+                # Resets the next line highlighting
+                asm_window.highlight_syntax()
 
 
         def assemble():
@@ -1046,7 +1063,8 @@ class FileMenu(ctk.CTkFrame):
                     # Pastes imported code into the text area
                     asm_window.delete_content()               # Clears the text area content
                     asm_window.insert_content(imported_code)  # Pastes the code
-                    asm_window.highlight_syntax()
+                    asm_window.highlight_syntax()             # Updates the colors after import
+                    asm_window.update_line_count()            # Updates the line counter after import
 
 
         def save():
