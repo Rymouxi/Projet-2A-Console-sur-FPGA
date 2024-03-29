@@ -4,7 +4,7 @@
 ; R2 <- 0x20000100 (size of the pile)
 MOV R0, #1
 LSL R0, R0, #29
-ADD R2, R2, R0
+MOV R2, R0
 ADD R0, #4
 ADD R2, #0x80
 ADD R2, #0x80
