@@ -23,10 +23,7 @@ import math
 
 from instruction_translation import *
 
-
-# Alows for instructions to be on the same line as a label
-
-
+# STOP should update the highlighting
 
 
 
@@ -163,15 +160,15 @@ class ASMWindow(ctk.CTkFrame):
         self.textbox.pack(side='right', fill='both', expand=True)
 
         # Configure tags for syntax highlighting
-        self.textbox.tag_config('label', foreground='#B02090')      # Red
+        self.textbox.tag_config('label', foreground='#B02090')      # Purple
         self.textbox.tag_config('Register', foreground='#509020')   # Green
         self.textbox.tag_config('register', foreground='#509020')   # Green
-        self.textbox.tag_config('comma', foreground='#B02080')      # Magenta
-        self.textbox.tag_config('bracket', foreground='#006000')    # Dark Green
+        self.textbox.tag_config('comma', foreground='#A0A000')      # Yellow
+        self.textbox.tag_config('bracket', foreground='#006020')    # Dark Green
         self.textbox.tag_config('hash', foreground='#D08030')       # Orange
         self.textbox.tag_config('comment', foreground='#888888')    # Gray
         self.textbox.tag_config('ERROR', background='#902020')      # Red
-        self.textbox.tag_config('next_line', background='#353545')  # Dark Gray
+        self.textbox.tag_config('next_line', background='#353545')  # Dark Blue Gray
         self.textbox.tag_config('breakline', background='#605010')  # Yellow
         self.line_count.tag_config('breakpoint', foreground='#FF0000', background='#502020')  # Red
 
@@ -283,7 +280,7 @@ class ASMWindow(ctk.CTkFrame):
             end_index = f'{next_line}.end'
             self.textbox.tag_add('next_line', start_index, end_index)
 
-        # Highlighting the next line to execute in step-by-step
+        # Highlighting the line were execution stopped
         self.textbox.tag_remove('breakline', '1.0', tk.END)
         if breakpoint > 0:
             start_index = f'{breakpoint}.0'
@@ -305,7 +302,7 @@ class ASMWindow(ctk.CTkFrame):
             if n == line_number:  # Check if we reached the desired line number
                 return real
 
-        # If the desired line number is not found, return -1 or raise an exception
+        # If the desired line number is not found
         return -1
 
 
@@ -743,8 +740,7 @@ class Toolbar(ctk.CTkFrame):
 
             # Empties debugger
             master.debugger_window.delete_content()
-            # Update the line count in the Debugger
-            debugger_window.update_line_count()
+            debugger_window.update_line_count()  # Update the line count in the Debugger
 
             # Empties registers
             for i in range(8):
@@ -794,8 +790,10 @@ class Toolbar(ctk.CTkFrame):
 
             # Display success message in the Debugger
             debugger_window.insert_content('Execution Aborted\n', 'lime')
-            # Update the line count in the Debugger
-            debugger_window.update_line_count()
+            debugger_window.update_line_count()  # Update the line count in the Debugger
+
+            # Resets the next line highlighting
+            asm_window.highlight_syntax()
 
 
         def run_step_by_step():
