@@ -1,15 +1,13 @@
-; Function POWER_OF_TWO
+; Function R0 = 2^R1
 
 POWER_OF_TWO:
-    MOV R2, #1          ; Initialize R2 to 1 (2^0)
-    MOV R0, #Power      ; power value in R0
+	MOV R0, #1		; Initialize R0 to 1 (2^0)
 
-shift_loop:
-    CMP R0, #0          ; Check if the exponent is zero
-    BEQ shift_done      ; If so, exit the loop
-    LSL R2, R2, #1      ; Left shift R2 by one position (equivalent to multiplying by 2)
-    SUB R0, R0, #1      ; Decrement the exponent
-    B shift_loop        ; Repeat the process until the exponent is zero
+SHIFT_LOOP:
+	CMP R1, #0		; Check if the exponent is zero
+	BEQ SHIFT_DONE		; If yes, break
+	LSL R0, R0, #1		; Shifts R0 1 to the left (Doubles it)
+	SUB R1, #1		; Decrement the exponent
+	B SHIFT_LOOP		; Repeat the process until the exponent is zero
 
-shift_done:
-    BX LR               ; Return
+SHIFT_DONE:
