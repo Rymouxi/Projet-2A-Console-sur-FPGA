@@ -23,8 +23,8 @@ import math
 
 from instruction_translation import *
 
-
-
+# Example functions in help
+# LCM3 instruction in help
 
 
 
@@ -985,19 +985,19 @@ class Toolbar(ctk.CTkFrame):
             debugger_window.update_line_count()
         
 
-        self.download_button = ctk.CTkButton(self, text='Download Code', width=100, height=10, font = ('Arial', 11), corner_radius=25, fg_color='gray', hover_color='darkgreen', state='disabled', command=download_code)
+        self.download_button = ctk.CTkButton(self, text='Download Code', width=100, height=10, font=('Arial', 11), corner_radius=25, fg_color='gray', hover_color='darkgreen', state='disabled', command=download_code)
         self.download_button.pack(side='right', padx=5)
-        self.connect_button = ctk.CTkButton(self, text='Connect Board', width=100, height=10, font = ('Arial', 11), corner_radius=25, fg_color='forestgreen', hover_color='darkgreen', command=connect_board)
+        self.connect_button = ctk.CTkButton(self, text='Connect Board', width=100, height=10, font=('Arial', 11), corner_radius=25, fg_color='forestgreen', hover_color='darkgreen', command=connect_board)
         self.connect_button.pack(side='right')
-        self.reset_button = ctk.CTkButton(self, text='Reset', width=100, height=10, font = ('Arial', 11), corner_radius=25, fg_color='forestgreen', hover_color='darkgreen', command=reset)
+        self.reset_button = ctk.CTkButton(self, text='Reset', width=100, height=10, font=('Arial', 11), corner_radius=25, fg_color='forestgreen', hover_color='darkgreen', command=reset)
         self.reset_button.pack(side='right', padx=5)
-        self.stop_button = ctk.CTkButton(self, text='STOP', width=100, height=10, font = ('Arial', 11), corner_radius=25, fg_color='gray', hover_color='maroon', state='disabled', command=stop)
+        self.stop_button = ctk.CTkButton(self, text='STOP', width=100, height=10, font=('Arial', 11), corner_radius=25, fg_color='gray', hover_color='maroon', state='disabled', command=stop)
         self.stop_button.pack(side='right')
-        self.runsbs_button = ctk.CTkButton(self, text='Run Step By Step', width=100, height=10, font = ('Arial', 11), corner_radius=25, fg_color='gray', hover_color='darkgreen', state='disabled', command=run_step_by_step)
+        self.runsbs_button = ctk.CTkButton(self, text='Run Step By Step', width=100, height=10, font=('Arial', 11), corner_radius=25, fg_color='gray', hover_color='darkgreen', state='disabled', command=run_step_by_step)
         self.runsbs_button.pack(side='right', padx=5)
-        self.run_button = ctk.CTkButton(self, text='Run', width=100, height=10, font = ('Arial', 11), corner_radius=25, fg_color='gray', hover_color='darkgreen', state='disabled', command=run)
+        self.run_button = ctk.CTkButton(self, text='Run', width=100, height=10, font=('Arial', 11), corner_radius=25, fg_color='gray', hover_color='darkgreen', state='disabled', command=run)
         self.run_button.pack(side='right')
-        self.assemble_button = ctk.CTkButton(self, text='Assemble', width=100, height=10, font = ('Arial', 11), corner_radius=25, fg_color='forestgreen', hover_color='darkgreen', command=assemble)
+        self.assemble_button = ctk.CTkButton(self, text='Assemble', width=100, height=10, font=('Arial', 11), corner_radius=25, fg_color='forestgreen', hover_color='darkgreen', command=assemble)
         self.assemble_button.pack(side='right', padx=5)
         self.file_menu = FileMenu(self, asm_window)
         self.file_menu.pack(side='left')
@@ -1157,7 +1157,7 @@ class HelpMenu(ctk.CTkFrame):
         def help_lcm3_docu():
             '''Opens an online documentation of the LCM3 instructions.'''
 
-            webbrowser.open_new('https://moodle.ensea.fr/pluginfile.php/24675/mod_resource/content/1/LCM3_Instructions_2017.pdf')
+            webbrowser.open_new('https://moodle.ensea.fr/pluginfile.php/24675/mod_resource/content/2/TD_uP_LCM3_1AB_2023-2024_v01_jeu.pdf')
 
 
         # Help menu button
@@ -1169,9 +1169,70 @@ class HelpMenu(ctk.CTkFrame):
         self['menu'] = self.menu
 
         # Add items to the File menu
+        self.menu.add_command(label='LCM3 DOC NOW HELP!!!', command=LCM3Documentation)
+        self.menu.add_command(label='LCM3 Doc on Moodle', command=help_lcm3_docu)
+        self.menu.add_separator()
         self.menu.add_command(label='This Simulator Documentation', command=SimulatorDocumentation)
         self.menu.add_separator()
-        self.menu.add_command(label='LCM3 Documentation', command=help_lcm3_docu)
+        self.menu.add_command(label='Code Examples', command=help_lcm3_docu)
+
+
+
+
+
+
+
+
+class LCM3Documentation(ctk.CTkToplevel):
+    '''Contains the written documentation of ASM LCM3.'''
+
+    def __init__(self):
+        super().__init__()
+
+        self.text = ("\n\n\n"+
+        "------------------------ LCM3 Instruction Set (alphabetic order) ------------------------\n\n\n\n"
+        'Syntax\t\t\tOperation\t\t\tValues\t\t\tCode\n'
+        '\t\t\t\t\t\t\t\t\t15   14   13   12   11   10    9     8     7     6     5     4     3     2     1     0\n\n'
+        'ADD Rd,Rn,#imm3\t\t\tRd<=Rn+ZE(imm3)\t\t\t0≤imm3≤7\t\t\t 0     0     0     1     1     1     0   |      imm3     |        n         |         d\n'
+        'ADD Rd,#imm8\t\t\tRd<=Rd+ZE(imm8)\t\t\t0≤imm8≤255\t\t\t 0     0     1     1     0   |         d         |           imm8 (unsigned)\n'
+        'ADD Rd,Rn,Rm\t\t\tRd<=Rn+Rm\t\t\t\t\t\t 0     0     0     1     1     0     0   |         m        |        n         |         d\n'
+        'AND Rd,Rm\t\t\tRd<=Rd AND Rm\t\t\t\t\t\t 0     1     0     0     0     0     0     0     0     0   |       m         |         d\n'
+        "B label\t\t\tPC<=adr(label)\t\t\t-2^10≤imm11≤2^10-1\t\t\t 1     1     1     0     0   |         imm11 (Δi in 2's complt)\n"
+        "BXX label\t\t\tif Z=0 then PC<=adr(label)\t\t\t-2^7≤imm8≤2^7-1\t\t\t 1     1     0     1   |      XX=cond      |           imm8 (Δi in 2's complt)\n"
+        'CMP Rn,#imm8\t\t\tNZVC<=Rn-ZE(imm8)\t\t\t0≤imm8≤2^8-1\t\t\t 0     0     1     0     1   |         n         |           imm8 (unsigned)\n'
+        'CMP Rd,Rm\t\t\tNZVC<=Rd-Rm\t\t\t\t\t\t 0     1     0     0     0     0     1     0     1     0   |        m         |         d\n'
+        'EOR Rd,Rm\t\t\tRd<=Rd xor Rm\t\t\t\t\t\t 0     1     0     0     0     0     0     0     0     1   |        m         |         d\n'
+        'LDR Rt,[Rn]\t\t\tRt<=M[align4(Rn)]\t\t\t\t\t\t 0     1     1     0     1     0     0     0     0     0   |         n         |          t\n'
+        'LSL Rd,Rm,#imm5\t\t\tRd<=Rm<<imm5\t\t\t0≤imm5≤31\t\t\t 0     0     0     0     0   |             imm5            |        m         |         d\n'
+        'MOV Rd,#imm8\t\t\tRd<=ZE(imm8)\t\t\t0≤imm8≤255\t\t\t 0     0     1     0     0   |         d         |           imm8 (unsigned)\n'
+        'MOV Rd,Rm\t\t\tRd<=Rm\t\t\t\t\t\t 0     0     0     0     0     0     0     0     0     0   |        m         |         d\n'
+        'STR Rt,[Rn]\t\t\tM[align4(Rn)]<=Rt\t\t\t\t\t\t 0     1     1     0     0     0     0     0     0     0   |         n         |          t\n'
+        'SUB Rd,Rn,#imm3\t\t\t Rd<=Rn-ZE(imm3)\t\t\t0≤imm3≤7\t\t\t 0     0     0     1     1     1     1   |      imm3     |         n         |         d\n'
+        'SUB Rd,#imm8\t\t\tRd<=Rd-ZE(imm8)\t\t\t0≤imm8≤255\t\t\t 0     0     1     1     1   |         d         |           imm8 (unsigned)\n'
+        'SUB Rd,Rn,Rm\t\t\tRd<=Rn-Rm\t\t\t\t\t\t 0     0     0     1     1     0     1   |        m         |         n         |         d\n\n\n'
+        'In "BXX label", XX : is a condition (if the condition is true then branch to label)'
+        '\tXX=NE ↔ Z=0 (Not Equal)\t\t\t\t\t↔ cond=0001\n'
+        '\tXX=EQ ↔ Z=1 (is EQual)\t\t\t\t\t↔ cond=0000\n'
+        '\tXX=GE ↔ N=V (Greater or Equal)\t\t\t\t\t↔ cond=1010\n'
+        '\tXX=LT ↔ N !=V (Lower Than)\t\t\t\t\t↔ cond=1011\n'
+        '\tXX=GT ↔ Z=0 et N=V (Greater Than)\t\t\t\t\t↔ cond=1100\n'
+        '\tXX=LE ↔ Z=1 ou N !=V (Less or equal)\t\t\t\t\t↔ cond=1101\n\n\n'
+        'ZE: Zero Extend; extension of the value to 32 bits (unsigned)\n'
+        'The variables n, d, m or imm3 are unsigned.\n'
+        "Only one instruction modifies the flags NZVC here: it's 'CMP'.\n"
+        'Mw[adr] is a word (32 bits) in memory at address adr.\n'
+        'Remark : adr must be a multiple of 4: 0, 4, 8, 0xC, 0x10…\n'
+        "The function align4(i)= (i/4)*4 : it's equivalent to clear the 2 LSBs.\n"
+        '\n\n\n\n\t\t\t\tHave a nice time coding!\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n')
+
+        self.title("LCM3 Instruction Set")                          # Title
+        self.geometry('900x800')
+        self.frame = ctk.CTkFrame(self)                             # Frame
+        self.frame.pack(fill='both', expand=True)
+        self.text_widget = ctk.CTkTextbox(self.frame, wrap='word')  # Text box
+        self.text_widget.pack(side='left', fill='both', expand=True)
+        self.text_widget.insert(tk.END, self.text)
+        self.text_widget.configure(state='disabled', font=('Helvetica',12))
 
 
 
