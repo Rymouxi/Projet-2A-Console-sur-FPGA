@@ -23,7 +23,7 @@ import math
 
 from instruction_translation import *
 
-# STOP should update the highlighting
+
 
 
 
@@ -972,7 +972,7 @@ class Toolbar(ctk.CTkFrame):
                             mem_and_bin.insert_bin(master.toolbar.bitstream[l] + '\n')
                         else:
                             offset += 1
-                    mem_and_bin.code_mem_set(l - offset + 1, master.toolbar.bitstream[l], master.toolbar.split_instructions[l+1])
+                    mem_and_bin.code_mem_set(l - offset + 1, master.toolbar.bitstream[l+1], master.toolbar.split_instructions[l+1])
 
                 # Display success message in debugger
                 debugger_window.insert_content('Assembly complete\n\n', 'lime')

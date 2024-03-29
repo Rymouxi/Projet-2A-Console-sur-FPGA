@@ -67,7 +67,7 @@ def instruction_translation(ASM:str):
             i+=1
 #je rajoute le code pour la fin du programme c'est peut être foireux 
         split_instruction.extend(["ENDENDEND:","MOV R0,R0","MOV R0,R0","BNE ENDENDEND"])
-        bitstream.extend(["0000000000000000",'0000000000000000','1101000111111110'])
+        bitstream.extend(["","0000000000000000",'0000000000000000','1101000111111110'])
         register_update.append([])
         register_update.append([])
         register_update.append([])
