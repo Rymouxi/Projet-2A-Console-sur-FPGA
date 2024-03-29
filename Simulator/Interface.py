@@ -929,7 +929,6 @@ class Toolbar(ctk.CTkFrame):
             # Fetching the code
             code = asm_window.get_text_content()
             master.toolbar.split_instructions, master.toolbar.bitstream, master.toolbar.register_update, master.toolbar.line_update, master.toolbar.memory_update, master.toolbar.error = instruction_translation(code)
-            print(instruction_translation(code))
 
             # Funny text variations for when user tries to assemble empty code
             variations = ['sipping a coconut', 'catching some rays', 'in a hammock', 'on a beach', 'snorkeling', 'in a tropical paradise', 'surfing the clouds',
@@ -1174,7 +1173,101 @@ class HelpMenu(ctk.CTkFrame):
         self.menu.add_separator()
         self.menu.add_command(label='This Simulator Documentation', command=SimulatorDocumentation)
         self.menu.add_separator()
-        self.menu.add_command(label='Code Examples', command=help_lcm3_docu)
+        self.menu.add_command(label='ASM Code Examples', command=CodeExamples)
+
+
+
+
+
+
+
+
+class CodeExamples(ctk.CTkToplevel):
+    '''Contains the written documentation of ASM LCM3.'''
+
+    def __init__(self):
+        super().__init__()
+
+        self.text = ('\n\n'+
+        '------------------------ LMC3 Assembly Code Examples ------------------------\n\n\n\n'
+        '; Multiplication function\n'
+        '; Returns R0 = R1 * R2\n\n'
+        'MULTIPLICATION:\n'
+        '\tMOV R0, #0\t\t\t; Initialize the result at zero\n\n'
+        'MUL_LOOP:\n'
+        '\tCMP R2, #0\t\t\t; Check if R2 factor is nil\n'
+        '\tBEQ MUL_DONE\t\t\t; If yes, break\n\n'
+        '\tCMP R1, #0\t\t\t; Check if R1 factor is nil\n'
+        '\tBEQ MUL_DONE\t\t\t; If yes, break\n\n'
+        '\tADD R0, R0, R1\t\t\t; R0 = R0 + R1\n'
+        '\tSUB  R2, R2, #1\t\t\t; Decrement the R2 factor\n'
+        '\tCMP R2, #0\n'
+        '\tBGE MUL_LOOP\t\t\t; Repeat if R2 >= 0\n\n'
+        'MUL_DONE:\n\n\n'
+        '------------------------------------------------------------------\n\n\n'
+        '; Euclidian Division function\n'
+        '; Returns R0 = R1 / R2\n'
+        '; And R1 is the remaining (R0 * R2 + R1_out = R1_in)\n\n'
+        'DIVISION:\n'
+	    '\tCMP R2, #0\t\t\t; Check if R2 is zero\n'
+	    '\tBEQ DIV_ERROR\t\t\t; If yes, error\n\n'
+    	'\tMOV R0, #0\t\t\t; Initilize the output R0 at zero\n\n'
+        'DIV_LOOP:\n'
+	    '\tCMP R1, #0\t\t\t; Check if R1 is zero\n'
+	    '\tBEQ DIV_DONE\t\t\t; if yes, get out of the loop and show R0 = 0\n\n'
+	    '\tCMP R1, R2\t\t\t; Check if R1 smaller than R2\n'
+	    '\tBLT DIV_ERROR\t\t\t; if so, error\n\n'
+	    '\tSUB R1, R1, R2\t\t\t; R1 - R2\n'
+	    '\tADD R0, R0, #1\t\t\t; R0 + 1\n\n'
+	    '\tB DIV_LOOP\t\t\t; Repeat the loop\n\n'
+        'DIV_DONE:\n'
+        'DIV_ERROR:\n\n\n'
+        '------------------------------------------------------------------\n\n\n'
+        '; PUSH (R3)\n\n'
+        '; R0 <- 0x20000004 (adress pointer)\n'
+        '; R2 <- 0x20000100 (size of the pile)\n'
+        'MOV R0, #1\n'
+        'LSL R0, R0, #29\n'
+        'MOV R2, R0\n'
+        'ADD R0, #4\n'
+        'ADD R2, #0x80\n'
+        'ADD R2, #0x80\n\n'
+        'SHIFT_ALL:\n'
+	    '\tLDR R1, [R0]\n'
+	    '\tSUB  R0, R0, #4\n'
+	    '\tSTR R1, [R0]\n'
+	    '\tADD R0, #8\n'
+	    '\tCMP R0, R2\n'
+	    '\tBNE SHIFT_ALL\n\n'
+        'STR R3, [R0]\n\n\n'
+        '------------------------------------------------------------------\n\n\n'
+        '; POP (R3)\n\n'
+        '; R0 <- 0x20000100 (adress pointer)\n'
+        '; R2 <- 0x20000000 (size of the pile)\n'
+        'MOV R0, #1\n'
+        'LSL R0, R0, #29\n'
+        'MOV R2, R0\n'
+        'ADD R0, #0x80\n'
+        'ADD R0, #0x80\n\n'
+        'LDR R3, [R0]\t\t; POP R3\n'
+        'SUB  R0, R0, #4\n\n'
+        'SHIFT_ALL:\n'
+	    '\tLDR R1, [R0]\n'
+	    '\tADD  R0, R0, #4\n'
+	    '\tSTR R1, [R0]\n'
+	    '\tSUB R0, #8\n'
+	    '\tCMP R0, R2\n'
+	    '\tBNE SHIFT_ALL\n'
+        '\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n')
+
+        self.title('LMC3 Assembly Code Examples')                                 # Title
+        self.geometry('500x1000')
+        self.frame = ctk.CTkFrame(self)                             # Frame
+        self.frame.pack(fill='both', expand=True)
+        self.text_widget = ctk.CTkTextbox(self.frame, wrap='word')  # Text box
+        self.text_widget.pack(side='left', fill='both', expand=True)
+        self.text_widget.insert(tk.END, self.text)
+        self.text_widget.configure(state='disabled', font=('Helvetica',12))
 
 
 
@@ -1189,27 +1282,27 @@ class LCM3Documentation(ctk.CTkToplevel):
     def __init__(self):
         super().__init__()
 
-        self.text = ("\n\n\n"+
-        "------------------------ LCM3 Instruction Set (alphabetic order) ------------------------\n\n\n\n"
+        self.text = ('\n\n'+
+        '------------------------ LCM3 Instruction Set (alphabetic order) ------------------------\n\n\n\n'
         'Syntax\t\t\tOperation\t\t\tValues\t\t\tCode\n'
         '\t\t\t\t\t\t\t\t\t15   14   13   12   11   10    9     8     7     6     5     4     3     2     1     0\n\n'
         'ADD Rd,Rn,#imm3\t\t\tRd<=Rn+ZE(imm3)\t\t\t0≤imm3≤7\t\t\t 0     0     0     1     1     1     0   |      imm3     |        n         |         d\n'
-        'ADD Rd,#imm8\t\t\tRd<=Rd+ZE(imm8)\t\t\t0≤imm8≤255\t\t\t 0     0     1     1     0   |         d         |           imm8 (unsigned)\n'
-        'ADD Rd,Rn,Rm\t\t\tRd<=Rn+Rm\t\t\t\t\t\t 0     0     0     1     1     0     0   |         m        |        n         |         d\n'
-        'AND Rd,Rm\t\t\tRd<=Rd AND Rm\t\t\t\t\t\t 0     1     0     0     0     0     0     0     0     0   |       m         |         d\n'
+        'ADD Rd,#imm8\t\t\tRd<=Rd+ZE(imm8)\t\t\t0≤imm8≤255\t\t\t 0     0     1     1     0   |        d         |           imm8 (unsigned)\n'
+        'ADD Rd,Rn,Rm\t\t\tRd<=Rn+Rm\t\t\t\t\t\t 0     0     0     1     1     0     0   |        m         |        n         |         d\n'
+        'AND Rd,Rm\t\t\tRd<=Rd AND Rm\t\t\t\t\t\t 0     1     0     0     0     0     0     0     0     0   |        m        |         d\n'
         "B label\t\t\tPC<=adr(label)\t\t\t-2^10≤imm11≤2^10-1\t\t\t 1     1     1     0     0   |         imm11 (Δi in 2's complt)\n"
-        "BXX label\t\t\tif Z=0 then PC<=adr(label)\t\t\t-2^7≤imm8≤2^7-1\t\t\t 1     1     0     1   |      XX=cond      |           imm8 (Δi in 2's complt)\n"
-        'CMP Rn,#imm8\t\t\tNZVC<=Rn-ZE(imm8)\t\t\t0≤imm8≤2^8-1\t\t\t 0     0     1     0     1   |         n         |           imm8 (unsigned)\n'
-        'CMP Rd,Rm\t\t\tNZVC<=Rd-Rm\t\t\t\t\t\t 0     1     0     0     0     0     1     0     1     0   |        m         |         d\n'
-        'EOR Rd,Rm\t\t\tRd<=Rd xor Rm\t\t\t\t\t\t 0     1     0     0     0     0     0     0     0     1   |        m         |         d\n'
-        'LDR Rt,[Rn]\t\t\tRt<=M[align4(Rn)]\t\t\t\t\t\t 0     1     1     0     1     0     0     0     0     0   |         n         |          t\n'
-        'LSL Rd,Rm,#imm5\t\t\tRd<=Rm<<imm5\t\t\t0≤imm5≤31\t\t\t 0     0     0     0     0   |             imm5            |        m         |         d\n'
-        'MOV Rd,#imm8\t\t\tRd<=ZE(imm8)\t\t\t0≤imm8≤255\t\t\t 0     0     1     0     0   |         d         |           imm8 (unsigned)\n'
-        'MOV Rd,Rm\t\t\tRd<=Rm\t\t\t\t\t\t 0     0     0     0     0     0     0     0     0     0   |        m         |         d\n'
-        'STR Rt,[Rn]\t\t\tM[align4(Rn)]<=Rt\t\t\t\t\t\t 0     1     1     0     0     0     0     0     0     0   |         n         |          t\n'
-        'SUB Rd,Rn,#imm3\t\t\t Rd<=Rn-ZE(imm3)\t\t\t0≤imm3≤7\t\t\t 0     0     0     1     1     1     1   |      imm3     |         n         |         d\n'
-        'SUB Rd,#imm8\t\t\tRd<=Rd-ZE(imm8)\t\t\t0≤imm8≤255\t\t\t 0     0     1     1     1   |         d         |           imm8 (unsigned)\n'
-        'SUB Rd,Rn,Rm\t\t\tRd<=Rn-Rm\t\t\t\t\t\t 0     0     0     1     1     0     1   |        m         |         n         |         d\n\n\n'
+        "BXX label\t\t\tif Z=0 then PC<=adr(label)\t\t\t-2^7≤imm8≤2^7-1\t\t\t 1     1     0     1   |     XX=cond      |           imm8 (Δi in 2's complt)\n"
+        'CMP Rn,#imm8\t\t\tNZVC<=Rn-ZE(imm8)\t\t\t0≤imm8≤2^8-1\t\t\t 0     0     1     0     1   |        n         |           imm8 (unsigned)\n'
+        'CMP Rd,Rm\t\t\tNZVC<=Rd-Rm\t\t\t\t\t\t 0     1     0     0     0     0     1     0     1     0   |        m        |         d\n'
+        'EOR Rd,Rm\t\t\tRd<=Rd xor Rm\t\t\t\t\t\t 0     1     0     0     0     0     0     0     0     1   |        m        |         d\n'
+        'LDR Rt,[Rn]\t\t\tRt<=M[align4(Rn)]\t\t\t\t\t\t 0     1     1     0     1     0     0     0     0     0   |        n         |          t\n'
+        'LSL Rd,Rm,#imm5\t\t\tRd<=Rm<<imm5\t\t\t0≤imm5≤31\t\t\t 0     0     0     0     0   |             imm5            |        m        |         d\n'
+        'MOV Rd,#imm8\t\t\tRd<=ZE(imm8)\t\t\t0≤imm8≤255\t\t\t 0     0     1     0     0   |        d         |           imm8 (unsigned)\n'
+        'MOV Rd,Rm\t\t\tRd<=Rm\t\t\t\t\t\t 0     0     0     0     0     0     0     0     0     0   |        m        |         d\n'
+        'STR Rt,[Rn]\t\t\tM[align4(Rn)]<=Rt\t\t\t\t\t\t 0     1     1     0     0     0     0     0     0     0   |        n         |          t\n'
+        'SUB Rd,Rn,#imm3\t\t\t Rd<=Rn-ZE(imm3)\t\t\t0≤imm3≤7\t\t\t 0     0     0     1     1     1     1   |      imm3     |        n         |         d\n'
+        'SUB Rd,#imm8\t\t\tRd<=Rd-ZE(imm8)\t\t\t0≤imm8≤255\t\t\t 0     0     1     1     1   |        d         |           imm8 (unsigned)\n'
+        'SUB Rd,Rn,Rm\t\t\tRd<=Rn-Rm\t\t\t\t\t\t 0     0     0     1     1     0     1   |        m         |        n         |         d\n\n\n'
         'In "BXX label", XX : is a condition (if the condition is true then branch to label)'
         '\tXX=NE ↔ Z=0 (Not Equal)\t\t\t\t\t↔ cond=0001\n'
         '\tXX=EQ ↔ Z=1 (is EQual)\t\t\t\t\t↔ cond=0000\n'
@@ -1223,9 +1316,9 @@ class LCM3Documentation(ctk.CTkToplevel):
         'Mw[adr] is a word (32 bits) in memory at address adr.\n'
         'Remark : adr must be a multiple of 4: 0, 4, 8, 0xC, 0x10…\n'
         "The function align4(i)= (i/4)*4 : it's equivalent to clear the 2 LSBs.\n"
-        '\n\n\n\n\t\t\t\tHave a nice time coding!\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n')
+        '\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n')
 
-        self.title("LCM3 Instruction Set")                          # Title
+        self.title('LCM3 Instruction Set')                          # Title
         self.geometry('900x800')
         self.frame = ctk.CTkFrame(self)                             # Frame
         self.frame.pack(fill='both', expand=True)
@@ -1247,7 +1340,7 @@ class SimulatorDocumentation(ctk.CTkToplevel):
     def __init__(self):
         super().__init__()
 
-        self.text = ("\n\n\n"+
+        self.text = ('\n\n\n'+
         "------------------------ ENSEA's Python LCM3 Simulator ------------------------\n\n"
         '    Engineers :\n\n'
         '    APPOURCHAUX Léo, BITTAUD CANOEN Laël, GABORIEAU Cyprien, JIN Clémentine\n'
