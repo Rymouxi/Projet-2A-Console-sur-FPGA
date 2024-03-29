@@ -1,27 +1,27 @@
-; Division
+; Euclidian Division function
+; Returns R0 = R1 / R2
+; And R1 is the remaining (R0 * R2 + R1_out = R1_in)
 
-B DIVISION                  ; R1/R2
-    DIV:
-        CMP R2, #0          ; check if R2 is zero
-        BEQ DIV_ERROR       ; If so, error
+MOV R1, #128
+MOV R2, #3
 
-    MOV R0, #0         		; Initilize the output R0 at zero
+DIVISION:
+	CMP R2, #0		; Check if R2 is zero
+	BEQ DIV_ERROR		; If yes, error
 
-    DIV_LOOP:
-        CMP R1, #0         	; check if R1 is zero
-        BEQ DIV_DONE        ; if so, get out of the loop and show R0 = 0
+    	MOV R0, #0		; Initilize the output R0 at zero
 
-        CMP R1, R2          ; check if R1 smaller than R2
-        BLT DIV_ERROR       ; if so, error
+DIV_LOOP:
+	CMP R1, #0		; Check if R1 is zero
+	BEQ DIV_DONE		; if yes, get out of the loop and show R0 = 0
 
-        SUB R1, R1, R2      ; R1 - R2
-        ADD R0, R0, #1      ; R0 + 1
+	CMP R1, R2		; Check if R1 smaller than R2
+	BLT DIV_ERROR		; if so, error
 
-        B DIV_LOOP          ; Repeat the loop
+	SUB R1, R1, R2      ; R1 - R2
+	ADD R0, R0, #1      ; R0 + 1
 
-    DIV_DONE:
-    ; the result is in R0
-        BX LR               
+	B DIV_LOOP          ; Repeat the loop
 
-    DIV_ERROR:
-        BX LR               
+DIV_DONE:   
+DIV_ERROR:
