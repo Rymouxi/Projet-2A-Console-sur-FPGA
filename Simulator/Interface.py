@@ -23,8 +23,6 @@ import math
 
 from instruction_translation import *
 
-# Do a little function that will go through line_update with the knowledge of the breakpoint list and will create another one containing when to stop.
-# Then use that list to make the breakpoints work even inside a loop
 
 # Alows for instructions to be on the same line as a label
 
@@ -161,19 +159,20 @@ class ASMWindow(ctk.CTkFrame):
         self.textbox_frame.pack(side='top', fill='both', expand=True)
         self.line_count = ctk.CTkTextbox(self.textbox_frame, width=20, text_color='#C0C0C0', fg_color='#404040', scrollbar_button_hover_color='#404040', scrollbar_button_color='#404040')
         self.line_count.pack(side='left', fill='both', expand=False)                           # Line numbers
-        self.textbox = ctk.CTkTextbox(self.textbox_frame, width=700, text_color='#2060D0')     # ASM window text box
+        self.textbox = ctk.CTkTextbox(self.textbox_frame, width=700, text_color='#2080C0')     # ASM window text box
         self.textbox.pack(side='right', fill='both', expand=True)
 
         # Configure tags for syntax highlighting
-        self.textbox.tag_config('label', foreground='#E02020')      # Red
-        self.textbox.tag_config('Register', foreground='#309030')   # Green
-        self.textbox.tag_config('register', foreground='#309030')   # Green
+        self.textbox.tag_config('label', foreground='#B02090')      # Red
+        self.textbox.tag_config('Register', foreground='#509020')   # Green
+        self.textbox.tag_config('register', foreground='#509020')   # Green
         self.textbox.tag_config('comma', foreground='#B02080')      # Magenta
         self.textbox.tag_config('bracket', foreground='#006000')    # Dark Green
-        self.textbox.tag_config('hash', foreground='#E08030')       # Orange
+        self.textbox.tag_config('hash', foreground='#D08030')       # Orange
         self.textbox.tag_config('comment', foreground='#888888')    # Gray
-        self.textbox.tag_config('ERROR', background='#702020')      # Red
-        self.textbox.tag_config('next_line', background='#304030')  # Dark Gray
+        self.textbox.tag_config('ERROR', background='#902020')      # Red
+        self.textbox.tag_config('next_line', background='#353545')  # Dark Gray
+        self.textbox.tag_config('breakline', background='#605010')  # Yellow
         self.line_count.tag_config('breakpoint', foreground='#FF0000', background='#502020')  # Red
 
         # Breakpoint list
@@ -211,7 +210,7 @@ class ASMWindow(ctk.CTkFrame):
             self.line_count.tag_add('breakpoint', start_index, end_index)  # Add the 'breakpoint' tag to highlight the line
 
 
-    def highlight_syntax(self, event=None, errors=[], next_line:int=-1):
+    def highlight_syntax(self, event=None, errors=[], next_line:int=-1, breakpoint:int=-1):
         '''Update syntax highlighting.'''
 
         # Define patterns and corresponding tags
@@ -283,6 +282,13 @@ class ASMWindow(ctk.CTkFrame):
             start_index = f'{next_line}.0'
             end_index = f'{next_line}.end'
             self.textbox.tag_add('next_line', start_index, end_index)
+
+        # Highlighting the next line to execute in step-by-step
+        self.textbox.tag_remove('breakline', '1.0', tk.END)
+        if breakpoint > 0:
+            start_index = f'{breakpoint}.0'
+            end_index = f'{breakpoint}.end'
+            self.textbox.tag_add('breakline', start_index, end_index)
 
 
     def correct_line(self, line_number: int):
@@ -871,6 +877,7 @@ class Toolbar(ctk.CTkFrame):
             if real_breaks != []:
                 while self.state - 3 < real_breaks[0]:  # Gets to the next breakpoint
                     run_step_by_step()
+                asm_window.highlight_syntax(None, [], -1, breaks[0])
                 debugger_window.insert_content('Breakpoint: Line %d - Step %d (%s)\n\n' % (breaks[0], real_breaks[0], master.toolbar.split_instructions[master.toolbar.line_update[self.state - 4]]), 'yellow')
                 debugger_window.update_line_count()  # Update the line count in the Debugger
                 
