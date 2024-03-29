@@ -23,7 +23,8 @@ import math
 
 from instruction_translation import *
 
-# Breakpoints
+# Do a little function that will go through line_update with the knowledge of the breakpoint list and will create another one containing when to stop.
+# Then use that list to make the breakpoints work even inside a loop
 
 # Alows for instructions to be on the same line as a label
 
@@ -853,15 +854,24 @@ class Toolbar(ctk.CTkFrame):
             # Get into the state of running
             if self.state < 2:
                 self.state = 2  # Corresponds to 0 executions (1decode or 2fetch)
-            
+
             # Check if there are breakpoints
             breaks = asm_window.get_breakpoints().copy()
-            while breaks != [] and breaks[0] < self.state - 2:  # Ignore all breakpoints before current step
-                breaks.pop(0)
-            if breaks != []:
-                while self.state - 3 < breaks[0]:  # Gets to the next breakpoint
+
+
+            # Get all the breakpoints taking loops into account
+            real_breaks = []
+            for i,e in enumerate(master.toolbar.line_update):
+                if asm_window.correct_line(e) in breaks:
+                    real_breaks.append(i)
+
+            # Run until breakpoint
+            while real_breaks != [] and real_breaks[0] < self.state - 2:  # Ignore all breakpoints before current step
+                real_breaks.pop(0)
+            if real_breaks != []:
+                while self.state - 3 < real_breaks[0]:  # Gets to the next breakpoint
                     run_step_by_step()
-                debugger_window.insert_content('Breakpoint at line %d\nYou can execute step by step or resume the execution\n\n' % breaks[0], 'yellow')
+                debugger_window.insert_content('Breakpoint: Line %d - Step %d (%s)\n\n' % (breaks[0], real_breaks[0], master.toolbar.split_instructions[master.toolbar.line_update[self.state - 4]]), 'yellow')
                 debugger_window.update_line_count()  # Update the line count in the Debugger
                 
 
