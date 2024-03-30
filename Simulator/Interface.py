@@ -23,8 +23,8 @@ import math
 
 from instruction_translation import *
 
-# Example functions in help
-# LCM3 instruction in help
+# Change values from register manualy + same for memory
+
 
 
 
@@ -134,7 +134,7 @@ class ASMWindow(ctk.CTkFrame):
             number_of_lines = int(self.textbox.index('end-1c').split('.')[0])  # Get the total number of lines in the text widget
             hidden_part = self.textbox.yview()[0]                              # Get the ratio of what is hidden
             hidden_lines = hidden_part * number_of_lines                       # Get the number of hidden lines
-            line_visible_click = event.y / 19 + 0.5                            # Get the number of the line clicked relative to the frame
+            line_visible_click = event.y / 19 + 1                              # Get the number of the line clicked relative to the frame
             line_number = int(line_visible_click + hidden_lines)               # Get the real number of the line
 
             # Add or remove the breakpoint
@@ -175,11 +175,15 @@ class ASMWindow(ctk.CTkFrame):
         # Breakpoint list
         self.break_list = []
 
-        # Bind events to update syntax highlighting, buttons update, line counter update, and breakpoint placing/removing
+        # Bind events to update syntax highlighting, buttons update,  andline counter update
         self.textbox.bind('<KeyRelease>', self.highlight_syntax)
         self.textbox.bind('<KeyRelease>', update_btns_on_modif)
         self.textbox.bind('<KeyRelease>', self.update_line_count)
+
+        # Bind mouse enter and leave events to change cursor, and breakpoint placing/removing
         self.line_count.bind('<Button-1>', place_breakpoint)
+        self.line_count.bind('<Enter>', lambda event: self.line_count.configure(cursor='hand2'))
+        self.line_count.bind('<Leave>', lambda event: self.line_count.configure(cursor=''))
 
         # Set the first number on the line counter and start to update the view
         update_line_view()
@@ -928,50 +932,52 @@ class Toolbar(ctk.CTkFrame):
 
             # Fetching the code
             code = asm_window.get_text_content()
-            master.toolbar.split_instructions, master.toolbar.bitstream, master.toolbar.register_update, master.toolbar.line_update, master.toolbar.memory_update, master.toolbar.error = instruction_translation(code)
-
-            # Funny text variations for when user tries to assemble empty code
-            variations = ['sipping a coconut', 'catching some rays', 'in a hammock', 'on a beach', 'snorkeling', 'in a tropical paradise', 'surfing the clouds',
-            'on a spa retreat', 'napping in a hammock', 'practicing mindfulness', 'doing yoga', 'enjoying a siesta', 'on a cosmic cruise', 'in a Zen garden',
-            'sunbathing', 'in a day spa', 'on a coffee break', 'chilling in a hammock', 'vacationing', 'on a beach', 'gone', 'too short', 'transparent', 'too small']
-            random_variation = random.choice(variations)
-
+        
             # Check if code is empty
             if code == '\n':
+                # Funny text variations for when user tries to assemble empty code
+                variations = ['sipping a coconut', 'catching some rays', 'in a hammock', 'on a beach', 'snorkeling', 'in a tropical paradise', 'surfing the clouds',
+                'on a spa retreat', 'napping in a hammock', 'practicing mindfulness', 'doing yoga', 'enjoying a siesta', 'on a cosmic cruise', 'in a Zen garden',
+                'sunbathing', 'in a day spa', 'on a coffee break', 'chilling in a hammock', 'vacationing', 'on a beach', 'gone', 'too short', 'transparent', 'too small']
+                random_variation = random.choice(variations)
+
                 debugger_window.insert_content("Assembling air? Your code's "+random_variation+'.', 'blue')
                 master.toolbar.assemble_button.configure(self, fg_color='forestgreen', state='normal')
                 self.state = 0
 
-            # Check if there are errors
-            elif master.toolbar.error != []:
-                master.toolbar.assemble_button.configure(self, fg_color='forestgreen', state='normal')
-                self.state = 0
-
-                # Display error in debugger
-                lines = []
-                for i in range(len(master.toolbar.error)//2):
-                    error_line = asm_window.correct_line(master.toolbar.error[2*i+1]+1)  # Corrects for eventual empty lines
-                    debugger_window.insert_content('%s at line %d\n' % (master.toolbar.error[2*i], error_line), 'red')
-                    lines.append(error_line)
-
-                # Highlight lines with errors
-                asm_window.highlight_syntax(None, lines)
-
             else:
-                # Fills the Code RAM array and the bitstream frame
-                if len(master.toolbar.bitstream) != 0:
-                    offset = 0
-                    for l in range(len(master.toolbar.split_instructions)-1):
-                        if master.toolbar.split_instructions[l] != '' and master.toolbar.split_instructions[l].find(':') == -1:
+                master.toolbar.split_instructions, master.toolbar.bitstream, master.toolbar.register_update, master.toolbar.line_update, master.toolbar.memory_update, master.toolbar.error = instruction_translation(code)
 
-                            # Display the instruction in the Code Memory
-                            mem_and_bin.code_mem_set(l - offset, master.toolbar.bitstream[l], master.toolbar.split_instructions[l])
+                # Check if there are errors
+                if master.toolbar.error != []:
+                    master.toolbar.assemble_button.configure(self, fg_color='forestgreen', state='normal')
+                    self.state = 0
 
-                            # Display the instruction in the binary window
-                            mem_and_bin.insert_bin(master.toolbar.bitstream[l] + '\n')
-                        else:
-                            offset += 1
-                    mem_and_bin.code_mem_set(l - offset + 1, master.toolbar.bitstream[l+1], master.toolbar.split_instructions[l+1])
+                    # Display error in debugger
+                    lines = []
+                    for i in range(len(master.toolbar.error)//2):
+                        error_line = asm_window.correct_line(master.toolbar.error[2*i+1]+1)  # Corrects for eventual empty lines
+                        debugger_window.insert_content('%s at line %d\n' % (master.toolbar.error[2*i], error_line), 'red')
+                        lines.append(error_line)
+
+                    # Highlight lines with errors
+                    asm_window.highlight_syntax(None, lines)
+
+                else:
+                    # Fills the Code RAM array and the bitstream frame
+                    if len(master.toolbar.bitstream) != 0:
+                        offset = 0
+                        for l in range(len(master.toolbar.split_instructions)-1):
+                            if master.toolbar.split_instructions[l] != '' and master.toolbar.split_instructions[l].find(':') == -1:
+
+                                # Display the instruction in the Code Memory
+                                mem_and_bin.code_mem_set(l - offset, master.toolbar.bitstream[l], master.toolbar.split_instructions[l])
+
+                                # Display the instruction in the binary window
+                                mem_and_bin.insert_bin(master.toolbar.bitstream[l] + '\n')
+                            else:
+                                offset += 1
+                        mem_and_bin.code_mem_set(l - offset + 1, master.toolbar.bitstream[l+1], master.toolbar.split_instructions[l+1])
 
                 # Display success message in debugger
                 debugger_window.insert_content('Assembly complete\n\n', 'lime')
