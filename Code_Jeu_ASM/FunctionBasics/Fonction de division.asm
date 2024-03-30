@@ -18,10 +18,10 @@ DIV_LOOP:
 	CMP R1, R2		; Check if R1 smaller than R2
 	BLT DIV_ERROR		; if so, error
 
-	SUB R1, R1, R2      ; R1 - R2
-	ADD R0, R0, #1      ; R0 + 1
+	SUB R1, R1, R2      	; R1 - R2
+	ADD R0, R0, #1      	; R0 + 1
 
-	B DIV_LOOP          ; Repeat the loop
+	B DIV_LOOP          	; Repeat the loop
 
 DIV_DONE:   
 DIV_ERROR:
