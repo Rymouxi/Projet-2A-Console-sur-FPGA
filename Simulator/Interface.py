@@ -23,8 +23,8 @@ import math
 
 from instruction_translation import *
 
-# Change values from register manualy + same for memory
-
+# Revert reg change
+# screen size bug on breakpoints mettre dans la doc
 
 
 
@@ -1051,12 +1051,12 @@ class Toolbar(ctk.CTkFrame):
                                 offset += 1
                         mem_and_bin.code_mem_set(l - offset + 1, master.toolbar.bitstream[l+1], master.toolbar.split_instructions[l+1])
 
-                # Display success message in debugger
-                debugger_window.insert_content('Assembly complete\n\n', 'lime')
+                    # Display success message in debugger
+                    debugger_window.insert_content('Assembly complete\n\n', 'lime')
                 
-                # Enables buttons Run and RSBS
-                master.toolbar.run_button.configure(self, fg_color='forestgreen', state='normal')
-                master.toolbar.runsbs_button.configure(self, fg_color='forestgreen', state='normal')
+                    # Enables buttons Run and RSBS
+                    master.toolbar.run_button.configure(self, fg_color='forestgreen', state='normal')
+                    master.toolbar.runsbs_button.configure(self, fg_color='forestgreen', state='normal')
 
             # Update the line count in the Debugger
             debugger_window.update_line_count()
