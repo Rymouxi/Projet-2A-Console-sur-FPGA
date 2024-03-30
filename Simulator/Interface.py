@@ -175,7 +175,7 @@ class ASMWindow(ctk.CTkFrame):
         # Breakpoint list
         self.break_list = []
 
-        # Bind events to update syntax highlighting, buttons update,  andline counter update
+        # Bind events to update syntax highlighting, buttons update, and line counter update
         self.textbox.bind('<KeyRelease>', self.highlight_syntax)
         self.textbox.bind('<KeyRelease>', update_btns_on_modif)
         self.textbox.bind('<KeyRelease>', self.update_line_count)
@@ -411,6 +411,9 @@ class RegisterWindow(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
 
+        def popup():
+            RegPopUp(self)
+
         self.frame = ctk.CTkFrame(self, corner_radius=0)  # Object Frame
         self.frame.pack(side='top', fill='both', expand=True)
 
@@ -455,8 +458,13 @@ class RegisterWindow(ctk.CTkFrame):
             self.grid_columnconfigure(j, weight=1)
 
         # Hex-Dec button
-        self.button = ctk.CTkButton(self.frame, text='Switch to Hexa', command=self.change_format)
-        self.button.pack(side='top')
+        self.switch_button = ctk.CTkButton(self.frame, text='Switch to Hexa', command=self.change_format)
+        self.switch_button.pack(side='top')
+        self.display = 0  # Variable to keep track of the mode
+
+        # Modify register value
+        self.edit_button = ctk.CTkButton(self.frame, text='Edit Reg Val', command=popup)
+        self.edit_button.pack(side='top')
         self.display = 0  # Variable to keep track of the mode
 
 
@@ -495,6 +503,70 @@ class RegisterWindow(ctk.CTkFrame):
     def set_step(self, value:int):
         '''Changes the step number displayed.'''
         self.step_counter_value.configure(text=str(value))
+
+
+
+
+
+
+
+
+class RegPopUp(ctk.CTkToplevel):
+    '''Contains the popup to change register values.'''
+
+    def __init__(self, master):
+        super().__init__(master)
+
+        def on_entry_keypress(event):
+            '''Callback function to handle keypress event in entry widgets.'''
+            # Raises letters to upper case
+            if event.char.isdigit() or event.keysym in {'Right', 'Left', 'Up', 'Down', 'Delete', 'BackSpace'}:
+                return None  # Let the default action proceed for other keys
+            else:
+                return "break"  # Prevent the default action for lowercase characters
+            
+
+        def apply_changes():
+            '''Apply changes to the values inside the registers.'''
+            for i, entry in enumerate(self.register_entries):
+                value = entry.get('1.0', 'end-1c')
+                if value != '' and 0<=int(value)<=4294967295:
+                    master.set_register_values(i,value)
+                # Here you can add logic to update the value of the registers accordingly
+        
+            # Close the popup window
+            self.destroy()
+
+
+        self.title('Edit Registers')  # Title
+        self.geometry('220x330')
+        self.frame = ctk.CTkFrame(self)  # Frame
+        self.frame.pack(fill='both', expand=True)
+
+        # Entry widgets for register values
+        self.register_entries = []  # List to hold the register entry widgets
+
+        for i in range(8):
+            # Create a vertical frame for each register entry
+            register_frame = ctk.CTkFrame(self.frame, height=30)
+            register_frame.pack(fill='x', padx=5, pady=2, expand=False)
+
+            # Create a label for the register
+            reg_label = ctk.CTkLabel(register_frame, text=f"R{i}: ")
+            reg_label.pack(side='left')
+
+            # Create an entry widget for the register value
+            entry = ctk.CTkTextbox(register_frame, height=30)
+            entry.pack(side='left', fill='x', expand=False)
+            entry.bind("<KeyPress>", on_entry_keypress)
+            self.register_entries.append(entry)
+
+        # Button to apply changes
+        self.apply_button = ctk.CTkButton(self.frame, text="Apply Changes", command=apply_changes)
+        self.apply_button.pack(side='top')
+
+        # Make the popup window stay on top of other windows
+        self.attributes('-topmost', True)
 
 
 
@@ -1275,6 +1347,9 @@ class CodeExamples(ctk.CTkToplevel):
         self.text_widget.insert(tk.END, self.text)
         self.text_widget.configure(state='disabled', font=('Helvetica',12))
 
+        # Make the popup window stay on top of other windows
+        self.attributes('-topmost', True)
+
 
 
 
@@ -1332,6 +1407,9 @@ class LCM3Documentation(ctk.CTkToplevel):
         self.text_widget.pack(side='left', fill='both', expand=True)
         self.text_widget.insert(tk.END, self.text)
         self.text_widget.configure(state='disabled', font=('Helvetica',12))
+
+        # Make the popup window stay on top of other windows
+        self.attributes('-topmost', True)
 
 
 
@@ -1444,6 +1522,9 @@ class SimulatorDocumentation(ctk.CTkToplevel):
         self.text_widget.pack(side='left', fill='both', expand=True)
         self.text_widget.insert(tk.END, self.text)
         self.text_widget.configure(state='disabled', font=('Helvetica',12))
+
+        # Make the popup window stay on top of other windows
+        self.attributes('-topmost', True)
 
 
 
