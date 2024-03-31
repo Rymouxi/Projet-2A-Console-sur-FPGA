@@ -490,7 +490,7 @@ class RegisterWindow(ctk.CTkFrame):
                 hex_value = '0x'+format(decimal_value, '08x') if i<8 else label.cget('text')  # Changing the format
                 label.configure(text=hex_value)
                 self.display = 1
-                self.button.configure(text='Switch to Dec')
+                self.switch_button.configure(text='Switch to Dec')
 
         else:  # in hex
             for i, label in enumerate(self.value_labels):
@@ -498,7 +498,7 @@ class RegisterWindow(ctk.CTkFrame):
                 decimal_value = int(hex_value[2:], 16) if i<8 else label.cget('text')  # Changing the format
                 label.configure(text=str(decimal_value))
                 self.display = 0
-                self.button.configure(text='Switch to Hexa')
+                self.switch_button.configure(text='Switch to Hexa')
 
 
     def set_step(self, value:int):
