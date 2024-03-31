@@ -23,8 +23,8 @@ import math
 
 from instruction_translation import *
 
-# Revert reg change
-# screen size bug on breakpoints mettre dans la doc
+# faire popup connect board
+
 
 
 
@@ -113,10 +113,9 @@ class ASMWindow(ctk.CTkFrame):
             '''Reenables the assembly button and turns off the others on code modification by the user.'''
 
             if master.master.master.master.toolbar.state != 0:
-                master.master.master.master.toolbar.stop_button.configure(self, fg_color='gray', state='disabled')
-                master.master.master.master.toolbar.run_button.configure(self, fg_color='gray', state='disabled', text='Run')
-                master.master.master.master.toolbar.runsbs_button.configure(self, fg_color='gray', state='disabled', text='Run Step By Step', hover_color='darkgreen')
-                master.master.master.master.toolbar.assemble_button.configure(self, fg_color='forestgreen', state='normal', text='Assemble')
+                master.master.master.master.toolbar.stop_button.configure(fg_color='gray', state='disabled')
+                master.master.master.master.toolbar.run_button.configure(fg_color='gray', state='disabled', text='Run')
+                master.master.master.master.toolbar.runsbs_button.configure(fg_color='gray', state='disabled', text='Run Step By Step', hover_color='darkgreen')
                 master.master.master.master.toolbar.state = 0
 
 
@@ -458,14 +457,16 @@ class RegisterWindow(ctk.CTkFrame):
             self.grid_columnconfigure(j, weight=1)
 
         # Hex-Dec button
-        self.switch_button = ctk.CTkButton(self.frame, text='Switch to Hexa', command=self.change_format)
-        self.switch_button.pack(side='top')
+        self.switch_button = ctk.CTkButton(self.frame, text='Switch to Hexa', fg_color='forestgreen', hover_color='darkgreen', command=self.change_format)
+        self.switch_button.pack(side='top', pady=10)
         self.display = 0  # Variable to keep track of the mode
 
         # Modify register value
-        self.edit_button = ctk.CTkButton(self.frame, text='Edit Reg Val', command=popup)
+        self.edit_button = ctk.CTkButton(self.frame, text='Edit Reg Val', fg_color='forestgreen', hover_color='darkgreen', command=popup)
         self.edit_button.pack(side='top')
         self.display = 0  # Variable to keep track of the mode
+
+        self.modified_regs = []
 
 
     def set_register_values(self, index:int, value:str):
@@ -528,11 +529,15 @@ class RegPopUp(ctk.CTkToplevel):
 
         def apply_changes():
             '''Apply changes to the values inside the registers.'''
+            master.modified_regs = []
             for i, entry in enumerate(self.register_entries):
                 value = entry.get('1.0', 'end-1c')
-                if value != '' and 0<=int(value)<=4294967295:
-                    master.set_register_values(i,value)
-                # Here you can add logic to update the value of the registers accordingly
+                if value != '' and 0 <= int(value) <= 4294967295:
+                    master.set_register_values(i, value)
+                    master.modified_regs.append(i)
+                    master.modified_regs.append(value)
+                else:
+                    master.set_register_values(i, 0)
         
             # Close the popup window
             self.destroy()
@@ -685,7 +690,7 @@ class MemAndBin(ctk.CTkTabview):
         self.bin_textbox.configure(state='normal')
         self.bin_textbox.insert(tk.END, content)
         self.bin_textbox.configure(state='disabled')
-  
+
 
 
 
@@ -807,11 +812,11 @@ class Toolbar(ctk.CTkFrame):
             '''Resets the values in registers, pipeline, binary, and memory arrays.'''
 
             # Updates button states
-            master.toolbar.assemble_button.configure(self, fg_color='gray', state='disabled', text='Assemble')
-            master.toolbar.run_button.configure(self, fg_color='gray', state='disabled', text='Run')
-            master.toolbar.runsbs_button.configure(self, fg_color='gray', state='disabled', text='Run Step By Step', hover_color='darkgreen')
-            master.toolbar.stop_button.configure(self, fg_color='gray', state='disabled')
-            master.toolbar.reset_button.configure(self, fg_color='gray', state='disabled')
+            master.toolbar.assemble_button.configure(fg_color='gray', state='disabled', text='Assemble')
+            master.toolbar.run_button.configure(fg_color='gray', state='disabled', text='Run')
+            master.toolbar.runsbs_button.configure(fg_color='gray', state='disabled', text='Run Step By Step', hover_color='darkgreen')
+            master.toolbar.stop_button.configure(fg_color='gray', state='disabled')
+            master.toolbar.reset_button.configure(fg_color='gray', state='disabled')
             self.state = 0
 
             # Empties debugger
@@ -843,25 +848,27 @@ class Toolbar(ctk.CTkFrame):
                     pipeline_window.set_cell(i, j+1, '', '#343638')
 
             # Updates button states
-            master.toolbar.assemble_button.configure(self, fg_color='forestgreen', state='normal', text='Assemble')
-            master.toolbar.run_button.configure(self, fg_color='gray', state='disabled', text='Run')
-            master.toolbar.runsbs_button.configure(self, fg_color='gray', state='disabled', text='Run Step By Step', hover_color='darkgreen')
-            master.toolbar.stop_button.configure(self, fg_color='gray', state='disabled')
-            master.toolbar.reset_button.configure(self, fg_color='forestgreen', state='normal')
+            master.toolbar.assemble_button.configure(fg_color='forestgreen', state='normal', text='Assemble')
+            master.toolbar.run_button.configure(fg_color='gray', state='disabled', text='Run')
+            master.toolbar.runsbs_button.configure(fg_color='gray', state='disabled', text='Run Step By Step', hover_color='darkgreen')
+            master.toolbar.stop_button.configure(fg_color='gray', state='disabled')
+            master.toolbar.reset_button.configure(fg_color='forestgreen', state='normal')
             self.state = 0
 
             # Highlight update
             asm_window.highlight_syntax()
+
+            # Reenables the register editing
+            register_window.edit_button.configure(fg_color='forestgreen', state='normal')
 
 
         def stop():
             '''Stops the Step-by-step execution.'''
 
             # Stop the runsbs
-            master.toolbar.run_button.configure(self, fg_color='gray', state='disabled', text='Run')
-            master.toolbar.runsbs_button.configure(self, fg_color='gray', text='Run Step By Step', state='disabled', hover_color='darkgreen')
-            master.toolbar.stop_button.configure(self, fg_color='gray', state='disabled')
-            master.toolbar.assemble_button.configure(self, fg_color='forestgreen', state='normal')
+            master.toolbar.run_button.configure(fg_color='gray', state='disabled', text='Run')
+            master.toolbar.runsbs_button.configure(fg_color='gray', text='Run Step By Step', state='disabled', hover_color='darkgreen')
+            master.toolbar.stop_button.configure(fg_color='gray', state='disabled')
             self.state = 0
 
             # Display success message in the Debugger
@@ -876,12 +883,12 @@ class Toolbar(ctk.CTkFrame):
             '''Launches the step y step execution of the code.'''
 
             # Updates button states
-            master.toolbar.run_button.configure(self, text='Resume')
-            master.toolbar.stop_button.configure(self, fg_color='firebrick', state='normal')
+            master.toolbar.run_button.configure(text='Resume')
+            master.toolbar.stop_button.configure(fg_color='firebrick', state='normal')
 
             if self.state == 1:
                 # starts the runsbs
-                master.toolbar.runsbs_button.configure(self, fg_color='forestgreen', text='Step->')
+                master.toolbar.runsbs_button.configure(fg_color='forestgreen', text='Step->')
                 self.state = 2
             else:
                 register_window.set_step(max(self.state-3, 0))
@@ -916,10 +923,9 @@ class Toolbar(ctk.CTkFrame):
                 
                 else:
                     # Updates button states
-                    master.toolbar.stop_button.configure(self, fg_color='gray', state='disabled')
-                    master.toolbar.run_button.configure(self, fg_color='gray', state='disabled', text='Run')
-                    master.toolbar.runsbs_button.configure(self, fg_color='gray', state='disabled', text='Run Step By Step', hover_color='darkgreen')
-                    master.toolbar.assemble_button.configure(self, fg_color='forestgreen', state='normal')
+                    master.toolbar.stop_button.configure(fg_color='gray', state='disabled')
+                    master.toolbar.run_button.configure(fg_color='gray', state='disabled', text='Run')
+                    master.toolbar.runsbs_button.configure(fg_color='gray', state='disabled', text='Run Step By Step', hover_color='darkgreen')
                     self.state = 0
 
                     # Display success message in the Debugger
@@ -951,8 +957,9 @@ class Toolbar(ctk.CTkFrame):
             if real_breaks != []:
                 while self.state - 3 < real_breaks[0]:  # Gets to the next breakpoint
                     run_step_by_step()
-                asm_window.highlight_syntax(None, [], -1, breaks[0])
-                debugger_window.insert_content('Breakpoint: Line %d - Step %d (%s)\n\n' % (breaks[0], real_breaks[0], master.toolbar.split_instructions[master.toolbar.line_update[self.state - 4]]), 'yellow')
+                next_line = asm_window.correct_line(master.toolbar.line_update[self.state - 4] + 1)  # Corrects for eventual empty lines
+                asm_window.highlight_syntax(None, [], -1, next_line)
+                debugger_window.insert_content('Breakpoint: Line %d - Step %d (%s)\n\n' % (next_line, real_breaks[0], master.toolbar.split_instructions[master.toolbar.line_update[self.state - 4]]), 'yellow')
                 debugger_window.update_line_count()  # Update the line count in the Debugger
                 
 
@@ -960,10 +967,9 @@ class Toolbar(ctk.CTkFrame):
             else:
 
                 # Update button states
-                master.toolbar.run_button.configure(self, fg_color='gray', state='disabled', text='Run')
-                master.toolbar.runsbs_button.configure(self, fg_color='gray', state='disabled', text='Run Step By Step', hover_color='darkgreen')
-                master.toolbar.stop_button.configure(self, fg_color='gray', state='disabled')
-                master.toolbar.assemble_button.configure(self, fg_color='forestgreen', state='normal')
+                master.toolbar.run_button.configure(fg_color='gray', state='disabled', text='Run')
+                master.toolbar.runsbs_button.configure(fg_color='gray', state='disabled', text='Run Step By Step', hover_color='darkgreen')
+                master.toolbar.stop_button.configure(fg_color='gray', state='disabled')
 
                 # Update register values
                 register_window.set_step(len(master.toolbar.line_update) - 1)
@@ -998,8 +1004,8 @@ class Toolbar(ctk.CTkFrame):
             '''Assembles the code.'''
 
             # Cleaning
-            reset()
-            master.toolbar.assemble_button.configure(self, fg_color='gray', state='disabled')
+            master.toolbar.assemble_button.configure(fg_color='gray', state='disabled')
+            register_window.edit_button.configure(fg_color='gray', state='disabled')
             self.state = 1
 
             # Fetching the code
@@ -1010,19 +1016,28 @@ class Toolbar(ctk.CTkFrame):
                 # Funny text variations for when user tries to assemble empty code
                 variations = ['sipping a coconut', 'catching some rays', 'in a hammock', 'on a beach', 'snorkeling', 'in a tropical paradise', 'surfing the clouds',
                 'on a spa retreat', 'napping in a hammock', 'practicing mindfulness', 'doing yoga', 'enjoying a siesta', 'on a cosmic cruise', 'in a Zen garden',
-                'sunbathing', 'in a day spa', 'on a coffee break', 'chilling in a hammock', 'vacationing', 'on a beach', 'gone', 'too short', 'transparent', 'too small']
+                'sunbathing', 'in a day spa', 'on a coffee break', 'chilling in a hammock', 'vacationing', 'on a beach', 'gone', 'too short', 'transparent', 'too small'
+                'partying without you', 'wearing flip-flops', 'delayed', 'still sleeping', 'sipping a cocktail', 'quoting EDDY-MALOU']
                 random_variation = random.choice(variations)
 
-                debugger_window.insert_content("Assembling air? Your code's "+random_variation+'.', 'blue')
-                master.toolbar.assemble_button.configure(self, fg_color='forestgreen', state='normal')
+                debugger_window.insert_content("Assembling air? Your code is "+random_variation+'.', 'blue')
+                master.toolbar.assemble_button.configure(fg_color='forestgreen', state='normal')
                 self.state = 0
 
+                # Reenable the register editing
+                register_window.edit_button.configure(fg_color='forestgreen', state='normal')
+
             else:
+                # preppend the modified registers
+                for i in range(len(register_window.modified_regs)//2):
+                    code = 'MOV R%s, #%s\n' % (register_window.modified_regs[2*i], register_window.modified_regs[2*i+1]) + code
+
+                # Call the simulator
                 master.toolbar.split_instructions, master.toolbar.bitstream, master.toolbar.register_update, master.toolbar.line_update, master.toolbar.memory_update, master.toolbar.error = instruction_translation(code)
 
                 # Check if there are errors
                 if master.toolbar.error != []:
-                    master.toolbar.assemble_button.configure(self, fg_color='forestgreen', state='normal')
+                    master.toolbar.assemble_button.configure(fg_color='forestgreen', state='normal')
                     self.state = 0
 
                     # Display error in debugger
@@ -1035,7 +1050,21 @@ class Toolbar(ctk.CTkFrame):
                     # Highlight lines with errors
                     asm_window.highlight_syntax(None, lines)
 
+                    register_window.modified_regs = []  # Resets the list of edited registers
+
                 else:
+                    # Run the preprompt
+                    for i in range(len(register_window.modified_regs)//2):
+                        register_window.set_register_values(master.toolbar.register_update[0][0], master.toolbar.register_update[0][1])  # Re add the register edit after reset
+                        master.toolbar.split_instructions.pop(0)  # Clean
+                        master.toolbar.bitstream.pop(0)
+                        master.toolbar.register_update.pop(0)
+                        master.toolbar.line_update.pop(0)
+                        master.toolbar.memory_update.pop(0)
+                    for i in range(len(master.toolbar.line_update)):
+                        master.toolbar.line_update[i] -= len(register_window.modified_regs)//2
+                    register_window.modified_regs = []  # Resets the list of edited registers
+
                     # Fills the Code RAM array and the bitstream frame
                     if len(master.toolbar.bitstream) != 0:
                         offset = 0
@@ -1055,8 +1084,8 @@ class Toolbar(ctk.CTkFrame):
                     debugger_window.insert_content('Assembly complete\n\n', 'lime')
                 
                     # Enables buttons Run and RSBS
-                    master.toolbar.run_button.configure(self, fg_color='forestgreen', state='normal')
-                    master.toolbar.runsbs_button.configure(self, fg_color='forestgreen', state='normal')
+                    master.toolbar.run_button.configure(fg_color='forestgreen', state='normal')
+                    master.toolbar.runsbs_button.configure(fg_color='forestgreen', state='normal')
 
             # Update the line count in the Debugger
             debugger_window.update_line_count()
@@ -1501,13 +1530,17 @@ class SimulatorDocumentation(ctk.CTkToplevel):
         '        Next line to execute is highlighted in the ASM Code Window\n'
         '        Watch the path of the instructions in the pipeline\n\n\n'
         '4. Troubleshooting\n'
-        '    4.1 Common Errors\n'
+        '    4.1 Breakpoints\n'
+        '        You can place and remove multiple breakpoints at any point of the execution.\n'
+        "        Don't hesitate to place some.\n"
+        '        (Breakpoint placing might be glitched if your monitor resolution exeeds 4K).\n\n\n'
+        '    4.2 Common Errors\n'
         '        - Invalid Syntax: CHECK THE SYNTAX of your LCM3 instructions!\n'
         '        - Undefined Labels: Ensure all labels are DEFINED before use.\n'
         '        - Repeated Labels: Ensure all labels are UNIQUE.\n'
         '        - Values out of range: CHECK THE LCM3, instructions have numbers limited in size\n'
         '                               Moreover you can only acces 0x20000000 to 0x80000000 in the user memory.\n\n\n'
-        '    4.2 Debugging Tips\n'
+        '    4.3 Debugging Tips\n'
         '        Errors will be highlighted in red\n'
         '        Check the Debugger window\n'
         '        Re-read your code\n'
