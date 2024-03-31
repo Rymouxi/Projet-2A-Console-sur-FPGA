@@ -457,12 +457,12 @@ class RegisterWindow(ctk.CTkFrame):
             self.grid_columnconfigure(j, weight=1)
 
         # Hex-Dec button
-        self.switch_button = ctk.CTkButton(self.frame, text='Switch to Hexa', fg_color='forestgreen', hover_color='darkgreen', command=self.change_format)
-        self.switch_button.pack(side='top', pady=10)
+        self.switch_button = ctk.CTkButton(self.frame, text='Switch to Hexa', width=100, height=10, font=('Arial', 11), corner_radius=25, fg_color='forestgreen', hover_color='darkgreen', command=self.change_format)
+        self.switch_button.pack(side='top', pady=15)
         self.display = 0  # Variable to keep track of the mode
 
         # Modify register value
-        self.edit_button = ctk.CTkButton(self.frame, text='Edit Reg Val', fg_color='forestgreen', hover_color='darkgreen', command=popup)
+        self.edit_button = ctk.CTkButton(self.frame, text='Edit Reg Val', width=100, height=10, font=('Arial', 11), corner_radius=25, fg_color='forestgreen', hover_color='darkgreen', command=popup)
         self.edit_button.pack(side='top')
         self.display = 0  # Variable to keep track of the mode
 
@@ -801,11 +801,15 @@ class Toolbar(ctk.CTkFrame):
         super().__init__(master)
 
         def download_code():
-            ''''''
+            '''Downloads the code on the board and starts the execution.\n
+               CURRENTLY NOT SUPPORTED!'''
 
 
         def connect_board():
-            ''''''
+            '''Opens a popup to choose option for connection to a board.\n
+               CURRENTLY NOT SUPPORTED!'''
+            ConnectPopUp(self)
+
 
 
         def reset():
@@ -1116,6 +1120,27 @@ class Toolbar(ctk.CTkFrame):
         self.state = 0
 
         self.split_instruction, self.line_instruction, self.bitstream, self.register_update, self.line_update, self.memory_update, self.error = [], [], [], [], [], [], []
+
+
+
+
+
+
+
+
+class ConnectPopUp(ctk.CTkToplevel):
+    '''Contains the popup to connect to a board.'''
+
+    def __init__(self, master):
+        super().__init__(master)
+
+        self.title('Connect Board')  # Title
+        self.geometry('400x200')
+        self.label = ctk.CTkLabel(self, text="Aucun port COM disponible", font=("Arial",20), fg_color="red")  # Frame
+        self.label.pack(fill='both', expand=True)
+
+        # Make the popup window stay on top of other windows
+        self.attributes('-topmost', True)
 
 
 
