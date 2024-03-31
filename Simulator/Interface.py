@@ -23,7 +23,7 @@ import math
 
 from instruction_translation import *
 
-# faire popup connect board
+
 
 
 
