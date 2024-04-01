@@ -55,7 +55,7 @@ def instruction_translation(ASM:str):
                 error.extend(error_simu)
                 error.append(j)
             j+=1
-            if j>1000:
+            if j>10000:
                 error.extend(["There's an infinite loop" ,line_pointer])
                 break
         
