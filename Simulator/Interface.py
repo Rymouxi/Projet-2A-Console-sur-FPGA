@@ -24,7 +24,7 @@ import math
 from instruction_translation import *
 
 
-# Empty debugg on assemble
+
 
 
 
@@ -49,7 +49,7 @@ class EnseaSimulator(ctk.CTk):
     def __init__(self) -> None:        
         super().__init__()
 
-        self.title("ENSEA's Python LCM3 ASM Simulator")                                  # Simulator title
+        self.title('ENSEA\'s Python LCM3 ASM Simulator')                                  # Simulator title
         self.geometry('980x720')
 
         self.main_frame = tk.ttk.PanedWindow(self, orient=tk.VERTICAL)                   # Main Frame under the Toolbar
@@ -201,12 +201,12 @@ class ASMWindow(ctk.CTkFrame):
         self.line_count.configure(width=35+7*math.floor(math.log10(int(line_numbers.splitlines()[-1]))))  # Sets an appropriate width for the frame
 
         # Remove existing breakpoints
-        self.line_count.tag_remove("breakpoint", '1.0', tk.END)
+        self.line_count.tag_remove('breakpoint', '1.0', tk.END)
 
         # Adding new breakpoints
         for line_number in self.break_list:
-            start_index: str = f"{line_number}.0"  # Calculate the index of the start of the line
-            end_index: str = f"{line_number}.end"  # Calculate the index of the end of the line
+            start_index: str = f'{line_number}.0'  # Calculate the index of the start of the line
+            end_index: str = f'{line_number}.end'  # Calculate the index of the end of the line
             self.line_count.tag_add('breakpoint', start_index, end_index)  # Add the 'breakpoint' tag to highlight the line
 
 
@@ -214,7 +214,7 @@ class ASMWindow(ctk.CTkFrame):
         '''Update syntax highlighting.'''
 
         # Define patterns and corresponding tags
-        patterns: dict[str] = {
+        patterns: dict[str,str] = {
             ' R': 'Register', ' r': 'register',
             '[\\[\\]]': 'bracket', ',': 'comma',
             '#': 'hash', ';': 'comment',
@@ -247,7 +247,7 @@ class ASMWindow(ctk.CTkFrame):
 
         # Iterate through the patterns and tag the text accordingly
         for pattern, tag in patterns.items():
-            start_index = '1.0'
+            start_index: str = '1.0'
             while True:
                 start_index = self.textbox.search(pattern, start_index, tk.END, regexp=True)
                 if not start_index:
@@ -255,15 +255,15 @@ class ASMWindow(ctk.CTkFrame):
 
                 # Compute end_index based on the pattern
                 if pattern == ',' or pattern == '[\\[\\]]':                                   # tags of length 1
-                    end_index = self.textbox.index(f'{start_index}+1c')
+                    end_index: str = self.textbox.index(f'{start_index}+1c')
                 elif pattern == 'b ' or pattern == 'B ':
                     start_index = self.textbox.index(f'{start_index} +2c')                    # Short loops 'B'
-                    end_index = self.textbox.index(f'{start_index} lineend')
+                    end_index: str = self.textbox.index(f'{start_index} lineend')
                 elif pattern == ' R' or pattern == ' r' or pattern == '#' or pattern == ';':  # tags of length > 1
-                    end_index = self.textbox.index(f'{start_index} lineend')
+                    end_index: str = self.textbox.index(f'{start_index} lineend')
                 else:
                     start_index = self.textbox.index(f'{start_index} +4c')                    # Long Loops 'BXX'
-                    end_index = self.textbox.index(f'{start_index} lineend')
+                    end_index: str = self.textbox.index(f'{start_index} lineend')
 
                 # Tag and jump to next character
                 self.textbox.tag_add(tag, start_index, end_index)
@@ -272,22 +272,22 @@ class ASMWindow(ctk.CTkFrame):
         # Error highlight
         self.textbox.tag_remove('ERROR', '1.0', tk.END)
         for e in errors:
-            start_index = f'{e}.0'
-            end_index = f'{e}.end'
+            start_index: str = f'{e}.0'
+            end_index: str = f'{e}.end'
             self.textbox.tag_add('ERROR', start_index, end_index)
 
         # Highlighting the next line to execute in step-by-step
         self.textbox.tag_remove('next_line', '1.0', tk.END)
         if next_line > 0:
-            start_index = f'{next_line}.0'
-            end_index = f'{next_line}.end'
+            start_index: str = f'{next_line}.0'
+            end_index: str = f'{next_line}.end'
             self.textbox.tag_add('next_line', start_index, end_index)
 
         # Highlighting the line were execution stopped
         self.textbox.tag_remove('breakline', '1.0', tk.END)
         if breakpoint > 0:
-            start_index = f'{breakpoint}.0'
-            end_index = f'{breakpoint}.end'
+            start_index: str = f'{breakpoint}.0'
+            end_index: str = f'{breakpoint}.end'
             self.textbox.tag_add('breakline', start_index, end_index)
 
 
@@ -460,12 +460,11 @@ class RegisterWindow(ctk.CTkFrame):
         # Hex-Dec button
         self.switch_button = ctk.CTkButton(self.frame, text='Switch to Hexa', width=100, height=10, font=('Arial', 11), corner_radius=25, fg_color='forestgreen', hover_color='darkgreen', command=self.change_format)
         self.switch_button.pack(side='top', pady=15)
-        self.display = 0  # Variable to keep track of the mode
+        self.display_dec: bool = True  # Variable to keep track of the mode
 
         # Modify register value
         self.edit_button = ctk.CTkButton(self.frame, text='Edit Reg Val', width=100, height=10, font=('Arial', 11), corner_radius=25, fg_color='forestgreen', hover_color='darkgreen', command=popup)
         self.edit_button.pack(side='top')
-        self.display = 0  # Variable to keep track of the mode
 
         self.modified_regs: list[str] = []
 
@@ -473,7 +472,7 @@ class RegisterWindow(ctk.CTkFrame):
     def set_register_values(self, index:int, value:str) -> None:
         '''Set register values using a list.'''
 
-        if self.display == 0:  # in dec
+        if self.display_dec == True:  # in dec
             self.value_labels[index].configure(text=value)
 
         else:  # in hex
@@ -485,12 +484,12 @@ class RegisterWindow(ctk.CTkFrame):
     def change_format(self) -> None:
         '''Change the format of values to hexadecimal.'''
 
-        if self.display == 0:  # in dec
+        if self.display_dec:  # in dec
             for i, label in enumerate(self.value_labels):
                 decimal_value = int(label.cget('text'))                                       # Retrieving the value
                 hex_value = '0x'+format(decimal_value, '08x') if i<8 else label.cget('text')  # Changing the format
                 label.configure(text=hex_value)
-                self.display = 1
+                self.display_dec = False
                 self.switch_button.configure(text='Switch to Dec')
 
         else:  # in hex
@@ -498,7 +497,7 @@ class RegisterWindow(ctk.CTkFrame):
                 hex_value = label.cget('text')                                         # Retrieving the value
                 decimal_value = int(hex_value[2:], 16) if i<8 else label.cget('text')  # Changing the format
                 label.configure(text=str(decimal_value))
-                self.display = 0
+                self.display_dec = True
                 self.switch_button.configure(text='Switch to Hexa')
 
 
@@ -525,7 +524,7 @@ class RegPopUp(ctk.CTkToplevel):
             if event.char.isdigit() or event.keysym in {'Right', 'Left', 'Up', 'Down', 'Delete', 'BackSpace'}:
                 return None  # Let the default action proceed for other keys
             else:
-                return "break"  # Prevent the default action for lowercase characters
+                return 'break'  # Prevent the default action for lowercase characters
             
 
         def apply_changes() -> None:
@@ -558,17 +557,17 @@ class RegPopUp(ctk.CTkToplevel):
             register_frame.pack(fill='x', padx=5, pady=2, expand=False)
 
             # Create a label for the register
-            reg_label = ctk.CTkLabel(register_frame, text=f"R{i}: ")
+            reg_label = ctk.CTkLabel(register_frame, text=f'R{i}: ')
             reg_label.pack(side='left')
 
             # Create an entry widget for the register value
             entry = ctk.CTkTextbox(register_frame, height=30)
             entry.pack(side='left', fill='x', expand=False)
-            entry.bind("<KeyPress>", on_entry_keypress)
+            entry.bind('<KeyPress>', on_entry_keypress)
             self.register_entries.append(entry)
 
         # Button to apply changes
-        self.apply_button = ctk.CTkButton(self.frame, text="Apply Changes", command=apply_changes)
+        self.apply_button = ctk.CTkButton(self.frame, text='Apply Changes', command=apply_changes)
         self.apply_button.pack(side='top')
 
         # Make the popup window stay on top of other windows
@@ -612,10 +611,10 @@ class MemAndBin(ctk.CTkTabview):
 
         # Filling the code treeview
         for i in range(2048):
-            address = '0x'+format(i*2+134217736, '08x')
-            hex_value = '0x0000'
-            instruction = ''
-            tags = ('even_row', 'odd_row')[i % 2 == 1]
+            address: str = '0x'+format(i*2+134217736, '08x')
+            hex_value: str = '0x0000'
+            instruction: str = ''
+            tags: str = ('even_row', 'odd_row')[i % 2 == 1]
             self.code_tree.insert('', 'end', values=(address, hex_value, instruction), tags=(tags,))
 
         # Vertical scrollbar
@@ -641,9 +640,9 @@ class MemAndBin(ctk.CTkTabview):
 
         # Filling the user treeview
         for i in range(2048):
-            address = '0x'+format(i*4+536870912, '08x')
-            hex_value = '0x00000000'
-            tags = ('even_row', 'odd_row')[i % 2 == 1]
+            address: str = '0x'+format(i*4+536870912, '08x')
+            hex_value: str = '0x00000000'
+            tags: str = ('even_row', 'odd_row')[i % 2 == 1]
             self.user_tree.insert('', 'end', values=(address, hex_value), tags=(tags,))
 
         # Vertical scrollbar
@@ -1012,6 +1011,10 @@ class Toolbar(ctk.CTkFrame):
             register_window.edit_button.configure(fg_color='gray', state='disabled')
             self.state = 1
 
+            # Empties debugger
+            master.debugger_window.delete_content()
+            debugger_window.update_line_count()  # Update the line count in the Debugger
+
             # Fetching the code
             code: str = asm_window.get_text_content()
         
@@ -1024,7 +1027,7 @@ class Toolbar(ctk.CTkFrame):
                 'partying without you', 'wearing flip-flops', 'delayed', 'still sleeping', 'sipping a cocktail', 'quoting EDDY-MALOU']
                 random_variation = random.choice(variations)
 
-                debugger_window.insert_content("Assembling air? Your code is "+random_variation+'.', 'blue')
+                debugger_window.insert_content('Assembling air? Your code is '+random_variation+'.', 'blue')
                 master.toolbar.assemble_button.configure(fg_color='forestgreen', state='normal')
                 self.state = 0
 
@@ -1136,7 +1139,7 @@ class ConnectPopUp(ctk.CTkToplevel):
 
         self.title('Connect Board')  # Title
         self.geometry('400x200')
-        self.label = ctk.CTkLabel(self, text="Aucun port COM disponible", font=("Arial",20), fg_color="red")  # Frame
+        self.label = ctk.CTkLabel(self, text='Aucun port COM disponible', font=('Arial',20), fg_color='red')  # Frame
         self.label.pack(fill='both', expand=True)
 
         # Make the popup window stay on top of other windows
@@ -1425,8 +1428,8 @@ class LCM3Documentation(ctk.CTkToplevel):
         'ADD Rd,#imm8\t\t\tRd<=Rd+ZE(imm8)\t\t\t0≤imm8≤255\t\t\t 0     0     1     1     0   |        d         |           imm8 (unsigned)\n'
         'ADD Rd,Rn,Rm\t\t\tRd<=Rn+Rm\t\t\t\t\t\t 0     0     0     1     1     0     0   |        m         |        n         |         d\n'
         'AND Rd,Rm\t\t\tRd<=Rd AND Rm\t\t\t\t\t\t 0     1     0     0     0     0     0     0     0     0   |        m        |         d\n'
-        "B label\t\t\tPC<=adr(label)\t\t\t-2^10≤imm11≤2^10-1\t\t\t 1     1     1     0     0   |         imm11 (Δi in 2's complt)\n"
-        "BXX label\t\t\tif Z=0 then PC<=adr(label)\t\t\t-2^7≤imm8≤2^7-1\t\t\t 1     1     0     1   |     XX=cond      |           imm8 (Δi in 2's complt)\n"
+        'B label\t\t\tPC<=adr(label)\t\t\t-2^10≤imm11≤2^10-1\t\t\t 1     1     1     0     0   |         imm11 (Δi in 2\'s complt)\n'
+        'BXX label\t\t\tif Z=0 then PC<=adr(label)\t\t\t-2^7≤imm8≤2^7-1\t\t\t 1     1     0     1   |     XX=cond      |           imm8 (Δi in 2\'s complt)\n'
         'CMP Rn,#imm8\t\t\tNZVC<=Rn-ZE(imm8)\t\t\t0≤imm8≤2^8-1\t\t\t 0     0     1     0     1   |        n         |           imm8 (unsigned)\n'
         'CMP Rd,Rm\t\t\tNZVC<=Rd-Rm\t\t\t\t\t\t 0     1     0     0     0     0     1     0     1     0   |        m        |         d\n'
         'EOR Rd,Rm\t\t\tRd<=Rd xor Rm\t\t\t\t\t\t 0     1     0     0     0     0     0     0     0     1   |        m        |         d\n'
@@ -1447,10 +1450,10 @@ class LCM3Documentation(ctk.CTkToplevel):
         '\tXX=LE ↔ Z=1 ou N !=V (Less or equal)\t\t\t\t\t↔ cond=1101\n\n\n'
         'ZE: Zero Extend; extension of the value to 32 bits (unsigned)\n'
         'The variables n, d, m or imm3 are unsigned.\n'
-        "Only one instruction modifies the flags NZVC here: it's 'CMP'.\n"
+        'Only one instruction modifies the flags NZVC here: it\'s "CMP".\n'
         'Mw[adr] is a word (32 bits) in memory at address adr.\n'
         'Remark : adr must be a multiple of 4: 0, 4, 8, 0xC, 0x10…\n'
-        "The function align4(i)= (i/4)*4 : it's equivalent to clear the 2 LSBs.\n"
+        'The function align4(i)= (i/4)*4 : it\'s equivalent to clear the 2 LSBs.\n'
         '\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n')
 
         self.title('LCM3 Instruction Set')                          # Title
@@ -1479,16 +1482,16 @@ class SimulatorDocumentation(ctk.CTkToplevel):
         super().__init__()
 
         self.text: str = ('\n\n\n'+
-        "------------------------ ENSEA's Python LCM3 Simulator ------------------------\n\n"
+        '------------------------ ENSEA\'s Python LCM3 Simulator ------------------------\n\n'
         '    Engineers :\n\n'
         '    APPOURCHAUX Léo, BITTAUD CANOEN Laël, GABORIEAU Cyprien, JIN Clémentine\n'
         '    LATRECHE Loubna, OULAD ALI Rym, XIANG Justine, YE Yumeng\n\n'
         '    Professors :\n\n'
         '    Mr. Kessal, Mr. Laroche, Mr. Monchal\n\n'
         '-------------------------------------------------------------------------------\n\n\n\n'
-        "ENSEA's Python LCM3 Simulator Documentation\n\n"
+        'ENSEA\'s Python LCM3 Simulator Documentation\n\n'
         '1. Introduction\n'
-        "    ENSEA's Python LCM3 Simulator is a tool that simulates the execution of programs "
+        '    ENSEA\'s Python LCM3 Simulator is a tool that simulates the execution of programs '
         'written in LCM3 assembly language. This documentation will guide you through all the '
         'features and capabilities of the simulator.\n\n\n'
         '2. Interface Features\n'
@@ -1504,7 +1507,7 @@ class SimulatorDocumentation(ctk.CTkToplevel):
         '            Light mode: Toggles light mode.\n\n'
         '        Help menu:\n'
         '            This Simulator Documentation: Opens this help window.\n'
-        "            LCM3 Documentation: Tries to open the ASM LCM3 Doc on Moodle (if your professors didn't delete it). You need to be logged in to see it.\n\n"
+        '            LCM3 Documentation: Tries to open the ASM LCM3 Doc on Moodle (if your professors didn\'t delete it). You need to be logged in to see it.\n\n'
         '        Assemble button: Assembles the code (compiles),\n'
         '                         displays syntax errors in the Debugger, displays the binary translation of your code in the Binary window.\n'
         '                         Also resets the Registers, the Memory, the Pipeline, the Debugger and the Binary window.\n\n'
@@ -1517,12 +1520,12 @@ class SimulatorDocumentation(ctk.CTkToplevel):
         '    2.3 Debugger\n'
         '        In this frame, you have acces to a feedback on your code, eventual errors, and info about the execution of the simulation.\n\n\n'
         '    2.4 Registers\n'
-        "        The register panel displays the current values of the simulator's registers.\n"
+        '        The register panel displays the current values of the simulator\'s registers.\n'
         '        You also have a step counter above, useful for debugging and performance assessement.\n'
         '        You can also change the display mode of the values between decimal and hexadecimal.\n\n\n'
         '    2.5 Code Memory tab\n'
         '        This tab shows where your code is saved on the board (the ROM).\n'
-        "        You can see the addresses where each instruction is stored along with it's translation in hexadecimal.\n"
+        '        You can see the addresses where each instruction is stored along with it\'s translation in hexadecimal.\n'
         '        As every instruction in the LCM3 is coded on 16 bits, and each memory address can contain 8 bits of information,\n'
         '        instructions are stored in every other address.\n\n\n'
         '    2.6 User Memory tab\n'
@@ -1539,12 +1542,12 @@ class SimulatorDocumentation(ctk.CTkToplevel):
         '    3.1 Writing LCM3 Code\n'
         '        Each instruction must be on a separate line.\n'
         '        You can use spaces, tabs and new lines at will to improve the visibility of your code.\n'
-        "        HOW TO WRITE COMMENTS: Just put a semicolon ';' before your comment.\n\n\n"
+        '        HOW TO WRITE COMMENTS: Just put a semicolon \';\' before your comment.\n\n\n'
         '    3.2 Running the Simulator\n'
         '        1 - ASSEMBLE YOUR CODE!\n\n'
         '        Step-By-Step execution:\n'
         '            2 - Click Run Step by Step to start the execution.\n'
-        "            3 - Click Step to execute a step. Don't forget to watch the memory and registers ;)\n\n"
+        '            3 - Click Step to execute a step. Don\'t forget to watch the memory and registers ;)\n\n'
         '        Run in one go:\n'
         '            2bis - Just run the code.\n\n'
         '        You can reset stored values at anytime with the reset button.\n\n\n'
@@ -1557,7 +1560,7 @@ class SimulatorDocumentation(ctk.CTkToplevel):
         '4. Troubleshooting\n'
         '    4.1 Breakpoints\n'
         '        You can place and remove multiple breakpoints at any point of the execution.\n'
-        "        Don't hesitate to place some.\n"
+        '        Don\'t hesitate to place some.\n'
         '        (Breakpoint placing might be glitched if your monitor resolution exeeds 4K).\n\n\n'
         '    4.2 Common Errors\n'
         '        - Invalid Syntax: CHECK THE SYNTAX of your LCM3 instructions!\n'
@@ -1572,7 +1575,7 @@ class SimulatorDocumentation(ctk.CTkToplevel):
         '        AND CHECK THE LCM3 SYNTAX!\n\n\n\n'
         '\t\t\t\tHave a nice time coding!\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n')
 
-        self.title("ENSEA's Python LCM3 Simulator - Documentation")  # Title
+        self.title('ENSEA\'s Python LCM3 Simulator - Documentation')  # Title
         self.geometry('1200x800')
         self.frame = ctk.CTkFrame(self)                              # Frame
         self.frame.pack(fill='both', expand=True)
