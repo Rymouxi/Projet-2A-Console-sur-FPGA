@@ -24,7 +24,7 @@ import math
 from instruction_translation import *
 
 
-
+# Empty debugg on assemble
 
 
 
@@ -46,7 +46,7 @@ file_path = None
 class EnseaSimulator(ctk.CTk):
     '''Main simulator window. Contains all the interface objects.'''
 
-    def __init__(self):        
+    def __init__(self) -> None:        
         super().__init__()
 
         self.title("ENSEA's Python LCM3 ASM Simulator")                                  # Simulator title
@@ -85,12 +85,12 @@ class EnseaSimulator(ctk.CTk):
         self.theme_toggle_dark()
 
 
-    def theme_toggle_dark(event=None):
+    def theme_toggle_dark(event=None) -> None:
         '''Toggles dark theme.'''
         ctk.set_appearance_mode('dark')
 
 
-    def theme_toggle_light(event=None):
+    def theme_toggle_light(event=None) -> None:
         '''Toggles light theme.'''
         ctk.set_appearance_mode('light')
 
@@ -106,10 +106,10 @@ class EnseaSimulator(ctk.CTk):
 class ASMWindow(ctk.CTkFrame):
     '''Contains all the frames and functions linked to the ASM coding area.'''
 
-    def __init__(self, master):
+    def __init__(self, master) -> None:
         super().__init__(master)
 
-        def update_btns_on_modif(self, event=None):
+        def update_btns_on_modif(self, event=None) -> None:
             '''Reenables the assembly button and turns off the others on code modification by the user.'''
 
             if master.master.master.master.toolbar.state != 0:
@@ -119,21 +119,21 @@ class ASMWindow(ctk.CTkFrame):
                 master.master.master.master.toolbar.state = 0
 
 
-        def update_line_view(event=None):
+        def update_line_view(event=None) -> None:
             '''Updates the view of the line counter to sync it with the textbox.'''
 
-            textbox_scroll_fraction = self.textbox.yview()[0]      # Get the current vertical scrollbar position of the textbox
-            self.line_count.yview_moveto(textbox_scroll_fraction)  # Set the vertical scrollbar position of the line counter to match the textbox
-            self.after(10, update_line_view)                       # Schedule the function to run again after 10 milliseconds
+            textbox_scroll_fraction: float = self.textbox.yview()[0]  # Get the current vertical scrollbar position of the textbox
+            self.line_count.yview_moveto(textbox_scroll_fraction)     # Set the vertical scrollbar position of the line counter to match the textbox
+            self.after(10, update_line_view)                          # Schedule the function to run again after 10 milliseconds
 
 
-        def place_breakpoint(event=None):
+        def place_breakpoint(event=None) -> None:
             '''Place a breakpoint on the clicked line.'''
 
             number_of_lines = int(self.textbox.index('end-1c').split('.')[0])  # Get the total number of lines in the text widget
-            hidden_part = self.textbox.yview()[0]                              # Get the ratio of what is hidden
-            hidden_lines = hidden_part * number_of_lines                       # Get the number of hidden lines
-            line_visible_click = event.y / 19 + 1                              # Get the number of the line clicked relative to the frame
+            hidden_part: float = self.textbox.yview()[0]                       # Get the ratio of what is hidden
+            hidden_lines: float = hidden_part * number_of_lines                # Get the number of hidden lines
+            line_visible_click: float = event.y / 19 + 1                       # Get the number of the line clicked relative to the frame
             line_number = int(line_visible_click + hidden_lines)               # Get the real number of the line
 
             # Add or remove the breakpoint
@@ -172,7 +172,7 @@ class ASMWindow(ctk.CTkFrame):
         self.line_count.tag_config('breakpoint', foreground='#FF0000', background='#502020')  # Red
 
         # Breakpoint list
-        self.break_list = []
+        self.break_list: list[str] = []
 
         # Bind events to update syntax highlighting, buttons update, and line counter update
         self.textbox.bind('<KeyRelease>', self.highlight_syntax)
@@ -189,15 +189,15 @@ class ASMWindow(ctk.CTkFrame):
         self.update_line_count()
 
 
-    def update_line_count(self, event=None):
+    def update_line_count(self, event=None) -> None:
         '''Updates the content of the line counter widget with line numbers.'''
 
-        line_count = int(self.textbox.index('end-1c').split('.')[0])        # Get the number of lines in the textbox
-        line_numbers = '\n'.join(str(i) for i in range(1, line_count + 1))  # Generate line numbers
-        self.line_count.configure(state='normal')                           # Make text editable
-        self.line_count.delete(1.0, tk.END)                                 # Clear previous content
-        self.line_count.insert(1.0, line_numbers)                           # Insert new line numbers
-        self.line_count.configure(state='disabled')                         # Make text disabled again
+        line_count = int(self.textbox.index('end-1c').split('.')[0])             # Get the number of lines in the textbox
+        line_numbers: str = '\n'.join(str(i) for i in range(1, line_count + 1))  # Generate line numbers
+        self.line_count.configure(state='normal')                                # Make text editable
+        self.line_count.delete(1.0, tk.END)                                      # Clear previous content
+        self.line_count.insert(1.0, line_numbers)                                # Insert new line numbers
+        self.line_count.configure(state='disabled')                              # Make text disabled again
         self.line_count.configure(width=35+7*math.floor(math.log10(int(line_numbers.splitlines()[-1]))))  # Sets an appropriate width for the frame
 
         # Remove existing breakpoints
@@ -205,16 +205,16 @@ class ASMWindow(ctk.CTkFrame):
 
         # Adding new breakpoints
         for line_number in self.break_list:
-            start_index = f"{line_number}.0"  # Calculate the index of the start of the line
-            end_index = f"{line_number}.end"  # Calculate the index of the end of the line
+            start_index: str = f"{line_number}.0"  # Calculate the index of the start of the line
+            end_index: str = f"{line_number}.end"  # Calculate the index of the end of the line
             self.line_count.tag_add('breakpoint', start_index, end_index)  # Add the 'breakpoint' tag to highlight the line
 
 
-    def highlight_syntax(self, event=None, errors=[], next_line:int=-1, breakpoint:int=-1):
+    def highlight_syntax(self, event=None, errors=[], next_line:int=-1, breakpoint:int=-1) -> None:
         '''Update syntax highlighting.'''
 
         # Define patterns and corresponding tags
-        patterns = {
+        patterns: dict[str] = {
             ' R': 'Register', ' r': 'register',
             '[\\[\\]]': 'bracket', ',': 'comma',
             '#': 'hash', ';': 'comment',
@@ -232,14 +232,14 @@ class ASMWindow(ctk.CTkFrame):
 
         # Looking for labels
 
-        index = '1.0'
+        index: str = '1.0'
         while True:
             index = self.textbox.search(':', index, tk.END)
             if not index:
                 break
             # Tag the text before the semicolon
-            start_index = self.textbox.index(f'{index} linestart')
-            end_index = self.textbox.index(f'{index}+1c')
+            start_index: str = self.textbox.index(f'{index} linestart')
+            end_index: str = self.textbox.index(f'{index}+1c')
             self.textbox.tag_add('label', start_index, end_index)
             index = f'{index}+1c'
 
@@ -291,12 +291,12 @@ class ASMWindow(ctk.CTkFrame):
             self.textbox.tag_add('breakline', start_index, end_index)
 
 
-    def correct_line(self, line_number: int):
+    def correct_line(self, line_number: int) -> int:
         '''Computes the real line pointed by 'Error' or 'Execute' from the simulator and the empty lines in the ASM window.'''
 
-        content = self.get_text_content().split('\n')  # Get the content of the text box and split it into lines
-        n = 0
-        real = 0
+        content: str = self.get_text_content().split('\n')  # Get the content of the text box and split it into lines
+        n: int = 0
+        real: int = 0
 
         for line in content:
             line = line.split(';')[0]  # Ignore comments
@@ -309,22 +309,22 @@ class ASMWindow(ctk.CTkFrame):
         return -1
 
 
-    def get_text_content(self):
+    def get_text_content(self) -> str:
         '''Gets the content of the text box.'''
         return self.textbox.get('1.0', tk.END)
 
 
-    def delete_content(self):
+    def delete_content(self) -> None:
         '''Deletes the content of the text box.'''
         return self.textbox.delete('1.0', tk.END)
     
 
-    def insert_content(self, content):
+    def insert_content(self, content: str) -> None:
         '''Inserts the content in the text box.'''
         return self.textbox.insert(tk.END, content)
     
 
-    def get_breakpoints(self):
+    def get_breakpoints(self) -> list[str]:
         '''Gives the list of breakpoints.'''
         return self.break_list
 
@@ -340,15 +340,15 @@ class ASMWindow(ctk.CTkFrame):
 class DebuggerWindow(ctk.CTkFrame):
     '''Contains all the frames and functions linked to the debugger area.'''
 
-    def __init__(self, master):
+    def __init__(self, master) -> None:
         super().__init__(master)
 
-        def update_line_numbers(event=None):
+        def update_line_numbers(event=None) -> None:
             '''Updates the view of the line counter to sync it with the textbox.'''
 
-            textbox_scroll_fraction = self.textbox.yview()[0]      # Get the current vertical scrollbar position of the textbox
-            self.line_count.yview_moveto(textbox_scroll_fraction)  # Set the vertical scrollbar position of the line counter to match the textbox
-            self.after(10, update_line_numbers)                    # Schedule the function to run again after 10 milliseconds
+            textbox_scroll_fraction: float = self.textbox.yview()[0]  # Get the current vertical scrollbar position of the textbox
+            self.line_count.yview_moveto(textbox_scroll_fraction)     # Set the vertical scrollbar position of the line counter to match the textbox
+            self.after(10, update_line_numbers)                       # Schedule the function to run again after 10 milliseconds
 
 
         self.frame = ctk.CTkFrame(self, corner_radius=0)                                # Object Frame
@@ -368,7 +368,7 @@ class DebuggerWindow(ctk.CTkFrame):
         self.update_line_count()
     
 
-    def delete_content(self):
+    def delete_content(self) -> None:
         '''Deletes the content of the text box.'''
 
         self.textbox.configure(state='normal')
@@ -376,7 +376,7 @@ class DebuggerWindow(ctk.CTkFrame):
         self.textbox.configure(state='disabled', text_color='black')
     
 
-    def insert_content(self, content:str, color='silver'):
+    def insert_content(self, content:str, color:str='silver') -> None:
         '''Inserts the content in the text box with specified color.'''
 
         self.textbox.configure(state='normal')
@@ -384,7 +384,7 @@ class DebuggerWindow(ctk.CTkFrame):
         self.textbox.configure(state='disabled', text_color=color)
 
 
-    def update_line_count(self, event=None):
+    def update_line_count(self, event=None) -> None:
         '''Updates the content of the line counter widget with line numbers.'''
 
         line_count = int(self.textbox.index('end-1c').split('.')[0])        # Get the number of lines in the textbox
@@ -407,10 +407,11 @@ class DebuggerWindow(ctk.CTkFrame):
 class RegisterWindow(ctk.CTkFrame):
     '''Contains all the frames and functions linked to the Registers area, and the step counter'''
 
-    def __init__(self, master):
+    def __init__(self, master) -> None:
         super().__init__(master)
 
-        def popup():
+        def popup() -> None:
+            '''Calls the register popup editing class.'''
             RegPopUp(self)
 
         self.frame = ctk.CTkFrame(self, corner_radius=0)  # Object Frame
@@ -433,7 +434,7 @@ class RegisterWindow(ctk.CTkFrame):
         self.sub_frame.pack(side='top', fill='both')
 
         # Storing register values
-        self.value_labels = []
+        self.value_labels: list[ctk.CTkLabel] = []
 
         # Create data entry widgets for Register 0 to 7
         for i in range(8):
@@ -466,10 +467,10 @@ class RegisterWindow(ctk.CTkFrame):
         self.edit_button.pack(side='top')
         self.display = 0  # Variable to keep track of the mode
 
-        self.modified_regs = []
+        self.modified_regs: list[str] = []
 
 
-    def set_register_values(self, index:int, value:str):
+    def set_register_values(self, index:int, value:str) -> None:
         '''Set register values using a list.'''
 
         if self.display == 0:  # in dec
@@ -481,7 +482,7 @@ class RegisterWindow(ctk.CTkFrame):
             self.change_format()
 
 
-    def change_format(self):
+    def change_format(self) -> None:
         '''Change the format of values to hexadecimal.'''
 
         if self.display == 0:  # in dec
@@ -501,7 +502,7 @@ class RegisterWindow(ctk.CTkFrame):
                 self.switch_button.configure(text='Switch to Hexa')
 
 
-    def set_step(self, value:int):
+    def set_step(self, value:int) -> None:
         '''Changes the step number displayed.'''
         self.step_counter_value.configure(text=str(value))
 
@@ -515,10 +516,10 @@ class RegisterWindow(ctk.CTkFrame):
 class RegPopUp(ctk.CTkToplevel):
     '''Contains the popup to change register values.'''
 
-    def __init__(self, master):
+    def __init__(self, master) -> None:
         super().__init__(master)
 
-        def on_entry_keypress(event):
+        def on_entry_keypress(event) -> None:
             '''Callback function to handle keypress event in entry widgets.'''
             # Raises letters to upper case
             if event.char.isdigit() or event.keysym in {'Right', 'Left', 'Up', 'Down', 'Delete', 'BackSpace'}:
@@ -527,7 +528,7 @@ class RegPopUp(ctk.CTkToplevel):
                 return "break"  # Prevent the default action for lowercase characters
             
 
-        def apply_changes():
+        def apply_changes() -> None:
             '''Apply changes to the values inside the registers.'''
             master.modified_regs = []
             for i, entry in enumerate(self.register_entries):
@@ -549,7 +550,7 @@ class RegPopUp(ctk.CTkToplevel):
         self.frame.pack(fill='both', expand=True)
 
         # Entry widgets for register values
-        self.register_entries = []  # List to hold the register entry widgets
+        self.register_entries: list[ctk.CTkTextbox] = []  # List to hold the register entry widgets
 
         for i in range(8):
             # Create a vertical frame for each register entry
@@ -586,7 +587,7 @@ class MemAndBin(ctk.CTkTabview):
     '''Contains all the frames and functions linked to the memory and binary tabs.\n
        This includes the Code memory (ROM), User memory (RAM), and Binary window with the bitstream.'''
 
-    def __init__(self, master):
+    def __init__(self, master) -> None:
         super().__init__(master)
 
         # Tabs
@@ -662,21 +663,21 @@ class MemAndBin(ctk.CTkTabview):
         self.bin_textbox.configure(state='disabled')
 
 
-    def code_mem_set(self, index:str, value:str='0', instruction:str=''):
+    def code_mem_set(self, index:str, value:str='0', instruction:str='') -> None:
         '''Set values for a chosen line in the treeview.'''
 
         self.item_id = self.code_tree.get_children()[int(index)]  # Get the item ID based on the index
         self.code_tree.item(self.item_id, values=('0x'+format(index*2+134217736, '08x'), '0x'+format(int(value, 2), '04x'), instruction))
 
     
-    def user_mem_set(self, index:str, value:int=0):
+    def user_mem_set(self, index:str, value:int=0) -> None:
         '''Set values for a chosen line in the treeview.'''
 
         self.item_id = self.user_tree.get_children()[int(index[2:], 16)//4-134217728]  # Get the item ID based on the index
         self.user_tree.item(self.item_id, values=('0x'+format((int(index[2:], 16)-536870912)+536870912, '08x'), '0x'+format(value, '08x')))
 
 
-    def delete_bin(self):
+    def delete_bin(self) -> None:
         '''Deletes the content of the text box.'''
 
         self.bin_textbox.configure(state='normal')
@@ -684,7 +685,7 @@ class MemAndBin(ctk.CTkTabview):
         self.bin_textbox.configure(state='disabled')
     
 
-    def insert_bin(self, content:str):
+    def insert_bin(self, content:str) -> None:
         '''Inserts the content in the text box.'''
         
         self.bin_textbox.configure(state='normal')
@@ -703,10 +704,10 @@ class MemAndBin(ctk.CTkTabview):
 class PipelineWindow(ctk.CTkFrame):
     '''Contains all the frames and functions linked to the pipeline.'''
 
-    def __init__(self, master):
+    def __init__(self, master) -> None:
         super().__init__(master)
 
-        pip_headers = ['Fetch', 'Decode', 'Execute']
+        pip_headers: list[str] = ['Fetch', 'Decode', 'Execute']
 
         # Create header labels on the left
         for i, header in enumerate(pip_headers):
@@ -727,7 +728,7 @@ class PipelineWindow(ctk.CTkFrame):
             self.grid_columnconfigure(j, weight=1)
 
 
-    def get_cell(self, row:int, col:int):
+    def get_cell(self, row:int, col:int) -> (tuple[str, str] | None):
         '''Get the value in the specified cell.'''
 
         if 0 <= row <= 2 and 1 <= col <= 20:
@@ -737,7 +738,7 @@ class PipelineWindow(ctk.CTkFrame):
             return None
 
 
-    def set_cell(self, row:int, col:int, value:str, color:str=None):
+    def set_cell(self, row:int, col:int, value:str, color:str=None) -> None:
         '''Set the value in the specified cell.'''
         
         if 0 <= row <= 2 and 1 <= col <= 20:
@@ -753,7 +754,7 @@ class PipelineWindow(ctk.CTkFrame):
                 entry_widget.configure(state='readonly')  # Make readonly again
 
 
-    def iter_pip(self, value:str, color:str=None):
+    def iter_pip(self, value:str, color:str=None) -> None:
         '''Shifts the whole pipeline on the right and creates a new FDE column on the left.'''
 
         # Shift on the right
@@ -774,13 +775,13 @@ class PipelineWindow(ctk.CTkFrame):
         else:
             # Assign a new color for the instruction
             if color:
-                new_color = color
+                new_color: str = color
             else:
-                new_color = self.generate_random_color()
+                new_color: str = self.generate_random_color()
                 self.set_cell(0, 1, value, new_color)
 
     
-    def generate_random_color(self):
+    def generate_random_color(self) -> str:
         '''Generate a random hexadecimal color code.'''
         return '#{:02x}'.format(random.randint(0x40, 0x70))+'{:02x}'.format(random.randint(0x40, 0x70))+'{:02x}'.format(random.randint(0x40, 0x70))
 
@@ -797,22 +798,22 @@ class Toolbar(ctk.CTkFrame):
     '''Contains all the buttons and corresponding functions from the toolbar at the top of the screen.\n
        The classes and function of the toolbar are located in the FileMenu class and the next ones. '''
 
-    def __init__(self, master, asm_window, debugger_window, register_window, mem_and_bin, pipeline_window):
+    def __init__(self, master, asm_window, debugger_window, register_window, mem_and_bin, pipeline_window) -> None:
         super().__init__(master)
 
         def download_code():
             '''Downloads the code on the board and starts the execution.\n
                CURRENTLY NOT SUPPORTED!'''
+            raise NotImplementedError('We can\'t connect yet')
 
 
-        def connect_board():
+        def connect_board() -> None:
             '''Opens a popup to choose option for connection to a board.\n
                CURRENTLY NOT SUPPORTED!'''
             ConnectPopUp(self)
 
 
-
-        def reset():
+        def reset() -> None:
             '''Resets the values in registers, pipeline, binary, and memory arrays.'''
 
             # Updates button states
@@ -866,7 +867,7 @@ class Toolbar(ctk.CTkFrame):
             register_window.edit_button.configure(fg_color='forestgreen', state='normal')
 
 
-        def stop():
+        def stop() -> None:
             '''Stops the Step-by-step execution.'''
 
             # Stop the runsbs
@@ -883,7 +884,7 @@ class Toolbar(ctk.CTkFrame):
             asm_window.highlight_syntax()
 
 
-        def run_step_by_step():
+        def run_step_by_step() -> None:
             '''Launches the step y step execution of the code.'''
 
             # Updates button states
@@ -920,7 +921,7 @@ class Toolbar(ctk.CTkFrame):
                     self.state += 1
 
                     # Higlight the next line in ASM window
-                    next_line = asm_window.correct_line(master.toolbar.line_update[self.state - 4] + 1)  # Corrects for eventual empty lines
+                    next_line: int = asm_window.correct_line(master.toolbar.line_update[self.state - 4] + 1)  # Corrects for eventual empty lines
                     asm_window.highlight_syntax(None, [], next_line)
 
                 # End of the step-by-step
@@ -937,7 +938,7 @@ class Toolbar(ctk.CTkFrame):
                     debugger_window.update_line_count()  # Update the line count in the Debugger
 
 
-        def run():
+        def run() -> None:
             '''Runs the code in one go.\n
                Also allows to resume after a runsbs.'''
 
@@ -946,11 +947,10 @@ class Toolbar(ctk.CTkFrame):
                 self.state = 2  # Corresponds to 0 executions (1decode or 2fetch)
 
             # Check if there are breakpoints
-            breaks = asm_window.get_breakpoints().copy()
-
+            breaks: list[int] = asm_window.get_breakpoints().copy()
 
             # Get all the breakpoints taking loops into account
-            real_breaks = []
+            real_breaks: list[int] = []
             for i,e in enumerate(master.toolbar.line_update):
                 if asm_window.correct_line(e) in breaks:
                     real_breaks.append(i)
@@ -961,7 +961,7 @@ class Toolbar(ctk.CTkFrame):
             if real_breaks != []:
                 while self.state - 3 < real_breaks[0]:  # Gets to the next breakpoint
                     run_step_by_step()
-                next_line = asm_window.correct_line(master.toolbar.line_update[self.state - 4] + 1)  # Corrects for eventual empty lines
+                next_line: int = asm_window.correct_line(master.toolbar.line_update[self.state - 4] + 1)  # Corrects for eventual empty lines
                 asm_window.highlight_syntax(None, [], -1, next_line)
                 debugger_window.insert_content('Breakpoint: Line %d - Step %d (%s)\n\n' % (next_line, real_breaks[0], master.toolbar.split_instructions[master.toolbar.line_update[self.state - 4]]), 'yellow')
                 debugger_window.update_line_count()  # Update the line count in the Debugger
@@ -981,7 +981,7 @@ class Toolbar(ctk.CTkFrame):
                     register_window.set_register_values(i, virtual_register[i])
                 for e in master.toolbar.register_update:
                     if e != [] and e[0] == 8:
-                        nzvc = e[1]
+                        nzvc: str = e[1]
                         register_window.set_register_values(8, nzvc)
 
                 # Update User RAM values
@@ -1004,7 +1004,7 @@ class Toolbar(ctk.CTkFrame):
                 asm_window.highlight_syntax()
 
 
-        def assemble():
+        def assemble() -> None:
             '''Assembles the code.'''
 
             # Cleaning
@@ -1013,7 +1013,7 @@ class Toolbar(ctk.CTkFrame):
             self.state = 1
 
             # Fetching the code
-            code = asm_window.get_text_content()
+            code: str = asm_window.get_text_content()
         
             # Check if code is empty
             if code == '\n':
@@ -1045,9 +1045,9 @@ class Toolbar(ctk.CTkFrame):
                     self.state = 0
 
                     # Display error in debugger
-                    lines = []
+                    lines: list[int] = []
                     for i in range(len(master.toolbar.error)//2):
-                        error_line = asm_window.correct_line(master.toolbar.error[2*i+1]+1)  # Corrects for eventual empty lines
+                        error_line: int = asm_window.correct_line(master.toolbar.error[2*i+1]+1)  # Corrects for eventual empty lines
                         debugger_window.insert_content('%s at line %d\n' % (master.toolbar.error[2*i], error_line), 'red')
                         lines.append(error_line)
 
@@ -1071,7 +1071,7 @@ class Toolbar(ctk.CTkFrame):
 
                     # Fills the Code RAM array and the bitstream frame
                     if len(master.toolbar.bitstream) != 0:
-                        offset = 0
+                        offset: int = 0
                         for l in range(len(master.toolbar.split_instructions)-1):
                             if master.toolbar.split_instructions[l] != '' and master.toolbar.split_instructions[l].find(':') == -1:
 
@@ -1117,7 +1117,7 @@ class Toolbar(ctk.CTkFrame):
         self.help_menu.pack(side='left')
 
         # Variable keeping track of the running state (assembled? runsbs? run? which step?)
-        self.state = 0
+        self.state: int = 0
 
         self.split_instruction, self.line_instruction, self.bitstream, self.register_update, self.line_update, self.memory_update, self.error = [], [], [], [], [], [], []
 
@@ -1131,7 +1131,7 @@ class Toolbar(ctk.CTkFrame):
 class ConnectPopUp(ctk.CTkToplevel):
     '''Contains the popup to connect to a board.'''
 
-    def __init__(self, master):
+    def __init__(self, master) -> None:
         super().__init__(master)
 
         self.title('Connect Board')  # Title
@@ -1154,10 +1154,10 @@ class ConnectPopUp(ctk.CTkToplevel):
 class FileMenu(ctk.CTkFrame):
     '''Calls specific classes to create the menus in the top left of the toolbar.'''
 
-    def __init__(self, master, asm_window):
+    def __init__(self, master, asm_window) -> None:
         super().__init__(master)
 
-        def save_as():
+        def save_as() -> None:
             '''Opens a dialog window to save the current code into a new file.\n
                It wont save it automatically like the 'save' function does.'''
 
@@ -1166,12 +1166,12 @@ class FileMenu(ctk.CTkFrame):
             file_path = tk.filedialog.asksaveasfilename(defaultextension='.txt', filetypes=[('Text files', '*.txt'), ('All files', '*.*')])
             if file_path:
                 with open(file_path, 'w') as file:
-                    saved_code = asm_window.get_text_content()  # Gets the code from the text area
+                    saved_code: str = asm_window.get_text_content()  # Gets the code from the text area
                     file.write(saved_code)
                     asm_window.highlight_syntax()
 
 
-        def new_file():
+        def new_file() -> None:
             '''Creates a new blank code page. If code is present in the text window, asks if the user wants to save the current code.\n
                If yes: Calls the 'save_as' function.\n
                If not: The current code will be lost !'''
@@ -1188,7 +1188,7 @@ class FileMenu(ctk.CTkFrame):
                 asm_window.delete_content()
 
 
-        def import_code():
+        def import_code() -> None:
             '''Opens a dialog window to import a code. If code is present in the text window, asks if the user wants to save the current code.\n
                If yes: Calls the 'save_as' function.\n
                If not: The current code will be lost !'''
@@ -1206,7 +1206,7 @@ class FileMenu(ctk.CTkFrame):
             file_path = tk.filedialog.askopenfilename(filetypes=[('Text files', '*.txt'), ('All files', '*.*')])
             if file_path:
                 with open(file_path, 'r') as file:
-                    imported_code = file.read()
+                    imported_code: str = file.read()
 
                     # Pastes imported code into the text area
                     asm_window.delete_content()               # Clears the text area content
@@ -1215,7 +1215,7 @@ class FileMenu(ctk.CTkFrame):
                     asm_window.update_line_count()            # Updates the line counter after import
 
 
-        def save():
+        def save() -> None:
             '''Overwrites the current save file, or opens a dialog window to create a one.'''
 
             global file_path
@@ -1227,7 +1227,7 @@ class FileMenu(ctk.CTkFrame):
             # If the user selected a file location, saves the content of the text area to the file
             if file_path:
                 with open(file_path, 'w') as file:
-                    saved_code = asm_window.get_text_content()  # Gets the code from the text area
+                    saved_code: str = asm_window.get_text_content()  # Gets the code from the text area
                     file.write(saved_code)
                     asm_window.highlight_syntax()
 
@@ -1257,7 +1257,7 @@ class FileMenu(ctk.CTkFrame):
 class SettingsMenu(ctk.CTkFrame):
     '''Settings menu class.'''
 
-    def __init__(self, master):
+    def __init__(self, master) -> None:
         super().__init__(master)
 
         # Settings menu button
@@ -1282,10 +1282,10 @@ class SettingsMenu(ctk.CTkFrame):
 class HelpMenu(ctk.CTkFrame):
     '''Help menu class.'''
 
-    def __init__(self, master):
+    def __init__(self, master) -> None:
         super().__init__(master)
     
-        def help_lcm3_docu():
+        def help_lcm3_docu() -> None:
             '''Opens an online documentation of the LCM3 instructions.'''
 
             webbrowser.open_new('https://moodle.ensea.fr/pluginfile.php/24675/mod_resource/content/2/TD_uP_LCM3_1AB_2023-2024_v01_jeu.pdf')
@@ -1317,10 +1317,10 @@ class HelpMenu(ctk.CTkFrame):
 class CodeExamples(ctk.CTkToplevel):
     '''Contains the written documentation of ASM LCM3.'''
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
-        self.text = ('\n\n'+
+        self.text: str = ('\n\n'+
         '------------------------ LMC3 Assembly Code Examples ------------------------\n\n\n\n'
         '; Multiplication function\n'
         '; Returns R0 = R1 * R2\n\n'
@@ -1414,10 +1414,10 @@ class CodeExamples(ctk.CTkToplevel):
 class LCM3Documentation(ctk.CTkToplevel):
     '''Contains the written documentation of ASM LCM3.'''
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
-        self.text = ('\n\n'+
+        self.text: str = ('\n\n'+
         '------------------------ LCM3 Instruction Set (alphabetic order) ------------------------\n\n\n\n'
         'Syntax\t\t\tOperation\t\t\tValues\t\t\tCode\n'
         '\t\t\t\t\t\t\t\t\t15   14   13   12   11   10    9     8     7     6     5     4     3     2     1     0\n\n'
@@ -1475,10 +1475,10 @@ class LCM3Documentation(ctk.CTkToplevel):
 class SimulatorDocumentation(ctk.CTkToplevel):
     '''Contains the written documentation of this simulator.'''
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
-        self.text = ('\n\n\n'+
+        self.text: str = ('\n\n\n'+
         "------------------------ ENSEA's Python LCM3 Simulator ------------------------\n\n"
         '    Engineers :\n\n'
         '    APPOURCHAUX Léo, BITTAUD CANOEN Laël, GABORIEAU Cyprien, JIN Clémentine\n'
