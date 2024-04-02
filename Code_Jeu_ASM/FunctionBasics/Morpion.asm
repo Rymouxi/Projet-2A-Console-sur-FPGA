@@ -43,10 +43,10 @@ B DIVISION                  ; R1/R2
 
     DIV_DONE:
     ; the result is in R0
-        BX LR               
+                        
 
     DIV_ERROR:
-        BX LR               
+                        
 
 MOV Ra, R0                  ; Ra contains the 4 bits indicating the case number
 MOV Re, R0                  ; Re contains also the 4 bits indicating the case number but we use it to check the succes or not
@@ -67,7 +67,7 @@ B POWER_OF_TWO
         B shift_loop        ; Repeat the process until the exponent is zero
 
     shift_done:
-        BX LR               ; Return R2 = 2^18
+                        ; Return R2 = 2^18
 
 B DIVISION                  ; R6/R2
     DIV:
@@ -90,10 +90,10 @@ B DIVISION                  ; R6/R2
 
     DIV_DONE:
     ; the result is in R0
-        BX LR               
+                        
 
     DIV_ERROR:
-        BX LR               
+                        
 MOV Rb, R0                      ; Rb contains the bit indicating the action X/O
 
 CMP Rb, #0                      
@@ -119,7 +119,7 @@ BEQ CIRCLE
 
     	MUL_DONE:
         	; the result is in R0
-        	BX LR  
+        	   
 
     B POWER_OF_TWO
         MOV R2, #1
@@ -132,7 +132,7 @@ BEQ CIRCLE
             B shift_loop        ; Repeat the process until the exponent is zero
 
         shift_done:
-            BX LR               ; Return the bit of position where wu put a 1, the result is in R2
+                            ; Return the bit of position where wu put a 1, the result is in R2
     
     B MULTIPLICATION            ; R0 = R2*Rc = 11*Rc
         MOV R0, #0      		; Initialize the result R0 as 0
@@ -151,7 +151,7 @@ BEQ CIRCLE
 
     	MUL_DONE:
         	; the result is in R0, we have now 1100..00, so can change the value at the position we want by adding this value
-        	BX LR
+        	 
     ADD R1, R1, R0
 
 BNE CROSS
@@ -176,7 +176,7 @@ BNE CROSS
 
     	MUL_DONE:
         	; the result is in R0
-        	BX LR  
+        	   
 
     B POWER_OF_TWO
         MOV R2, #1
@@ -189,7 +189,7 @@ BNE CROSS
             B shift_loop        ; Repeat the process until the exponent is zero
 
         shift_done:
-            BX LR               ; Return the bit of position where wu put a 1, the result is in R2
+                            ; Return the bit of position where wu put a 1, the result is in R2
     
     B MULTIPLICATION            ; R0 = R2*Rc = 11*Rc
         MOV R0, #0      		; Initialize the result R0 as 0
@@ -208,7 +208,7 @@ BNE CROSS
 
     	MUL_DONE:
         	; the result is in R0, we have now 0100..00, so can change the value at the position we want by adding this value
-        	BX LR
+        	 
     ADD R1, R1, R0
 
 ; Now we check the corresponded line, column and diagonalline to verify if anybody wins
@@ -249,9 +249,9 @@ CheckWin:
 
     ; If no winner is found, return 0
     MOV R0, #0
-    BX LR
+     
 
 WINNER_FOUND:
     ; If a winner is found, return 1
     MOV R0, #1
-    BX LR
+     
