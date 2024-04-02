@@ -49,10 +49,11 @@ class EnseaSimulator(ctk.CTk):
     def __init__(self) -> None:        
         super().__init__()
 
-        self.title('ENSEA\'s Python LCM3 ASM Simulator v1.2 (tournevis)')                                  # Simulator title
+        self.title('ENSEA\'s Python LCM3 ASM Simulator v1.2 (tournevis)')                # Simulator title
         self.geometry('980x720')
 
-        self.iconbitmap(r'C:\XXXXXXXXX\icon.ico')
+        # /!\ CAREFULL: The iconbitmap method requires the absolute path
+        self.iconbitmap(r'C:\XXXXXXXXX\icon.ico')                                        # Icon
 
         self.main_frame = tk.ttk.PanedWindow(self, orient=tk.VERTICAL)                   # Main Frame under the Toolbar
         self.main_frame.pack(side='bottom', expand=True, fill='both', pady=5)
