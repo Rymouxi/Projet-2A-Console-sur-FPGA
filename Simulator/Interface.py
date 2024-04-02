@@ -1,6 +1,6 @@
 
 
-# ---------------------- ENSEA's Python LCM3 Simulator ---------------------- #
+# ---------------------- ENSEA's Python LCM3 Simulator  v1.2 (tournevis) ---------------------- #
 #
 # Engineers :
 #
@@ -11,7 +11,7 @@
 #
 # Mr. Kessal, Mr. Laroche, Mr. Monchal
 #
-# --------------------------------------------------------------------------- #
+# --------------------------------------------------------------------------------------------- #
 
 
 
@@ -49,8 +49,10 @@ class EnseaSimulator(ctk.CTk):
     def __init__(self) -> None:        
         super().__init__()
 
-        self.title('ENSEA\'s Python LCM3 ASM Simulator')                                  # Simulator title
+        self.title('ENSEA\'s Python LCM3 ASM Simulator v1.2 (tournevis)')                                  # Simulator title
         self.geometry('980x720')
+
+        self.iconbitmap(r'C:\XXXXXXXXX\icon.ico')
 
         self.main_frame = tk.ttk.PanedWindow(self, orient=tk.VERTICAL)                   # Main Frame under the Toolbar
         self.main_frame.pack(side='bottom', expand=True, fill='both', pady=5)
@@ -1516,14 +1518,14 @@ class SimulatorDocumentation(ctk.CTkToplevel):
         super().__init__()
 
         self.text: str = ('\n\n\n'+
-        '------------------------ ENSEA\'s Python LCM3 Simulator ------------------------\n\n'
+        '------------------------ ENSEA\'s Python LCM3 Simulator  v1.2 (tournevis) ------------------------\n\n'
         '    Engineers :\n\n'
         '    APPOURCHAUX Léo, BITTAUD CANOEN Laël, GABORIEAU Cyprien, JIN Clémentine\n'
         '    LATRECHE Loubna, OULAD ALI Rym, XIANG Justine, YE Yumeng\n\n'
         '    Professors :\n\n'
         '    Mr. Kessal, Mr. Laroche, Mr. Monchal\n\n'
-        '-------------------------------------------------------------------------------\n\n\n\n'
-        'ENSEA\'s Python LCM3 Simulator Documentation\n\n'
+        '-------------------------------------------------------------------------------------------------------------------\n\n\n\n'
+        'ENSEA\'s Python LCM3 Simulator v1.2 (tournevis) Documentation\n\n'
         '1. Introduction\n'
         '    ENSEA\'s Python LCM3 Simulator is a tool that simulates the execution of programs '
         'written in LCM3 assembly language. This documentation will guide you through all the '
@@ -1609,7 +1611,7 @@ class SimulatorDocumentation(ctk.CTkToplevel):
         '        AND CHECK THE LCM3 SYNTAX!\n\n\n\n'
         '\t\t\t\tHave a nice time coding!\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n')
 
-        self.title('ENSEA\'s Python LCM3 Simulator - Documentation')  # Title
+        self.title('ENSEA\'s Python LCM3 Simulator v1.2 (tournevis) - Documentation')  # Title
         self.geometry('1200x800')
         self.frame = ctk.CTkFrame(self)                              # Frame
         self.frame.pack(fill='both', expand=True)
