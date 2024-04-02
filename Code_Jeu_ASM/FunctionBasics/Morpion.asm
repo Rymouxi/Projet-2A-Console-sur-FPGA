@@ -3,7 +3,7 @@
 ; We read the 4 bits which indicate the case number
 
 MOV R5, #1                      
-LSL R5, R5, #31
+LSL R5, R5, #29
 MOV R6, #1
 LSL R6, R6, #8
 ADD R6, #4
