@@ -109,8 +109,9 @@ class ASMWindow(ctk.CTkFrame):
     def __init__(self, master) -> None:
         super().__init__(master)
 
-        def update_btns_on_modif(self, event=None) -> None:
-            '''Reenables the assembly button and turns off the others on code modification by the user.'''
+        def update_btns_on_modif(event=None) -> None:
+            '''Reenables the assembly button and turns off the others on code modification by the user.\n
+               Also computes the line height. NECESSARY for breakpoints as it changes from monitor to monitor.'''
 
             if master.master.master.master.toolbar.state != 0:
                 master.master.master.master.toolbar.stop_button.configure(fg_color='gray', state='disabled')
@@ -130,30 +131,36 @@ class ASMWindow(ctk.CTkFrame):
         def place_breakpoint(event=None) -> None:
             '''Place a breakpoint on the clicked line.'''
 
-            # Compute line height, important when changing monitor size or config.
-            bbox1 = self.textbox.bbox('1.0')
-            if self.textbox.bbox('2.0') == None:  # Necessary else 2nd line doesn't exist
-                self.insert_content('\n')
-                bbox2 = self.textbox.bbox('2.0')
-                self.textbox.delete('2.0', tk.END)
-            else:
-                bbox2 = self.textbox.bbox('2.0')
-            line_height: int = bbox2[1] - bbox1[1]
+            if self.line_height != 0:
+                number_of_lines = float(self.textbox.index('end-1c').split('.')[0])    # Get the total number of lines in the text widget
+                hidden_part: float = self.textbox.yview()[0]                           # Get the ratio of what is hidden
+                hidden_lines: float = hidden_part * number_of_lines                    # Get the number of hidden lines
+                visible_lines: float = event.y / self.line_height + 1                  # Get the number of the line clicked relative to the frame
+                line_number = int(min(visible_lines + hidden_lines, number_of_lines))  # Get the real number of the line
 
-            number_of_lines = float(self.textbox.index('end-1c').split('.')[0])  # Get the total number of lines in the text widget
-            hidden_part: float = self.textbox.yview()[0]                         # Get the ratio of what is hidden
-            hidden_lines: float = hidden_part * number_of_lines                  # Get the number of hidden lines
-            visible_lines: float = event.y / line_height + 1                     # Get the number of the line clicked relative to the frame
-            line_number = int(visible_lines + hidden_lines)                      # Get the real number of the line
+                # Add or remove the breakpoint
+                if line_number in self.break_list:
+                    self.break_list.remove(line_number)
+                else:
+                    self.break_list.append(line_number)
 
-            # Add or remove the breakpoint
-            if line_number in self.break_list:
-                self.break_list.remove(line_number)
-            else:
-                self.break_list.append(line_number)
+                # Update the visuals
+                self.update_line_count()
 
-            # Update the visuals
-            self.update_line_count()
+
+        def get_line_height(event=None) -> None:
+            '''Compute line height, important when changing monitor size or config.'''
+
+            if self.line_height == 0:
+                bbox1 = self.textbox.bbox('1.0')
+                if self.textbox.bbox('2.0') == None:  # Necessary else 2nd line doesn't exist
+                    self.insert_content('\n')
+                    bbox2 = self.textbox.bbox('2.0')
+                    self.textbox.delete('2.0', tk.END)
+                else:
+                    bbox2 = self.textbox.bbox('2.0')
+                line_height: int = bbox2[1] - bbox1[1]
+                self.line_height = line_height
 
 
         # Frames
@@ -194,6 +201,10 @@ class ASMWindow(ctk.CTkFrame):
         self.line_count.bind('<Enter>', lambda event: self.line_count.configure(cursor='hand2'))
         self.line_count.bind('<Leave>', lambda event: self.line_count.configure(cursor=''))
 
+        # Bind mouse to computing line height
+        self.line_height: int = 0
+        self.textbox.bind('<Key>', get_line_height)
+
         # Set the first number on the line counter and start to update the view
         update_line_view()
         self.update_line_count()
@@ -212,6 +223,13 @@ class ASMWindow(ctk.CTkFrame):
 
         # Remove existing breakpoints
         self.line_count.tag_remove('breakpoint', '1.0', tk.END)
+
+        # Check for previous breakpoints out of limits
+        cleaned_break = []
+        for e in self.break_list:
+            if e <= float(self.textbox.index('end-1c').split('.')[0]):
+                cleaned_break.append(e)
+        self.break_list = cleaned_break
 
         # Adding new breakpoints
         for line_number in self.break_list:
