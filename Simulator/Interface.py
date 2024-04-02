@@ -1318,8 +1318,12 @@ class HelpMenu(ctk.CTkFrame):
     
         def help_lcm3_docu() -> None:
             '''Opens an online documentation of the LCM3 instructions.'''
-
             webbrowser.open_new('https://moodle.ensea.fr/pluginfile.php/24675/mod_resource/content/2/TD_uP_LCM3_1AB_2023-2024_v01_jeu.pdf')
+
+
+        def git_hub() -> None:
+            '''Opens the github of this project.'''
+            webbrowser.open_new('https://github.com/Rymouxi/Projet-2A-Console-sur-FPGA')
 
 
         # Help menu button
@@ -1337,6 +1341,8 @@ class HelpMenu(ctk.CTkFrame):
         self.menu.add_command(label='This Simulator Documentation', command=SimulatorDocumentation)
         self.menu.add_separator()
         self.menu.add_command(label='ASM Code Examples', command=CodeExamples)
+        self.menu.add_separator()
+        self.menu.add_command(label='Found a bug? Want an update? ---> GitHub', command=git_hub)
 
 
 
