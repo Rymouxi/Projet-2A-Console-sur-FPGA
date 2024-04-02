@@ -21,7 +21,6 @@ B POWER_OF_TWO
         B shift_loop        ; Repeat the process until the exponent is zero
 
     shift_done:
-        BX LR               ; Return R2 = 2^28
 
 B DIVISION                  ; R1/R2
     DIV:
