@@ -24,7 +24,7 @@ import math
 from instruction_translation import *
 
 
-
+# Reset the breakpoints more often
 
 
 
@@ -130,11 +130,21 @@ class ASMWindow(ctk.CTkFrame):
         def place_breakpoint(event=None) -> None:
             '''Place a breakpoint on the clicked line.'''
 
-            number_of_lines = int(self.textbox.index('end-1c').split('.')[0])  # Get the total number of lines in the text widget
-            hidden_part: float = self.textbox.yview()[0]                       # Get the ratio of what is hidden
-            hidden_lines: float = hidden_part * number_of_lines                # Get the number of hidden lines
-            line_visible_click: float = event.y / 19 + 1                       # Get the number of the line clicked relative to the frame
-            line_number = int(line_visible_click + hidden_lines)               # Get the real number of the line
+            # Compute line height, important when changing monitor size or config.
+            bbox1 = self.textbox.bbox('1.0')
+            if self.textbox.bbox('2.0') == None:  # Necessary else 2nd line doesn't exist
+                self.insert_content('\n')
+                bbox2 = self.textbox.bbox('2.0')
+                self.textbox.delete('2.0', tk.END)
+            else:
+                bbox2 = self.textbox.bbox('2.0')
+            line_height: int = bbox2[1] - bbox1[1]
+
+            number_of_lines = float(self.textbox.index('end-1c').split('.')[0])  # Get the total number of lines in the text widget
+            hidden_part: float = self.textbox.yview()[0]                         # Get the ratio of what is hidden
+            hidden_lines: float = hidden_part * number_of_lines                  # Get the number of hidden lines
+            visible_lines: float = event.y / line_height + 1                     # Get the number of the line clicked relative to the frame
+            line_number = int(visible_lines + hidden_lines)                      # Get the real number of the line
 
             # Add or remove the breakpoint
             if line_number in self.break_list:
@@ -831,6 +841,7 @@ class Toolbar(ctk.CTkFrame):
             for i in range(8):
                 register_window.set_register_values(i, 0)
             register_window.set_register_values(8, '0000')
+            register_window.modified_regs = []  # Resets the list of edited registers
 
             # Resets step sounter
             register_window.set_step(0)
