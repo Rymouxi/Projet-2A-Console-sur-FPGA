@@ -1,3 +1,21 @@
+
+
+% ------------------ ENSEA's Python LCM3 Simulator Repport -------------------
+%
+% Engineers :
+%
+% APPOURCHAUX Léo, BITTAUD CANOEN Laël, GABORIEAU Cyprien, JIN Clémentine
+% LATRECHE Loubna, OULAD ALI Rym, XIANG Justine, YE Yumeng
+%
+% Professors :
+%
+% Mr. Kessal, Mr. Laroche, Mr. Monchal
+%
+% ----------------------------------------------------------------------------
+
+
+% Document properties --------------------------------------------------------
+
 \documentclass{article}
 \usepackage{geometry}
 \usepackage{graphicx} % Required for inserting images
@@ -5,6 +23,14 @@
 \usepackage{inconsolata}
 \usepackage{xcolor}
 \usepackage{listings} % Required to show code lines
+\usepackage{enumerate}
+
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern} % Load Latin Modern font family
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage[export]{adjustbox}
+\usepackage{float}
 
 \geometry{a4paper, top=1.0in, left=0.75in ,bottom=1.44in, right=0.52in}
 
@@ -19,16 +45,16 @@
 \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
 
 \lstdefinelanguage{MyPython}{
-    keywords={def, True, False, and, or, in, not},
+    keywords={def, True, False, and, or, in, not, None},
     keywordstyle=\color{codeorange},
-    morekeywords={[2]while, for, if, else, elif,return},
+    morekeywords={[2]while, for, if, else, elif, return, __init__, super, class},
     keywordstyle={[2]\color{codepurple}},
-    morekeywords={[3]type,int,str,range,enumerate},%type color
+    morekeywords={[3]type, int, str, range, enumerate, ctk, CTk, EnseaSimulator, CTkFrame, ASMWindow, CTkTextbox, tk, DebuggerWindow, RegisterWindow, RegPopUp, CTkToplevel, MemAndBin, CTkTabview, PipelineWindow, Toolbar, FileMenu, SettingsMenu, HelpMenu, LCM3Documentation, SimulatorDocumentation, CodeExamples}, % Type color
     keywordstyle={[3]\color{codered}},
-    morekeywords={[4]find,len,count,self,append,DecToBin,print,exit,format,index,isdigit},%Function colors
+    morekeywords={[4]find, len, count, append, DecToBin, print, exit, format, isdigit, cget, bind, tag_add, search, get, pack, title, geometry, bbox, delete}, % Function color
     keywordstyle={[4]\color{codeblue}},
     commentstyle={\color{codegray}},
-    morecomment=[l]{\#},
+    morecomment=[l]{\#}, % Comment color
     stringstyle=\color{codegreen},
     morestring=[b]{'},
     morestring=[b]{"},
@@ -39,6 +65,7 @@
     showstringspaces=false,
     sensitive=true,
     basicstyle=\ttfamily\fontfamily{zi4}\selectfont,
+    showtabs=true,
 }
 \lstdefinelanguage{MyVHDL}{
     keywords={ADD, AND, B, BGE, BLT, BGT, BLE, CMP, EOR, LDR, LSL, MOV, STR, SUB},
@@ -47,7 +74,7 @@
     keywordstyle={[2]\color{codepurple}},
     morekeywords={[3]type,int,str,range,enumerate},%type color
     keywordstyle={[3]\color{codered}},
-    morekeywords={[4]find,len,count,self,append,DecToBin,print,exit,format,index,isdigit},%Function colors
+    morekeywords={[4]find, len, count, self, append, DecToBin, print, exit, format, index, isdigit},%Function colors
     keywordstyle={[4]\color{codeblue}},
     commentstyle={\color{codegray}},
     morecomment=[l]{\#},
@@ -77,7 +104,7 @@
     sensitive=true,
     basicstyle=\ttfamily\fontfamily{zi4}\selectfont,
 }
-% Links colors configuration
+% Links colours configuration
 \hypersetup{
     colorlinks=true,
     linkcolor=black,
@@ -89,6 +116,8 @@
 \newcommand{\codebf}[1]{\textbf{\code{#1}}}
 \newcommand{\codeASM}[0]{\code{code\_ASM }}
 \newcommand{\n}[0]{\(\backslash\)n}
+% Define subsubsubsection command
+\newcommand{\subsubsubsection}[1]{\paragraph{#1}\mbox{}\\}
 
 % maketitle override to suppress the auto date
 \makeatletter
@@ -114,13 +143,57 @@
 
 
 
-\title{Project Report\\ASM IDE in Python for our VHDL-Programmed FPGA}
-\author{APPOURCHAUX Léo, BITAUD-CANOEN Laël, GABORIEAU Cyprien, JIN Clémentine,\\LATRECHE Loubna, OULAD ALI Rym, XIANG, Justine, YE Yumeng}
+
+
+
+
+
+
+
+
+% Title Page -----------------------------------------------------------------
 
 \begin{document}
-\maketitle
-\author{With the help of KESSAL Lounis, LAROCHE Christian and MONCHAL Laurent}
+\begin{titlepage}
+\begin{center}
+\textbf{\LARGE École Nationale Supérieure de l'Électronique et de ses Applications}\\[0.5cm]
 
+\vspace{10pt}
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.14]{logoEnsea.png}
+        \label{fig:my_label}
+\end{figure}
+
+\par
+
+\vspace{15pt}
+\textbf{\LARGE  Project Report\\ \textbf{\huge ASM IDE in Python for our VHDL - Programmed FPGA}}\\
+\vspace{15pt}
+\vspace{25pt}
+\large APPOURCHAUX Léo, BITAUD-CANOEN Laël, GABORIEAU Cyprien, \\ JIN Clémentine, LATRECHE Loubna, OULAD ALI Rym, XIANG, Justine, YE Yumeng\\
+
+\vspace{50pt}
+\end{center}
+
+\par
+\vfill
+\begin{center}
+\textbf{\vfill \textsl{With the help of KESSAL Lounis, LAROCHE Christian and MONCHAL Laurent}}\\
+\end{center}
+\end{titlepage}
+
+
+
+
+
+
+
+
+
+% Table of Contents ----------------------------------------------------------
+
+\newpage
 \tableofcontents
 
 
@@ -128,164 +201,739 @@
 
 
 
+
+
+% General Introduction -------------------------------------------------------
+
 \newpage
 \section{Project explanation}
+The first idea of the project was to build a computer from scratch numerically. Then, we were guided by the professors to make this machine with an FPGA board. They also encouraged us to make software where we could implement basic code on the board. The software explanation is divided into two parts: \\
+The first explains how we turn raw text into simulation data and a bitstream that can be sent on the board. \\
+The second part of the software concerns the interface which allows for writing, debugging and simulating code. \\
+The basic code is in Assembly(ASM) more precisely the LCM3 instructions of which there are every possible instructions: \\
+\begin{figure}[h!]
+    \centerline{\includegraphics[scale=0.6]{LCM3_instructions.png}}
+    \caption{Enter Caption}
+    \label{fig:enter-label}
+\end{figure}
 
+
+
+
+
+
+
+
+
+
+% Simulator ------------------------------------------------------------------
 
 \newpage
 \section{Software}
 \subsection{Simulator}
 
-Let's consider the code we get from the UI is called \codeASM  and is a string containing raw code of ASM. 
+Let's consider the code we get from the UI called \codeASM which is a string containing the raw code of ASM. 
 \subsubsection{Global structure}
 \subsubsection{Text slicing}
 \paragraph{}
-The very first step of this process is to reshape the data to be easily exploited. To do so we must take into account the fact that the interface is sending us some text in the shape of a string. What we need is a data table whose every argument is a string type instruction.
+The first step of this process is to reshape the data to be easily exploited. To do so we must consider that the interface is sending us some text in the shape of a string. We need a data table whose every argument is a string-type instruction.
 
-\paragraph{Séparateur d'instruction:}
-To split our instructions, we use the separator '\n'. Le's take an example for the code we get:
+\paragraph{Instruction slicing:}
+To split our instructions, we use the separator '\n'. Let's take an example of the code we get:
 \begin{lstlisting}[language=MyPython]
 code_ASM="MOV R0,#10\nMOV R1,#5"
 \end{lstlisting}
-Here we have 2 instructions: \code{MOV~R0,\#10} and \code{MOV~R1,\#5} that we must separate. To do that we slice the str, cutting the \n and separating these instructions in an array in split\_instructions:
+Here we have 2 instructions: \code{MOV~R0,\#10} and \code{MOV~R1,\#5} that we must separate. To do that we slice the str, cutting the '\n' and separating these instructions in an array in the split\_instructions variable:
 \begin{lstlisting}[language=MyPython]
-def line_jump(codeASM):
-    split_instruction=[]
+def line_jump(code_ASM):
+    split_instructions=[]
+    while codeASM.count('\n'):
+        split_instructions.append(codeASM[0:codeASM.find('\n'))
+        code_ASM=code_ASM[code_ASM.find('\n')+2::]
     return split_instructions
 \end{lstlisting}
-
+At the end of this function, we have a variable which resembles:
 \begin{lstlisting}[language=MyPython]
-def tamerere():
-    return yolo
-    type
-    27476
-index=code.find('\n') and this
-    #Allez
+split_instructions=["MOV R0,#10","MOV R1,#5"]
+\end{lstlisting}
+We have the same kind of process to remove the '\(\backslash\)t' and comments, which ones are spotted by ';'. We also want to remove the spaces before and after the instruction.
+\paragraph{Example} Here is a practical example with an ASM code:
+\begin{lstlisting}[language=MyASM]
+  MOV R1,#5   
+    MOV R0,#3;We put 3 in register 0
+\end{lstlisting}
+The \codeASM in Python will look like this:
+\begin{lstlisting}[language=MyPython]
+code_ASM="  MOV R1,#5   \n\tMOV R0,#3;We put 3 in register 0\n"
+\end{lstlisting}
+and after using our treatment function, we get an array of instructions to simulate:
+\begin{lstlisting}[language=MyPython]
+split_instructions=["MOV R1,#5","MOV R0,#3"]
 \end{lstlisting}
 
+\subsubsection{Recognition of "Actions" instructions}
+We created a function called \code{instruction\_recognition} in which we give one instruction, the line where is this instruction and the state of the simulation (if we want to simulate or return the bitstream). When we are in simulation, the function returns several variables: 
+\begin{itemize}
+    \item[-]The way we change the registers.
+    \item[-]The line we are going next (important for Branch instructions).
+    \item[-]The ways we change the memory.
+    \item[-]The eventual simulation error.
+\end{itemize}
+Only the bitstream is returned when we are not in simulation mode.\\
+Each type of action from the LCM3 set is listed in this function and we have a function to treat each action.\\
+Let's take an example with a MOV instruction: \code{"MOV R1,\#5"}.
+The \code{instruction\_recognition} function recognizes the MOV action and calls the MOV function.
+Because we use the LCM3 instructions%Mettre un lien$
+, we have a definite set of instructions to recognize. As we saw previously we can take an instruction from \code{split\_instructions} and compare the first 3 characters (in fact 4 because of the space) to find which "action" we are using. In Python, we simply used \code{if}/\code{elif} controls.\\
+\textbf{Note}: we take into account the possibility to have empty str \code{''} or instruction for label \code{'label:'}.
 
-\subsubsection{Reconnaissance des instructions "Actions"}
-\subsubsection{Reconnaissance des registres}
-Every element of the instruction list is now starting by an action function, in order to recognize an action function (MOV, LDR ...) we put the instruction into a multi if condition checking the first 3 element of every instructions looking for a "MOV" for instance.
-\subsubsection{Reconnaissance des arguments de type nombre}
-\subsubsection{Simulation interne des registres}
-\subsubsection{Simulation interne de la mémoire}
-\subsubsection{Cas particulier des branchements}
-\paragraph{La reconnaissance de labels}
-\paragraph{Gestion du saut vers une ligne}
-\paragraph{Les B/BXX label}
-\subsubsection{Gestion des erreurs}
-\subsubsection{Génération d'un bitstream}
+\subsubsection{Registers recognition}
+The function used for this part is named \code{register\_recognition}. It takes one instruction as an argument and returns an array in which there is the register's number(s) converted in binary of 3 bits.\\
+\textbf{Example:}
+\begin{lstlisting}[language=MyPython]
+print(register_recognition("MOV R1,R5"))
+>>>['001','101']
+\end{lstlisting}
+There are different steps for this function:
+\begin{itemize}
+\item[-]We need to know how many registers we have in this instruction. For this, we count the number of 'R' we have. (To avoid any problem with actions containing 'R' such as 'EOR', we slice the given action: an instruction such as \code{"MOV R1,R5"} will be transformed into \code{"R1,R5"}).
+\item[-]We find the index of these 'R' and store them.
+\item[-]We recognize which number is after the 'R'.
+\item[-]We then convert the number into a 3-bit binary.
+\end{itemize}
+\subsubsection{Immediat Numbers Recognition}
+The function used here is called \code{imm\_recognition}. It takes one instruction as an argument as well as the number of bits needed. It returns the binary of the immediate number in the size given in the argument.\\
+\textbf{Example:}
+\begin{lstlisting}[language=MyPython]
+print(imm_recognition("MOV R1,#50",8))
+>>>00110010
+print(imm_recognition("ADD R1,R2,#0x5",3))
+>>>101
+print(imm_recognition("LSL R1,R2,#0b111",5))
+>>>00111
+\end{lstlisting}
+This function works with decimal, hexadecimal and binary numbers. And it works in successive steps too:
+\begin{itemize}
+    \item[-]We first spot where is the '\#' character.
+    \item[-]Then we look at the first 2 characters after this '\#'.
+    \item[-]And we look if these characters are '0x'/'0X' or '0b'/'0B' (In this order, because we might have issues if we have hexadecimal numbers beginning with '0b').
+    \item[-]We take every number after and convert them in binary of the right size if necessary.
+\end{itemize}
+
+\subsubsection{Internal Simulation or Registers}
+To track the evolution of registers every time they are modified, we created a global variable named \code{virtual\_register} which memorizes the state of each register. This variable is accessible and editable everywhere.\\
+At the beginning of the simulation, we initialize this variable with only zeros. It has this form:
+\begin{lstlisting}[language=MyPython]
+print(virtual_register)
+>>>[0,0,0,0,0,0,0,0,0]
+\end{lstlisting}
+If you counted, you will note that there are 9 numbers in place of 8, we will explain why in the Branch section.\\
+When we edit register number 3, we just need to assign a number to the global variable:
+\begin{lstlisting}[language=MyPython]
+virtual_register[4]=51
+print(virtual_register)
+>>>[0,0,0,51,0,0,0,0,0]
+\end{lstlisting}
+\subsubsection{Internal Simulation of the Memory}
+\subsubsection{Special Case of Branches}
+\paragraph{Label Recognition}
+\paragraph{Line Jump Management}
+\paragraph{B/BXX Labels}
+\subsubsection{Error Management}
+\subsubsection{Bitstream Generation}
 
 \subsubsection{Tests}
-
 
 \paragraph{}
 
 
+
+
+
+
+
+
+
+
+
+
+% Interface ------------------------------------------------------------------
+
 \newpage
 \subsection{Interface}
+\paragraph{}
 \subsubsection{Introduction}
+\paragraph{}
 
-The interface of the simulator provides an ergonomic platform to code in ASM.\\
-Specific goals include creating a visually appealing user interface, providing accurate syntax and error highlighting, and establishing an environment conducive to learning the fundamental concepts of assembly language. The user should also be able to save or import code, connect a board and download code on it.
+The interface of the simulator provides an ergonomic, robust, and educational platform to code in ASM.\\
+Goals include creating a visually appealing user interface, providing accurate syntax and error highlighting, and establishing an environment conducive to learning the fundamental concepts of assembly language by giving a wide range of tools to the user to monitor the simulation of code. The user should also be able to save or import a file and run the code in one go or step by step.
 
-\noindent \\Primary objectives of the interface are:
-
-\begin{itemize}
-  \item Create an ASM window in which we can read and write code.
-  \item Create a debugger to display all potential errors.
-  \item Create a register window to display register values.
-  \item Create memory windows to display where the code is stored and where the user can edit the RAM.
-  \item Create a pipeline in which we can see the instructions going through Fetch, Decode, and Execute.
-  \item Create a binary window in which we can read the binary corresponding to our code.
-  \item Create buttons to save, import, assemble, run, run step by step, reset, connect a board, and download code.
-  \item Provide documentation about the LCM3 and the simulator itself.
-  \item Have re-sizeable frames, light and dark themes, syntax highlighting, and a bit of colour.
-\end{itemize}
-
-
+\paragraph{}
 \subsubsection{Modules Used}
+
 To code the interface, we used several modules:
 
 \begin{itemize}
-    \item \textbf{Tkinter}: The graphical user interface is built using Tkinter, a popular GUI toolkit used in Python.
-    \item \textbf{CustomTkinter}: An extension of Tkinter with a more modern look.
-    \item \textbf{Random}: The classic random library to pick random numbers or elements.
-    \item \textbf{Webbrowser}: Useful to open an online documentation of the ASM LCM3.
-    
+    \item \textbf{Tkinter:} The graphical user interface is built using Tkinter, a popular GUI toolkit used in Python.
+    \item \textbf{CustomTkinter:} An extension of Tkinter with a more modern look.
+    \item \textbf{Random:} The classic random library to pick random numbers or elements.
+    \item \textbf{Webbrowser:} Useful to open an online documentation of the ASM LCM3.
+    \item \textbf{math:} The classic math library.
+    \item \textbf{The Simulator:} Described in the previous part, getting simulation data and a bitstream from the code is necessary. 
 \end{itemize}
 
+\paragraph{}
+\subsubsection{Interface Architecture and Features}
+\paragraph{}
 
-\subsubsection{Interface Architecture}
+The interface contains different frames where we can write code or read information. They are:
 
-The interface code is Object-Oriented. There's a class for every CustomTkinter object (every frame/button/etc.).
-
-\paragraph{Toolbar Functionality}
-The toolbar serves as a central hub for quick access to essential functionalities. Here's an overview of the core toolbar functions:
-
-\paragraph{Toolbar Functionality}
-The toolbar serves as a central hub for quick access to essential functionalities. Here's an overview of the core toolbar functions:
 \begin{itemize}
-  \item \textbf{File Management:} The file-related functions include creating a new file, importing code from an external file, saving the current code, and saving code with a new filename. These actions ensure efficient code management within the simulator.
-
-  \item \textbf{Theme Customization:} Users can toggle between dark and light themes using the "Settings" menu in the toolbar. This feature enhances the user experience by accommodating different preferences for visual appearance.
-
-  \item \textbf{Help and Documentation:} The toolbar provides quick access to documentation, including both simulator-specific help and external LCM3 documentation. This facilitates learning and troubleshooting.
-
-  \item \textbf{Simulation Controls:} Functions for assembling code, running simulations (both step-by-step and continuous), and resetting the simulator are conveniently accessible in the toolbar. These controls streamline the simulation process.
+  \item \textbf{ASM Zone:} This is the text frame the user will code in. It provides syntax color highlighting, error and breakpoints highlighting, and a tracker showing the next line to be executed. The line counter on the left is clickable to add or remove breakpoints.
+  \item \textbf{Debugger:} The debugger frame displays errors or information about the code assembling. The errors give information useful for debugging as they specify the type and the place of the errors. When hitting a breakpoint, the debugger also gives us information on the line, the step and the instruction we stopped. Text colors change according to the cases, like empty code, success, error, or breakpoint. There is also a line counter.
+  \item \textbf{Register frame:} This frame displays the values of all registers. There is an option to switch between decimal and hexadecimal displays and a button to put initial values in the registers before the execution. You can also see the step count displayed at the top.
+  \item \textbf{Code memory array:} This array shows the memory where the code is stored. It displays the instruction in text format and their corresponding binary code in hexadecimal. As the code instructions are 16 bits, each address is on an even number.
+  \item \textbf{User memory array:} This array, on the other hand, shows the part of the memory accessible by the user. It's the readable and editable RAM. As the stored values are 32 bits, the addresses are every 4 bytes.
+  \item \textbf{Binary frame:} This frame displays the binary translation of the code that will be sent to the board if one is connected.
+  \item \textbf{Pipeline array:} This array displays the path of instructions in the Fetch, Decode, and Execute. Instructions go down in the pipeline and at the same time, the previous states of the pipeline can be seen on the right. Everything is colored so we can distinguish the different instructions.
 \end{itemize}
 
-\paragraph{Menu Structure}
-The menu structure is organized logically, with distinct menus for file operations, settings, and help. This categorization enhances the discoverability of functions and ensures an intuitive user experience.
+\paragraph{}
+Three menus are accessible in the top left corner.
 
-\paragraph{Code Assembly Area}
-The main area of the interface is dedicated to code assembly. Users can write LCM3 assembly code in this section, with each instruction on a separate line. The code assembly area employs a simple and clean text editor interface for ease of use.
-
-\paragraph{Memory and Register Displays}
-Real-time updates on memory contents and register values are prominently displayed. These sections provide users with insights into the evolving state of the program during execution. Clear and organized representations of data contribute to a better understanding of program behavior.
-
-\paragraph{Pipeline Simulation}
-The pipeline simulation section illustrates the step-wise execution of instructions, including fetching, decoding, and execution phases. This dynamic visualization aids users in comprehending the flow of instructions through the simulator's pipeline.
-
-\paragraph{Buttons and Controls}
-Function-specific buttons, such as "Assemble," "Run," and "Step ->," are strategically placed for accessibility. These controls are responsive to the current state of the simulation, ensuring a seamless user experience.
-
-\paragraph{Overall Architecture}
-The interface architecture follows a modular design, with distinct components for each major function. This modularity enhances maintainability and facilitates future expansions or updates to the simulator. The use of the Tkinter library in Python provides a robust foundation for building the graphical user interface.
-
-The combination of these design elements results in an intuitive, efficient, and visually coherent interface for the LCM3 simulator, supporting effective code development and simulation.
-
-\subsubsection{Key Features}
-The LCM3 simulator encompasses the following key features:
 \begin{itemize}
-    \item \textbf{Code Assembly:} Users can write code in the LCM3 assembly language directly within the user interface. The simulator provides the capability to assemble this code, thereby generating the corresponding executable binary.
-
-  \item \textbf{Step-by-Step Simulation:} The step-by-step simulation feature allows users to execute their code incrementally. This facilitates debugging by enabling a detailed inspection of each instruction during execution.
-
-  \item \textbf{Memory and Register Management:} The interface displays real-time updates on the state of memory and registers throughout program execution. This enables users to track and understand the evolution of data during execution.
-
-  \item \textbf{Simulation Pipeline:} The pipeline simulation illustrates the various stages of instruction during execution, including Fetch, Decode, and Execute. This provides a dynamic visualization of the instruction flow through the pipeline.
-
-  \item \textbf{Customizable Themes:} Users can personalize the simulator's appearance by choosing between a dark and light theme. This enhances the user experience by allowing visual adaptation based on individual preferences.
+  \item \textbf{File Menu:} This menu allows creating a new file, importing code from an external file, and saving the current code. These actions ensure efficient code management within the simulator.
+  \item \textbf{Settings Menu:} This menu allows you to switch between dark and light themes. This feature enhances the user experience by accommodating different preferences for visual appearance.
+  \item \textbf{Help Menu:} This menu provides quick access to documentation, including the ASM LCM3 documentation on Moodle and on the simulator itself. It also includes the simulator documentation, Code examples, and the link to GitHub.
 \end{itemize}
-These features offer a comprehensive platform for developing, debugging, and learning the LCM3 assembly language.
+
+\paragraph{}
+You can also access several simulation buttons in the top right corner.
+
+\begin{itemize}
+  \item \textbf{Assemble Button:} Allows to assemble the code. Displays the result, including potential errors, in the debugger window. Calls the simulation function to prepare a run or step-by-step.
+  \item \textbf{Run Button:} Simulates the code in one go. Enables you to resume simulation if in mode step-by-step. Stops if it encounters a breakpoint.
+  \item \textbf{Run Step-by-step Button:} Simulates the code incrementally. This facilitates debugging by enabling a detailed inspection of each instruction execution.
+  \item \textbf{Stop Button:} Stops the execution.
+  \item \textbf{Reset Button:} Resets the values in the User memory, the Code memory, the pipeline, the registers, the binary window, and the debugger. It also reduces the lag by re-initialising some of the frames.
+  \item \textbf{Connect Board Button:} Allows to connect a board to the computer running the simulator. Opens a pop-up to configure the port, the baud rate, and other connection parameters.
+  \item \textbf{Download Code Button:} Once a board is connected, this button allows you to download the bit stream of the ASM code onto the board. And triggers the running of the code on the board.
+\end{itemize}
+
+\paragraph{}
+Finally, there are a few features we wanted to add:
+
+\begin{itemize}
+  \item \textbf{Resizeable Frames and Window:} We want to be able to change the ratios between frames or the size of the window without any constraints.
+\end{itemize}
+
+\paragraph{}
+\subsubsection{History of the different versions of the interface}
+\paragraph{}
+
+There have been 3 main versions. \\
+An alpha test in the form of a raw algorithm to apprehend the Tkinter module.\\
+A beta version in the functional format, still with Tkinter.\\
+A third and final version, object-oriented based on Custom Tkinter instead of Tkinter. \\
+We will of course focus on the final version in the next part.
+
+
+\newpage
+\subsubsection{The Code (quite long)}
+\paragraph{}
+\textbf{WARNING: We won't go into all the subtle interface details as there's too much to cover.}
+\paragraph{}
+
+In Custom Tkinter (ctk), the main window is of type '\code{class ctk.CTk}', the pop-ups are of type \\
+'\code{class ctk.CTkToplevel}', and the frames within the windows are of type '\code{class ctk.CTkFrame}'. \\
+
+\subsubsubsection{EnseaSimulator}
+
+The class of our main window defines the geometry and calls all the other classes for internal frames, which themselves call the classes for pop-ups or functions (like the simulator). It also possesses 2 methods to switch the theme between Dark and Light. \\
+Code extract: \\
+
+\begin{lstlisting}[language=MyPython]
+class EnseaSimulator(ctk.CTk):
+    '''Main simulator window. Contains all the interface objects.'''
+    def __init__(self) -> None:        
+        super().__init__()
+        self.title('ENSEA\'s Python LCM3 ASM Simulator v1.2 (tournevis)')
+        self.geometry('980x720')
+\end{lstlisting}
+\paragraph{}
+\subsubsubsection{ASMWindow}
+\begin{lstlisting}[language=MyPython]
+class ASMWindow(ctk.CTkFrame):
+\end{lstlisting}
+\paragraph{}
+
+The first frame called by the '\code{EnseaSimulator}' class is the frame where the user can write their ASM code. This frame is the '\code{ASMWindow}' class. This class is much more complex than the main class as it contains all the features linked to this frame. \\
+First, we configure the frame, the title, the line counter on the side and the text box. \\
+Code extracts:  \\
+
+\begin{lstlisting}[language=MyPython]
+self.textbox = ctk.CTkTextbox(self.textbox_frame, width=700, text_color='#2080C0')
+self.textbox.pack(side='right', fill='both', expand=True)
+\end{lstlisting}
+\paragraph{}
+
+Then we define all the methods. The first 3 are the getters and setters of the text box. Useful everytime another frame has to interact with the code of the user. \\
+Code extracts: \\
+
+\begin{lstlisting}[language=MyPython]
+def get_text_content(self) -> str:
+    '''Gets the content of the text box.'''
+    return self.textbox.get('1.0', tk.END)
+\end{lstlisting}
+\begin{lstlisting}[language=MyPython]
+def delete_content(self) -> None: ...
+\end{lstlisting}
+\begin{lstlisting}[language=MyPython]
+def insert_content(self, content: str) -> None: ...
+\end{lstlisting}
+\paragraph{}
+
+There are lots of buttons on the interface. Some must be reset when the user modifies code in the ASM code frame so there's no mismatch between the current execution and the code displayed. This forces the user to re-assemble their code if they modify it. The following function does this: \\
+
+\begin{lstlisting}[language=MyPython]
+def update_btns_on_modif(event=None) -> None:
+\end{lstlisting}
+\paragraph{}
+
+Another neat feature is the syntax highlighting. Who doesn't like some help? The highlighting function is called quite often to update the highlighting smoothly and follows these steps: \\
+1. Fetch the code, \\
+2. Look for Labels and patterns such as registers, comas, or numbers to paint them in their respective colors. Do the same for errors, breakpoints, and the next line to be executed, \\
+3. Then compute the start and end positions of patterns to tag and paint, \\
+4. Clean all the old tags, \\
+5. Apply all the new tags. \\
+Function prototype and Code extract (tagging the labels): \\
+
+
+\begin{lstlisting}[language=MyPython]
+def highlight_syntax(self, event=None, errors=[], next_line:int=-1, breakpoint:int=-1) -> None:
+\end{lstlisting}
+\begin{lstlisting}[language=MyPython]
+index: str = '1.0'
+    while True:
+        index = self.textbox.search(':', index, tk.END)
+        if not index:
+            break
+        # Tag the text before the semicolon
+        start_index: str = self.textbox.index(f'{index} linestart')
+        end_index: str = self.textbox.index(f'{index}+1c')
+        self.textbox.tag_add('label', start_index, end_index)
+        index = f'{index}+1c'
+\end{lstlisting}
+\paragraph{}
+
+A Subtle detail: As described in the simulator part, the code is cut into pieces and unnecessary white spaces are deleted before interpretation. This implies that the simulation data refers to shifted line numbers. It's not a problem for most of the simulation, but in the rare cases when we want to tell the user where he made a mistake or want to highlight a line (previous function) it is necessary to perform a small correction. That's the job of the next function which iterates through the lines to shift back the line numbers in place. \\
+Function Prototype: \\
+
+\begin{lstlisting}[language=MyPython]
+def correct_line(self, line_number: int) -> int:
+\end{lstlisting}
+\paragraph{}
+
+To display line numbers on the left side, we must know 2 things: How many lines exist, and where are we looking? The following functions do just that. The first one counts the number of lines in the text box and adds numbers on the left. It also adapts the width of the line counter to allow bigger numbers to fit, and some cleaning operations on the breakpoints. The second function fixes the views of the text box and the line counter so each line number stays in front of its corresponding line. \\
+Functions prototypes: \\
+
+\begin{lstlisting}[language=MyPython]
+def update_line_count(self, event=None) -> None:
+\end{lstlisting}
+\begin{lstlisting}[language=MyPython]
+def update_line_view(event=None) -> None:
+\end{lstlisting}
+\paragraph{}
+
+Breakpoint! This was a tough thing to implement. \\
+The difficult part lies in trying to know which line the user clicked on, as the lie counter frame is just a text box and the module doesn't provide any direct way to know what was clicked. \\
+A clever series of calculus allows us to find the line. We count the number of lines, the ratio of the text that is hidden, then the number of hidden lines, the height in pixels of one line, and the place of the clicked lines among the visible ones. \\
+Getting the height of a line is also a challenge in itself as once again no method is provided by the module to do so. We can get around it by measuring the distance between the beginning of 2 lines that we quickly initialise and then remove at the start of the program. Getting the width of a line every time we start the simulator is ABSOLUTELY NECESSARY for the breakpoints to work regardless of the screen definition and the monitor properties. \\
+Finally, we can just add the breakpoint or remove it if already present. We also need to clean breakpoints located on lines that don't exist anymore if we reduce the size of the code. \\
+The way the interface provides the user with the simulation \textbf{allows us to ADD or REMOVE a BREAKPOINTS at ANY point of the execution} should we have started the assemble, run, run step by step or not. When clicking on the next resume or step the interface will already have updated its list of breakpoints. \\
+Function prototype: \\
+
+\begin{lstlisting}[language=MyPython]
+def place_breakpoint(event=None) -> None:
+\end{lstlisting}
+\paragraph{}
+
+The get line height function is called once at the start of the program as said just above. \\
+Its code might be interesting: \\
+
+\begin{lstlisting}[language=MyPython]
+def get_line_height(event=None) -> None:
+    '''Compute line height, important when changing monitor size or config.'''
+
+    if self.line_height == 0:
+        bbox1 = self.textbox.bbox('1.0')
+        if self.textbox.bbox('2.0') == None:
+            # Necessary else 2nd line doesn't exist
+            self.insert_content('\n')
+            bbox2 = self.textbox.bbox('2.0')
+            self.textbox.delete('2.0', tk.END)
+        else:
+            bbox2 = self.textbox.bbox('2.0')
+        # Compute distance between start of line 1 and 2
+        line_height: int = bbox2[1] - bbox1[1]
+        self.line_height = line_height
+\end{lstlisting}
+\paragraph{}
+
+Once we identified the clicked lines, we made a getter of the list of breakpoints: \\
+
+\begin{lstlisting}[language=MyPython]
+def get_breakpoints(self) -> list[str]:
+\end{lstlisting}
+\paragraph{}
+
+The final step is to bind functions to appropriate keys, for example, a click on a line number to create a breakpoint: \\
+
+\begin{lstlisting}[language=MyPython]
+self.line_count.bind('<Button-1>', place_breakpoint)
+\end{lstlisting}
+
+
+\newpage
+\subsubsubsection{DebuggerWindow}
+\begin{lstlisting}[language=MyPython]
+class DebuggerWindow(ctk.CTkFrame):
+\end{lstlisting}
+\paragraph{}
+
+The Debugger has the same architecture as the ASM window but is simpler. It has its geometry and key binds and some of the same following methods as the ASM window. The only difference is that this box is uneditable for the user, so we have to perform quick changes to make it editable for a very short time just enough to insert or delete content: \\
+
+\begin{lstlisting}[language=MyPython]
+def insert_content(self, content:str, color:str='silver') -> None:
+\end{lstlisting}
+\begin{lstlisting}[language=MyPython]
+def delete_content(self) -> None:
+\end{lstlisting}
+\begin{lstlisting}[language=MyPython]
+def update_line_count(self, event=None) -> None:
+\end{lstlisting}
+\begin{lstlisting}[language=MyPython]
+def update_line_view(event=None) -> None:
+\end{lstlisting}
+\paragraph{}
+\subsubsubsection{RegisterWindow}
+\begin{lstlisting}[language=MyPython]
+class RegisterWindow(ctk.CTkFrame):
+\end{lstlisting}
+\paragraph{}
+
+As usual, the class first defines the geometry of the frame. This time there are titles, a step counter, register labels and values, and 2 buttons. We store the values, the display state, and the hand-modified registers in lists. The first 2 methods are setters for the values of the registers and the step counter. \\
+Functions prototypes: \\
+
+\begin{lstlisting}[language=MyPython]
+def set_register_values(self, index:int, value:str) -> None:
+\end{lstlisting}
+\begin{lstlisting}[language=MyPython]
+def set_step(self, value:int) -> None:
+\end{lstlisting}
+\paragraph{}
+
+Then we need a button and a corresponding method for switching the registers values display between hexadecimal and decimal. \\
+Function prototype and code extract: \\
+
+\begin{lstlisting}[language=MyPython]
+def change_format(self) -> None:
+\end{lstlisting}
+\begin{lstlisting}[language=MyPython]
+# Changing format from dec to hex
+hex_value='0x'+format(int(label.cget('text')),'08x') if i<8 else label.cget('text')
+\end{lstlisting}
+\paragraph{}
+
+Finally, we need the same to be able to edit the initial register values. As we want a pop-up to edit the new values we will need a new window object.
+
+
+\newpage
+\subsubsubsection{RegPopUp}
+\begin{lstlisting}[language=MyPython]
+class RegPopUp(ctk.CTkToplevel):
+\end{lstlisting}
+\paragraph{}
+
+As usual, we create the geometry of the window, here with register labels, text entries, and a button. We then bind keys to the 2 methods: \\
+The first checks we only input numbers, and the second saves the register modification. Here are the prototypes: \\
+
+\begin{lstlisting}[language=MyPython]
+def on_keypress(event) -> None:
+\end{lstlisting}
+\begin{lstlisting}[language=MyPython]
+def apply_changes() -> None:
+\end{lstlisting}
+\paragraph{}
+\subsubsubsection{MemAndBin}
+\begin{lstlisting}[language=MyPython]
+class MemAndBin(ctk.CTkTabview):
+\end{lstlisting}
+\paragraph{}
+
+The tab view contains the Code memory (ROM), the User memory (RAM) and the binary display. We first build the geometry of the tabs, 2 arrays for the memory and a basic text box for the binary display. It takes quite many lines of code but is rather simple. The only difficulties lie in the formats and the starting points of the memories, for example, the Code memory starts at 0x08000008. We then need to make the appropriate setters. \\
+Here are the prototypes: \\
+
+\begin{lstlisting}[language=MyPython]
+def code_mem_set(self, index:str, value:str='0', instruction:str='') -> None:
+\end{lstlisting}
+\begin{lstlisting}[language=MyPython]
+def user_mem_set(self, index:str, value:int=0) -> None:
+\end{lstlisting}
+\begin{lstlisting}[language=MyPython]
+def delete_bin(self) -> None:
+\end{lstlisting}
+\begin{lstlisting}[language=MyPython]
+def insert_bin(self, content:str) -> None:
+\end{lstlisting}
+\paragraph{}
+\subsubsubsection{PipelineWindow}
+\begin{lstlisting}[language=MyPython]
+class PipelineWindow(ctk.CTkFrame):
+\end{lstlisting}
+\paragraph{}
+
+As usual, we start by defining the geometry, here an array that fills from the top left to the bottom right. We then make appropriate getter and setter. \\
+
+\begin{lstlisting}[language=MyPython]
+def get_cell(self, row:int, col:int) -> (tuple[str, str] | None):
+\end{lstlisting}
+\begin{lstlisting}[language=MyPython]
+def set_cell(self, row:int, col:int, value:str, color:str=None) -> None:
+\end{lstlisting}
+\paragraph{}
+
+Then the longer part is writing a method for the iteration of the pipeline. We make great use of our previously defined getter and setter to move the instructions to the bottom and the right. Of course, everything is in colors! \\
+
+\begin{lstlisting}[language=MyPython]
+def iter_pip(self, value:str, color:str=None) -> None:
+\end{lstlisting}
+\begin{lstlisting}[language=MyPython]
+def generate_random_color(self) -> str:
+\end{lstlisting}
+\paragraph{}
+\subsubsubsection{Toolbar}
+\begin{lstlisting}[language=MyPython]
+class Toolbar(ctk.CTkFrame):
+\end{lstlisting}
+\paragraph{}
+
+The toolbar is the last frame in the main window of our simulator. It has a really simple geometry (just a group of buttons), but it also contains a lot of functions that run everything from pop-ups to the execution to the assembly to the help menus and saving code.
+
+\paragraph{}
+\subsubsubsection{Function Assemble}
+\begin{lstlisting}[language=MyPython]
+def assemble() -> None:
+\end{lstlisting}
+\paragraph{}
+
+This function is executed when the user clicks on the Assemble button. It performs the following list of tasks: \\
+\textbf{1.} Button configuration: it updates all buttons depending on the success of the Assembly. \\
+\textbf{2.} Empties the debugger: In the case of a fail that cleans the multiple assembly trials. \\
+\textbf{3.} Fetching the code. \\
+\textbf{4.} If the code is empty: Insert a fun little text and Stop. \\
+\textbf{5.} Else: Prepend instructions corresponding to the eventual initial values of the registers to the code \\
+\textbf{6.} Call the simulator. \\
+\textbf{7.} If the simulator returns errors: Display them in the debugger and Stop. \\
+\textbf{8.} Else: Run the pre-prompt corresponding to the initial register values. \\
+\textbf{9.} Display the instructions in the code memory and the bitstream in the binary tab. \\
+\textbf{10.} Display a success message in the debugger and perform various update operations. \\
+
+\paragraph{}
+
+Two clever tricks are performed here. The first one is the order in which we perform the actions. We only call the simulator if there's code, and then we only assemble it if there are no errors. \\
+The second trick concerns the initial value registers. Changing only the register display would not work. Continuously adding the initial values to the display would not work either as the code has to perform tests and loops sometimes. The execution may change path depending on the value of a register. This is why we convert the values into ASM code instructions, and then send them before the real code to the simulator so it takes those values into account. When receiving the data simulation, we run as many instructions as we just sent in the background before giving the hand back to the user. \\
+Small code extracts of the pre-prompt creation and run: \\
+
+\begin{lstlisting}[language=MyPython]
+# preppend the modified registers
+    for i in range(len(register_window.modified_regs)//2):
+        code = 'MOV R%s, #%s\n' % (register_window.modified_regs[2*i], register_window.modified_regs[2*i+1]) + code
+\end{lstlisting}
+\begin{lstlisting}[language=MyPython]
+# Run the preprompt
+    for i in range(len(register_window.modified_regs)//2):
+        register_window.set_register_values(master.toolbar.register_update[0][0], master.toolbar.register_update[0][1])
+\end{lstlisting}
+\subsubsubsection{Function Run Step By Step}
+\begin{lstlisting}[language=MyPython]
+def run_step_by_step() -> None:
+\end{lstlisting}
+\paragraph{}
+
+This function is executed when the user presses the corresponding button. It can also be called by the run to delegate the execution of a small number of steps when dealing with breakpoints. Here are the tasks performed: \\
+\textbf{1.} Button configuration: it updates all buttons depending on the success of the step. \\
+\textbf{2.} If Run Step By Step is not started: Changes display from 'Run Step By Step' to 'Step'. The RSBS is now started. \\
+\textbf{3.} Else: If we have finished: various updates and Stop. \\
+\textbf{4.} Else: Execute a Step. \\
+\textbf{4.1} Update the pipeline 2 steps ahead. \\
+\textbf{4.2} Update the registers. \\
+\textbf{4.3} Update user memory. \\
+\textbf{4.4} Update code highlights. \\
+
+\subsubsubsection{Function Run}
+\begin{lstlisting}[language=MyPython]
+def run() -> None:
+\end{lstlisting}
+\paragraph{}
+
+This function is called when the user presses the Run button. Here are the tasks of the function: \\
+\textbf{1.} Button configuration: it updates all buttons depending on the success of the step. \\
+\textbf{2.} Fetching breakpoints list. \\
+\textbf{3.} Treating the list to get the real breakpoints (taking loops into account). \\
+\textbf{4.} Ignore breakpoints situated before the current step of execution. \\
+\textbf{5.} If there are still breakpoints: Run until the next one. \\
+\textbf{6.} Else: Run until the end. \\
+\textbf{7.} Running updates the registers, the user RAM, the pipeline, and the debugger. \\
+\textbf{8.} Perform various updates. \\
+
+\subsubsubsection{Function Stop}
+\begin{lstlisting}[language=MyPython]
+def stop() -> None:
+\end{lstlisting}
+\paragraph{}
+
+This function is called when the user presses the corresponding button. This simply ends the run step by step by performing various button changes and other updates.
+
+
+\newpage
+\subsubsubsection{Function Reset}
+\begin{lstlisting}[language=MyPython]
+def reset() -> None:
+\end{lstlisting}
+\paragraph{}
+
+This function is called when the user presses the corresponding button. This simply resets every information stored relative to the simulation. That is to say: \\
+ - The buttons, \\
+ - The debugger, \\
+ - The registers, \\
+ - The step counter, \\
+ - The user memory, \\
+ - The code memory, \\
+ - The binary code, \\
+ - The pipeline, \\
+ - The highlighting. \\
+
+\subsubsubsection{Function Connect Board}
+\begin{lstlisting}[language=MyPython]
+def connect_board() -> None:
+\end{lstlisting}
+\paragraph{}
+
+This function is called when the user clicks the corresponding button. See the next part for an in-depth explanation. \\
+
+\subsubsubsection{Function Download Code}
+\begin{lstlisting}[language=MyPython]
+def download_code():
+\end{lstlisting}
+\paragraph{}
+
+This function is called when the user clicks the corresponding button. See the next part for an in-depth explanation. \\
+
+\subsubsubsection{FileMenu}
+\begin{lstlisting}[language=MyPython]
+class FileMenu(ctk.CTkFrame):
+\end{lstlisting}
+\paragraph{}
+
+This is the first menu of the toolbar. It contains 4 different options: Save, Save As, Import, and New.\\
+\textbf{Save as:} This function saves the code present in the ASM frame to a new file. \\
+\textbf{Save:} Saves the current open file or calls 'Save as' if it wasn't previously saved. \\
+\textbf{Import code:} This function loads the codes from a file to the ASM code frame (asks the user for a save of the current code before). \\
+\textbf{New file:} Empties the ASM code frame (asks the user for a save before). \\
+
+\begin{lstlisting}[language=MyPython]
+def save_as() -> None:
+\end{lstlisting}
+\begin{lstlisting}[language=MyPython]
+def save() -> None:
+\end{lstlisting}
+\begin{lstlisting}[language=MyPython]
+def import_code() -> None:
+\end{lstlisting}
+\begin{lstlisting}[language=MyPython]
+def new_file() -> None:
+\end{lstlisting}
+\subsubsubsection{SettingsMenu}
+\begin{lstlisting}[language=MyPython]
+class SettingsMenu(ctk.CTkFrame):
+\end{lstlisting}
+\paragraph{}
+
+This menu gives us 2 options. Switching between Light and Dark themes. \\
+
+\begin{lstlisting}[language=MyPython]
+def theme_toggle_dark(event=None) -> None:
+\end{lstlisting}
+\begin{lstlisting}[language=MyPython]
+def theme_toggle_light(event=None) -> None:
+\end{lstlisting}
+
+\paragraph{}
+\subsubsubsection{HelpMenu}
+\begin{lstlisting}[language=MyPython]
+class HelpMenu(ctk.CTkFrame):
+\end{lstlisting}
+\paragraph{}
+
+This menu offers a bunch of options. \\
+The link to ASM LCM3 documentation on Moodle. \\
+The ASM LCM3 documentation on the interface. \\
+The simulator documentation. \\
+Code examples. \\
+The GitHub Link for the project. \\
+
+\begin{lstlisting}[language=MyPython]
+def help_lcm3_docu() -> None:
+\end{lstlisting}
+\begin{lstlisting}[language=MyPython]
+class LCM3Documentation(ctk.CTkToplevel):
+\end{lstlisting}
+\begin{lstlisting}[language=MyPython]
+class SimulatorDocumentation(ctk.CTkToplevel):
+\end{lstlisting}
+\begin{lstlisting}[language=MyPython]
+class CodeExamples(ctk.CTkToplevel):
+\end{lstlisting}
+\begin{lstlisting}[language=MyPython]
+def git_hub() -> None:
+\end{lstlisting}
 
 
 
+
+% Adding a figure
+
+%\begin{figure}[H]
+%    \centering
+%    \includegraphics[width=1\linewidth]{Images_Screens/Interface01.png}
+%    \caption{Interface}
+%  \end{figure}
+
+
+
+
+
+
+
+
+
+
+
+% Connection to board --------------------------------------------------------
 
 \newpage
 \subsection{Connection to the board}
 \paragraph{}\textbf{Goal of having a connection:} To test the user's code behaviour on the simulator, it is necessary to establish a connection between the simulator and the board. A connection allows the communication between the IDE and the board: sending and receiving of information.
 
-\paragraph{}\textbf{Connection process :} The connection process is designed to be user-friendly, easy to use and flexible. The graphical user interface (GUI) provides a pop-up when the user clicks on "connect board". This pop-up allows the user to input specific parameters for establishing the serial connection. This includes selecting the Communication (COM) port, baudrate, timeout, parity, stopbits, and bytesize. These parameters are critical for configuring the serial communication protocol between the simulator and the Arty A7 board.
+\paragraph{}\textbf{Connection process :} The connection process is designed to be easy to use. The graphical user interface (GUI) provides a pop-up when the user clicks on "connect board". This pop-up allows the user to input specific parameters to establish the serial connection. This includes selecting the Communication (COM) port, baudrate, timeout, parity, stopbits, and bytesize. These parameters are important for configuring the serial communication protocol between the simulator and the Arty A7 board.
 
-We use the \texttt{tkinter} library to create an interactive interface, making it accessible for users. 
+We use the \texttt{tkinter} library to create an interactive interface, making it accessible to users. 
 \paragraph{The parameters to configure and send to the board :}
  \begin{itemize}
-    \item \textbf{Com Ports:} The available COM ports are dynamically retrieved using the \texttt{serial.tools.list\_ports} library. Users are presented with a list of available COM ports in the connection pop-up, allowing them to select the appropriate port for communication. In the absence of any available COM ports, a notification is displayed, indicating that the connection is not possible until a valid port is detected.
+    \item \textbf{Com Ports:}The available COM ports are retrieved using the \texttt{serial.tools.list\_ports} library, ensuring that users can select from the available options. If there is no COM port available, it will be indicated on the connection pop-up. Therefore, the connection won't be possible.
 
-    \item \textbf{Baudrate:} The baudrate represents the speed of data transmission between the simulator and the Arty A7 board. Users can select from a range of predefined baudrates, such as 300, 1200, 2400, 4800, 9600, 14400, 19200, 38400, 57600, and 115200. The default baudrate is set to 9600, providing a balanced option for various communication scenarios.
+    \item \textbf{Baudrate:} The baudrate represents the speed of data transmission between the simulator and the Arty A7 board. Users can select from a range of baudrates values, such as 300, 1200, 2400, 4800, 9600, 14400, 19200, 38400, 57600, and 115200. The default baudrate is set to 9600.
 
     \item \textbf{Timeout:} The timeout parameter defines the maximum time the simulator should wait for data from the Arty A7 board. Users can customize this value based on the specific requirements of their application. The default timeout is set to 1, offering a reasonable balance between responsiveness and efficiency.
 
@@ -298,39 +946,258 @@ We use the \texttt{tkinter} library to create an interactive interface, making i
 \end{itemize}
 
 
-The \texttt{connect\_board} function orchestrates the creation of a \texttt{serial.Serial} object, incorporating the user-defined parameters. This object encapsulates the serial connection, serving as the communication link between the simulator and the Arty A7 board. Once the user finalizes their selections, the pop-up closes, leaving the simulator connected and ready for interaction.
-
-The available COM ports are retrieved using the \texttt{serial.tools.list\_ports} library, ensuring that users can select from the available options. If there is no COM port available, it will be indicated on the connection pop-up. Therefore, the connection won't be possible.
-\paragraph{}\textbf{Disconnect Management :}The code also integrates a disconnect mechanism, allowing users to gracefully terminate the serial connection when needed. This feature is crucial for scenarios where reconfiguration or adjustment of the simulation parameters is required without restarting the entire application.
+\paragraph{}In the \texttt{connect\_board} function, we create a \texttt{serial.Serial} object, it contains the parameters defined by the user. This object serves as the communication link between the simulator and the Arty A7 board. Once the user finalizes their selections and clicks on the button "ok", the pop-up closes, leaving the simulator connected and ready for interaction.
 
 
+\paragraph{}It is important to disconnect the board from the simulator once finished, for various reasons: stop consuming memory, security etc. Once the connection between the simulator and the board is done, the connect button turns into a disconnect button allowing the user to close the connection when finished.
+ 
+\paragraph{}\textbf{Disconnect Management :}
+The disconnection process is handled by the \texttt{disconnect\_board} function. Here's an explanation of how it works:
+\begin{enumerate}
+    \item \textbf{User Confirmation:}
+    \begin{itemize}
+        \item The function begins by displaying a message box (\texttt{tkinter.messagebox.askyesno}) asking the user whether they want to close the serial connection. The user can choose "Yes" or "No."
+    \end{itemize}
+    
+    \item \textbf{Handling User Response:}
+    \begin{itemize}
+        \item If the user selects "Yes," the code proceeds to close the serial connection using \texttt{ser.close()}. It also updates the \texttt{connect\_state} variable to \texttt{False}, indicating that the connection is closed.
+        \item If the user selects "No," the \texttt{connect\_state} variable is set to \texttt{True}, indicating that the connection remains open.
+    \end{itemize}
+    
+    \item \textbf{Print Statements:}
+    \begin{itemize}
+        \item The function prints messages to the console, indicating whether the serial connection was closed or left open based on the user's choice.
+    \end{itemize}
+    
+    \item \textbf{Global Variables:}
+    \begin{itemize}
+        \item The \texttt{global} keyword is used to access and modify the global variables \texttt{ser} and \texttt{connect\_state} within the function.
+    \end{itemize}
+    
+    \item \textbf{Integration with the Interface:}
+    \begin{itemize}
+        \item The function is typically called when the user interacts with the graphical user interface (GUI), specifically in response to a button press.
+    \end{itemize}
+\end{enumerate}
 
+The user's choice ("Yes" or "No") is crucial in determining whether the serial connection should be closed. If closed, it ensures that resources are released, and the system returns to a clean state. If not closed, the connection remains active for further communication.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% FPGA -----------------------------------------------------------------------
 
 \newpage
 \section{FPGA}
-\subsection{Fetch}
-\subsection{Decode}
-\subsection{Execute}
-\subsection{UAL}
-\subsection{ROM-RAM}
+\subsection{Préambule}
+\subsubsection{Arty A7 FPGA}
+
+\paragraph{}The Arty A7 FPGA board stands out for its notable attributes, centering around the Xilinx Artix-100T FPGA. The on-board programming capability simplifies the development process, maintaining not configured state that allows for tailored configurations according to specific project requirements. This flexibility is instrumental in accommodating diverse applications and adapting to evolving project needs.
+
+\paragraph{}One of the key strengths lies in the resources of the FPGA. The board's resources are sufficiently expansive, ensuring that there are no limitations or constraints on the intricacy and scale of designs. This scalability is crucial for pushing the boundaries of what can be achieved with the FPGA, making the Arty A7 an optimal choice for projects that demand versatility and robust computational capabilities.
+
+\paragraph{}Moreover, the adaptability of the Arty A7 enhances its appeal for a range of development endeavors. Its inherent versatility aligns well with the dynamic nature of modern projects, providing a reliable platform for innovation and exploration. In essence, the Arty A7 FPGA board emerges as a versatile and powerful tool, well-suited for projects demanding a high degree of customization and computational prowess.
+
+\subsubsection{ASM LCM3 Instruction set}
+
+\paragraph{}The adoption of the LCM3 instruction set offers several advantages while presenting specific constraints. Firstly, LCM3 adheres to a Reduced Instruction Set Computer (RISC) architecture, characterised by simple and easily understandable instructions. The simplicity of the instructions is a major asset, facilitating both the programming process and code comprehension.
+
+\paragraph{}One of LCM3's strengths lies in its conciseness. Despite having a limited number of instructions, it proves sufficient for programming a genuine Cortex-M3 microcontroller. This capability allows for the development of effective and functional programs while avoiding unnecessary complexity.
+Another notable advantage is the compact size of the code generated by LCM3, with each instruction encoded on only 16 bits. This compactness is crucial in environments where memory is often a limiting factor.
+
+\paragraph{}However, it is essential to consider certain constraints associated with LCM3. The limitation to only 8 available registers may pose challenges when designing complex programs requiring a large number of variables. Additionally, while values are encoded on 5 or 8 bits, providing some flexibility, it may limit the precise representation of numbers in certain situations.
+
+\paragraph{}Constraints related to address jumps for B Label and BXX Label loops also require careful planning during loop design to avoid exceeding capacity.
+
+
+\subsubsection{Getting started with Vivado}
+
+\paragraph{}Xilinx Vivado Design Suite constitutes a set of software tools developed by Xilinx, a company specialising in programmable circuit technologies, particularly Field-Programmable Gate Arrays (FPGAs) and System-on-chip (SoC) devices, such as the ARTY A7 board employed in our project. Vivado supports the advanced design of programmable logic circuits on FPGAs, providing a user-friendly environment for the development of complex digital systems while allowing for the implementation of customized functions with maximum flexibility. \\
+
+The software also facilitates constraint management to ensure adherence to specifications such as temporal synchronization, power consumption, and other project-specific requirements. Advanced debugging features, including hardware-software co-simulation, are also offered by Vivado. Furthermore, Vivado encompasses all stages of the FPGA design process, from requirement specification to configuration file generation for hardware programming. This streamlines project management and ensures a seamless transition throughout the design process.
+
+Ultimately, Xilinx Vivado Design Suite is tailored specifically for Xilinx FPGAs, ensuring optimal integration with Xilinx devices. This guarantees comprehensive support for the specific features inherent to Xilinx FPGAs.
+
+\subsubsection{Introduction to ModelSim}
+
+ModelSim is a digital hardware simulator employed in digital circuit design and hardware verification. The simulator provides advanced debugging features that enable the detection and correction of errors in the design. It also allows for the simulation of circuit behaviour in various scenarios, facilitating the verification of design compliance with specifications. 
+
+ModelSim supports multiple hardware description languages such as VHDL (VHSIC Hardware Description Language) and Verilog and simulates different configurations while evaluating circuit behaviour.
+
+In contrast to Vivado, ModelSim is more lightweight, leading to efficient time savings. Additionally, simulation can be performed automatically using scripts. Although ModelSim cannot replace all the functionalities of Vivado, it proves highly valuable for conducting simulations and debugging.
+
+
+\subsubsection{Nomenclature and Selection of Variables}
+
+\subsection{Coding of Arty A7 board}
+
+\subsubsection{Fetch}
+
+\paragraph{}The FETCH block is responsible for retrieving the instruction to be executed from the main memory. The address of this instruction is typically determined by the Program Counter (PC), which points to the next instruction to be executed.
+
+The FETCH block then loads this instruction from memory into an internal register of the processor. This step is crucial as it marks the starting point of executing an instruction.
+
+After retrieving the instruction, the FETCH block increments the instruction counter based on information received from the EXECUTE block. This increment is done to point to the memory location of the next instruction. This ensures that the next appropriate instruction will be retrieved in the subsequent instruction cycle.
+
+Once the instruction is retrieved and the instruction counter is incremented, the processor is ready to proceed to the next step in the instruction cycle, typically the decoding of the instruction and its execution by the functional units of the processor.
+
+\paragraph{}In this initial block, the inputs and outputs are as follows : 
+
+\begin{itemize}
+\item \texttt{clk} (clock)
+\item \texttt{iF$\_$instruction} (input instruction)
+\item \texttt{iF$\_$branchement} (branching flag)
+\item \texttt{iF$\_$delta} (delta information)
+\item \texttt{oF$\_$adresse} (output address)
+\item \texttt{oF$\_$instruction} (output instruction)
+\end{itemize}
+
+
+\paragraph{}Within the block, there exists an internal signal:
+\begin{itemize}
+\item \texttt{signF$\_$pc}: initialised to the first address, 0x0000, at the moment (default value for now, will be modified to 4 after the creation of the memory block).
+\end{itemize}
+
+\paragraph{}\textbf{\texttt{iF$\_$instruction}} est l’instruction récupérée depuis la mémoire grâce à l’adresse \texttt{oF$\_$adresse} du temps précédent. Cette information est envoyée telle quelle au bloc suivant, le bloc DECODE. 
+
+\paragraph{}\textbf{\texttt{iF$\_$branchement}} acts as a flag, taking on values of 0 or 1. 
+When the flag is not active, \textbf{\texttt{signF$\_$pc}} will be incremented by 1 (default value for now, will be modified to 4 after the creation of the memory block), and the next instruction will be retrieved at \textbf{\texttt{signF$\_$pc + 1}}. 
+If the flag is active, it indicates a loop or a function call. From the EXECUTE block, \textbf{\texttt{iF$\_$branchement}} has been retrieved with \textbf{\texttt{iF$\_$delta}}, providing information about the number of lines to skip or jump back. Before the information returns from the EXECUTE block, two more instructions will have already been retrieved due to two clock cycles. Therefore, the next instruction will be retrieved at the address \textbf{\texttt{signF$\_$pc + iF$\_$delta - 2}}.
+
+
+\subsubsection{Decode}
+
+The DECODE block is responsible for decoding the instruction to be executed in the EXECUTE block. This block takes only the iD$\_$instruction as input, and separates the information into flags, register numbers, and values, which are then sent as outputs to both the DECODE block and the memory block.
+
+Decoding is accomplished through conditional statements that compare the leading bits of each instruction to determine the instruction type according to the LCM3 instruction table. This is the same table used by the simulator to translate ASM code into binary code. All information is initially stored in internal signals before being transmitted to the outputs.
+
+
+\paragraph{}In this initial block, the inputs and outputs are as follows
+\begin{itemize}
+
+\item \texttt{clk} (clock)
+\item \texttt{iD$\_$instruction} (input instruction)
+\item \texttt{oD$\_$enW} (write enable signal)
+\item \texttt{oD$\_$enMEM} (memory enable signal)
+\item \texttt{oD$\_$RW} (read/write signal)
+\item \texttt{oD$\_$sel} (selection signal; flag if there are constant values, \texttt{oD$\_$valeurImm})
+\item \texttt{oD$\_$instBXX} (flag indicating a loop)
+\item \texttt{oD$\_$instB} (flag indicating a function call)
+\item \texttt{oD$\_$cond} (various values depending on the BXX label)
+\item \texttt{oD$\_$delta}
+\item \texttt{oD$\_$d} (register number)
+\item \texttt{oD$\_$n} (register number)
+\item \texttt{oD$\_$m} (register number)
+\item \texttt{oD$\_$t} (register number)
+\item \texttt{oD$\_$valeurImm} (constant value taken as input from the ASM instruction)
+\item \texttt{oD$\_$codeOP} (operational code)
+\end{itemize}
+
+
+\paragraph{}Within the block, there exist the following internal signals: 
+\begin{itemize}
+\item \texttt{signD$\_$enW}: initialized to the first address, 0x0000, at the moment
+\item \texttt{signD$\_$enMEM}
+\item \texttt{signD$\_$RW}
+\item \texttt{signD$\_$sel}
+\item \texttt{signD$\_$instBXX}
+\item \texttt{signD$\_$instB}
+\item \texttt{signD$\_$cond}
+\item \texttt{signD$\_$delta}
+\item \texttt{signD$\_$d}
+\item \texttt{signD$\_$n}
+\item \texttt{signD$\_$m}
+\item \texttt{signD$\_$t}
+\item \texttt{signD$\_$valeurImm}
+\item \texttt{signD$\_$codeOP}
+\end{itemize}
+
+
+\paragraph{}The \textbf{\texttt{iD$\_$instruction}} is the instruction retrieved from the FETCH block; it has not been modified since it was retrieved one clock cycle ago from memory. The \textbf{\texttt{iD$\_$instruction}} then undergoes 16 if-tests to determine the types of instructions. By referencing the LCM3 instruction table, the structure of the information contained in the binary code can be understood. From there, flags are raised, and values are recorded.
+
+\paragraph{}\textbf{\texttt{oD$\_$enW}}, \textbf{\texttt{oD$\_$enMEM}}, and \textbf{\texttt{oD$\_$RW}} are flags that activate respectively when there is a need to rewrite a register and/or access memory.
+
+\paragraph{}\textbf{\texttt{oD$\_$sel}} is a flag that takes on the value of 1 when there is an input value, which is then stored in \textbf{\texttt{oD$\_$valeurImm}}.
+
+\paragraph{}\textbf{\texttt{oD$\_$codeOP}} is the operational code that allows the ALU block to determine the type of operation. The table of operational codes is common to the DECODE, ALU, and EXECUTE blocks.
+
+\paragraph{}\textbf{\texttt{oD$\_$instB}} and \textbf{\texttt{oD$\_$instBXX}} are two flags that activate respectively for function calls and loops. In the case of loops, of the BXX Label types, \textbf{\texttt{oD$\_$cond}} is used to specify the type of comparison made in the loop.
+
+\paragraph{}\textbf{\texttt{oD$\_$d}}, \textbf{\texttt{oD$\_$n}}, \textbf{\texttt{oD$\_$m}}, and \textbf{\texttt{oD$\_$t}} contain the register numbers involved in each instruction.
+
+
+\subsubsection{UAL}
+The 4-bit NZVC number obtained from the FPU output is used to store negative, zero, overflow, and carry exceptions. These exceptions are loaded into the CCR register and sent to the control unit.
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.4]{FPGA/UAL_schematic.PNG}
+\end{figure}
+
+\subsubsection{Execute}
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.45]{FPGA/execute_sim1.PNG}
+\end{figure}
+
+
+\subsubsection{ROM-RAM}
+
+\subsection{Simulation réalisée}
+\subsubsection{Fetch}
+\subsubsection{Decode}
+\subsubsection{Execute}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% ASM ------------------------------------------------------------------------
 
 \newpage
-\section{Snake Game Coding}
+\section{ASM Coding}
 \subsection{Introduction}
-In this part, the goal was to develop the classic Snake game using ASM assembly language while adhering to strict constraints on the use of LCM3 instructions. To address these constraints, some foundational functions, including division, multiplication, and modulo, were pre-developed to simplify the game development.
+In this part, the goal was to develop the classic Snake game using ASM assembly language while adhering to the strict constraints of LCM3 instructions. To address these constraints, some foundational functions, including division, multiplication, and modulo, were pre-developed to simplify the game development.
 
 \subsection{Constraints and Preparation}
  By anticipating essential arithmetic operations, some basic functions such as division, multiplication and modulo, were created in advance. These functions are crucial for managing positions, movement, and collisions in the Snake game.
 
 \subsubsection{Constraints of LCM3 Instructions}
+
+Using LCM3 Instructions comes with its constraints, and one significant limitation is the need to write all functions manually. Unlike higher-level languages that come with built-in functions for common operations, ASM requires explicit coding of even basic functionalities. This means that functions such as MOV and ADD are available, but essential operations like multiplication, which are fundamental in many coding scenarios, are not readily accessible.
+
+The absence of built-in multiplication functions, for instance, poses a challenge as it necessitates the creation of custom multiplication routines. This can be a time-consuming process and may result in less optimized code compared to what a compiler might generate automatically in higher-level languages.
+
 \subsubsection{Example: Division Function}
 The division function was implemented using an iterative subtraction approach (Euclidean division). This method involves repetitively subtracting the divisor from the dividend until the dividend becomes 0. And at the same time, we keep the quotient as a counter. This approach ensures obtaining a result of integer division.\\
 
 
-\newline
-\begin{lstlisting}[language={[ARM]Assembler}, frame=single]
+\begin{lstlisting}[language=MyASM]
 ; Division function excerpt
-
 DIVIDE_LOOP:
     CMP R3, #0
     BEQ DIVIDE_DONE
@@ -349,7 +1216,7 @@ DIVIDE_ERROR:
     \item \textbf{Initialization}:
     \begin{itemize}
         \item \texttt{DIVIDE\_LOOP} is the entry point for the division function.
-        \item \texttt{CMP R3, #0}: Compares the dividend (\texttt{R3}) with zero to check if the dividend is already zero.
+        \item \texttt{CMP R3, \#0}: Compares the dividend (\texttt{R3}) with zero to check if the dividend is already zero.
         \item \texttt{BEQ DIVIDE\_DONE}: Branches to \texttt{DIVIDE\_DONE} if the dividend is zero, indicating the division is complete.
         \item \texttt{CMP R3, R2}: Compares the dividend (\texttt{R3}) with the divisor (\texttt{R2}).
         \item \texttt{BNE DIVIDE\_INCREMENT}: Branches to \texttt{DIVIDE\_INCREMENT} if the dividend is not equal to the divisor.
@@ -358,14 +1225,14 @@ DIVIDE_ERROR:
     \item \textbf{Subtraction Loop}:
     \begin{itemize}
         \item \texttt{SUB R3, R3, R2}: Subtracts the divisor from the dividend.
-        \item \texttt{ADD R0, R0, #1}: Increments the quotient (\texttt{R0}) to keep track of the number of subtractions.
+        \item \texttt{ADD R0, R0, \#1}: Increments the quotient (\texttt{R0}) to keep track of the number of subtractions.
         \item \texttt{B DIVIDE\_LOOP}: Branches back to the beginning of the loop to repeat the subtraction process.
     \end{itemize}
 
     \item \textbf{Increment Loop}:
     \begin{itemize}
         \item \texttt{DIVIDE\_INCREMENT}: If the dividend is not equal to the divisor, the code branches here.
-        \item \texttt{ADD R0, R0, #1}: Increments the quotient to account for the remaining portion of the dividend.
+        \item \texttt{ADD R0, R0, \#1}: Increments the quotient to account for the remaining portion of the dividend.
         \item \texttt{B DIVIDE\_DONE}: Branches to \texttt{DIVIDE\_DONE} to complete the division.
     \end{itemize}
 
@@ -376,8 +1243,7 @@ DIVIDE_ERROR:
     \end{itemize}
 \end{enumerate}
 
+
 \end{document}
-
-
 
 
