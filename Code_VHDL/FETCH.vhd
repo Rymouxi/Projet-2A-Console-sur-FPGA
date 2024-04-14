@@ -37,9 +37,7 @@ entity FETCH is
     Port ( clk : in STD_LOGIC;
            iF_branchement : in STD_LOGIC;
            iF_delta : in STD_LOGIC_VECTOR (31 downto 0);
-           iF_instruction : in STD_LOGIC_VECTOR (15 downto 0);
-           oF_adresse : out STD_LOGIC_VECTOR (31 downto 0);
-           oF_instruction : out STD_LOGIC_VECTOR (15 downto 0));
+           oF_adresse : out STD_LOGIC_VECTOR (31 downto 0));
 end FETCH;
 
 architecture Behavioral of FETCH is
@@ -48,19 +46,19 @@ architecture Behavioral of FETCH is
 
 begin
     increment : process(clk) begin
-  
+    if rising_edge(clk) then 
+
         if ((clk' event)and(clk='1')) then 
             if (iF_branchement='0')
                 then signF_pc <= signF_pc+1 ;
+            elsif (iF_branchement='1')
+                then signF_pc <= signF_pc+iF_delta-2 ;
             end if ;
-            if (iF_branchement='1')
-                then signF_pc <= signF_pc+iF_delta-1 ;
-            end if ;
-        end if;  
-         
+        end if; 
+ 
+    end if; 
     end process increment; 
     
 oF_adresse <= signF_pc;
-oF_instruction <= iF_instruction;
 
 end Behavioral;

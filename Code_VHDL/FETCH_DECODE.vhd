@@ -1,38 +1,13 @@
-----------------------------------------------------------------------------------
--- Company: ENSEA
--- Engineer: JIN CLEMENTINE
--- 
--- Create Date: 03.10.2023 14:19:34
--- Design Name: 
--- Module Name: DECODE - Behavioral
--- Project Name: 
--- Target Devices: Arty A7-100
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments: credit GUENEGUES Morgane & ACELDY Alexandre
--- 
-----------------------------------------------------------------------------------
-
-
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
-
-entity DECODE is
+entity FETCH_DECODE is
     Port ( clk : in STD_LOGIC;
+           iF_branchement : in STD_LOGIC;
+           iF_delta : in STD_LOGIC_VECTOR (31 downto 0);
+           oF_adresse : out STD_LOGIC_VECTOR (31 downto 0);
            iD_instruction : in STD_LOGIC_VECTOR (15 downto 0);
            oD_enW : out STD_LOGIC;
            oD_enMEM : out STD_LOGIC;
@@ -48,10 +23,11 @@ entity DECODE is
            oD_t : out STD_LOGIC_VECTOR (2 downto 0);
            oD_valeurImm : out STD_LOGIC_VECTOR (31 downto 0);
            oD_codeOp : out STD_LOGIC_VECTOR (2 downto 0));
-end DECODE;
+end FETCH_DECODE;
 
-architecture Behavioral of DECODE is
+architecture Behavioral of FETCH_DECODE is
 
+    signal signF_pc : STD_LOGIC_VECTOR (31 downto 0) := "00000000000000000000000000000000" ;
     signal signD_enW : STD_LOGIC:='0';
     signal signD_enMEM : STD_LOGIC:='0';
     signal signD_RW : STD_LOGIC:='0';
@@ -68,11 +44,24 @@ architecture Behavioral of DECODE is
     signal signD_delta : STD_LOGIC_VECTOR (31 downto 0);
 
 begin
-
-    translate: process(clk)
-    begin        
-    if rising_edge(clk) then
-  
+    -- FETCH process
+    increment : process(clk) begin
+        if rising_edge(clk) then 
+            if ((clk' event) and (clk='1')) then 
+                if (iF_branchement='1') then 
+                    signF_pc <= signF_pc + iF_delta - 1;
+                else
+                    signF_pc <= signF_pc + 1;
+                end if;
+            end if; 
+        end if; 
+    end process increment; 
+    
+    oF_adresse <= signF_pc;
+    
+    -- DECODE process
+    translate: process(clk) begin        
+        if rising_edge(clk) then
             if (iD_instruction(15 downto 9)="0001110") --ADD Rd, Rn,#imm3
                 then    signD_valeurImm (2 downto 0)<=iD_instruction (8 downto 6);
                         signD_valeurImm (31 downto 3)<="00000000000000000000000000000";
@@ -103,7 +92,7 @@ begin
                         signD_t <="000";
                         signD_valeurImm (7 downto 0)<=iD_instruction (7 downto 0);
                         signD_valeurImm (31 downto 8)<="000000000000000000000000";
-                        signD_codeOp<="000";
+                        signD_codeOp<="000"; 
                         signD_cond <="1111";
                         signD_delta <="00000000000000000000000000000000";
             
@@ -174,7 +163,7 @@ begin
                         signD_sel<='0';
                         signD_instBXX <= '1';
                         signD_instB <= '0';
-                        signD_cond <= iD_instruction(11 downto 8);
+                        signD_cond <="1111";
                         signD_d <="000";
                         signD_n <="000";
                         signD_m <="000";
@@ -397,9 +386,10 @@ begin
                         signD_delta <="00000000000000000000000000000000";  
           
         end if; 
-    end if;
+        end if;
     end process translate; 
 
+    -- Sorties DECODE
     oD_enW <= signD_enW;
     oD_enMEM <= signD_enMEM;
     oD_RW <= signD_RW;
